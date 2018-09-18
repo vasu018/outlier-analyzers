@@ -9,48 +9,6 @@ from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
 
-# # Create feature
-# feature = np.array([["Texas"],
-#                     ["California"],
-#                     ["Texas"],
-#                     ["Delaware"],
-#                     ["Texas"]])
-#
-# # Create one-hot encoder
-# one_hot = LabelBinarizer()
-#
-# #
-# # One-hot encode feature
-# one_hot.fit_transform(feature)
-# #
-#
-# # Reverse one-hot encoding
-# ret = one_hot.inverse_transform(one_hot.transform(feature))
-# print(ret)
-# print(one_hot.classes_)
-#
-# # Create dummy variables from feature
-# ret = pd.get_dummies(feature[:,0])
-# print("One-class encoding:\n", ret)
-
-#######
-
-# raw_data = {'patient': [1, 1, 1, 2, 2],
-#         'obs': [1, 2, 3, 1, 2],
-#         'treatment': [0, 1, 0, 1, 0],
-#         'score': ['strong', 'weak', 'normal', 'weak', 'strong']}
-# df = pd.DataFrame(raw_data, columns = ['patient', 'obs', 'treatment', 'score'])
-# print(df)
-#
-# # Create a label (category) encoder object
-# le = preprocessing.LabelEncoder()
-#
-# # Fit the encoder to the pandas column
-# le.fit(df['score'])
-# # print(df)
-# print("######################")
-
-
 #
 # Create multiclass feature
 #
