@@ -3,7 +3,6 @@ Module to calculate the outliers for network configurations that is supplied
 as features. Outliers are calculated on the multi-class features using the
 zScore and modified zScore Outlier analyzer technique.
 
-<Input>: Type of question and parameters to the question.
 High level design:
 
 Step 1: From the data frames generated as output of the question is converted to
@@ -21,6 +20,9 @@ Outlier detection:
     (a) zScore
     (b) modified zScore
     (c) ...
+
+
+<Input>: question-type, question-parameters, custom-threshold
 <Output>: Outliers
 '''
 
@@ -30,7 +32,7 @@ from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
 
-DEBUG_PRINT_FLAG = True
+DEBUG_PRINT_FLAG = False
 
 '''
 Example list of multiclass features.
@@ -72,18 +74,17 @@ multiclass_feature2 = [("1.1.1.1", "2.2.2.2"),
                       ("", ""),
                       ("1.1.1.1", ""),
                       ("2.2.2.2","")]
-if DEBUG_PRINT_FLAG:
-    # Input Multi-class feature.
-    print("# Multi-class feature:\n", multiclass_feature)
-    print()
+
+print("# Multi-class feature:\n", multiclass_feature)
+print()
 
 # Create multiclass multilabelbinarizer
 one_hot_multiclass = MultiLabelBinarizer()
 multiClassEncodedList = one_hot_multiclass.fit_transform(multiclass_feature)
 
-if DEBUG_PRINT_FLAG:
-    print("# Multi-class encoded features:\n", multiClassEncodedList)
-    print()
+
+print("# Multi-class encoded features:\n", multiClassEncodedList)
+print()
 
 uniqueClasses = one_hot_multiclass.classes_
 
@@ -137,9 +138,9 @@ Calculate Mean and Standard deviation on the density values of data set.
 meanDataSet =  numpy.mean(entryDensityList)
 medianDataSet = numpy.median(entryDensityList)
 standardDeviationDataSet = statistics.stdev(entryDensityList)
-if DEBUG_PRINT_FLAG:
-    print("# Mean:", meanDataSet)
-    print("# Standard Deviation:", standardDeviationDataSet)
+
+print("# Mean:", meanDataSet)
+print("# Standard Deviation:", standardDeviationDataSet)
 
 ''' 
 Calculate ZScores and Outliers.
@@ -165,10 +166,9 @@ for entryDensityCounter, eachValue in enumerate(entryDensityList):
         outliersMedian.append(multiclass_feature[entryDensityCounter])
 
 
-if DEBUG_PRINT_FLAG:
-    print()
-    print("# Outliers with Mean on data-set:")
-    print(outliersMean)
-    print()
-    print("# Outliers with Median on data-set:")
-    print(outliersMedian)
+
+print("# Outliers with Mean on data-set:")
+print(outliersMean)
+print()
+print("# Outliers with Median on data-set:")
+print(outliersMedian)
