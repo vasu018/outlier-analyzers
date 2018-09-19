@@ -32,7 +32,33 @@ from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
 
+# Importing pybatfish APIs.
+from pybatfish.client.commands import *
+from pybatfish.question.question import load_questions, list_questions
+from pybatfish.question import bfq
+
+# Debug Flag
 DEBUG_PRINT_FLAG = False
+
+
+# Loading questions from pybatfish.
+load_questions()
+
+pd.compat.PY3 = True
+PD_DEFAULT_COLWIDTH = 250
+pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
+
+bf_init_snapshot('datasets/networks/example')
+
+'''
+[TODO]: Integrate the pybatfish question output to the classification below.
+'''
+
+'''
+Sample Example provided below.
+'''
+# nTPSeversVRFs = bfq.nodeProperties(properties="NTP_Servers|VRFs").answer()
+# print(nTPSeversVRFs)
 
 '''
 Example list of multiclass features.
