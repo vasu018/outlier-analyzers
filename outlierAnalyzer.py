@@ -230,10 +230,10 @@ for entryDensityCounter, eachValue in enumerate(entryDensityList):
         print("\t", eachValue,"\t\t\t\t", zScoreMean,"\t\t", zScoreMedian)
 
     # Currently one standard deviation is considered for calculating the outliers.
-    if (zScoreMean >= 0.8):
+    if (zScoreMean >= 1):
         outliersMean.append(multiclass_feature_Xi[entryDensityCounter])
 
-    if (zScoreMedian >= 0.8):
+    if (zScoreMedian >= 1):
         outliersMedian.append(multiclass_feature_Xi[entryDensityCounter])
 
 print("#")
