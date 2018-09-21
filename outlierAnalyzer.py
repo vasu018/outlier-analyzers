@@ -26,11 +26,13 @@ Outlier detection:
 <Output>: Outliers
 '''
 
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
+from collections import Counter
 
 # Importing pybatfish APIs.
 from pybatfish.client.commands import *
@@ -38,8 +40,10 @@ from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
 
 # Debug Flag
-DEBUG_PRINT_FLAG = False
+DEBUG_PRINT_FLAG = True
 
+# Static Threshold for comparison with density calculation
+OUTLIER_THRESHOLD = 1.0/3.0
 
 # Loading questions from pybatfish.
 load_questions()
@@ -67,7 +71,7 @@ Example list of multiclass features.
 data frames.
 '''
 
-multiclass_feature = [("1.1.1.1", "2.2.2.2", "1500"),
+multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "3.3.3.3", "1500"),
                       ("3.3.3.3", "", "9100"),
                       ("1.1.1.1",""),
@@ -84,7 +88,7 @@ multiclass_feature = [("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "", ""),
                       ("2.2.2.2","9100")]
 
-multiclass_feature2 = [("1.1.1.1", "2.2.2.2"),
+multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", "3.3.3.3"),
                       ("3.3.3.3", ""),
                       ("1.1.1.1", ""),
@@ -101,12 +105,51 @@ multiclass_feature2 = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", ""),
                       ("2.2.2.2","")]
 
-print("# Multi-class feature:\n", multiclass_feature)
+print("# Multi-class feature set is:\n", multiclass_feature_Xi)
 print()
+
+
+#
+# Approach 1: Simple Threshold-based outlier detection
+# with outlier threshold 1/3
+#
+
+# Unique instance counter of the elements.
+valueCounterOutCome = Counter(multiclass_feature_Xi)
+print("# Unique Instance Counter:", valueCounterOutCome)
+# print()
+
+mostCommonElement = valueCounterOutCome.most_common(1)
+print("# Most common element from the input data:", mostCommonElement)
+# print()
+
+mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
+print("# Most common element size:", mostCommonElementSize)
+# print()
+
+totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
+print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
+
+outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
+print("# Outlier threshold on data:",outlierThresholdValue)
+print()
+
+
+outliersThresholdAppraoch = []
+if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
+    for entryCounter, entryValue in enumerate(valueCounterOutCome.elements()):
+        if (entryValue != valueCounterOutCome.most_common()[0][0]):
+            print("Outlier:", entryValue)
+            outliersThresholdAppraoch.append(entryValue)
+            # [TODO]: Just simple code.
+            # Required calculation can de done later.
+#
+# Approach 2: Outlier detection using attribute density.
+#
 
 # Create multiclass multilabelbinarizer
 one_hot_multiclass = MultiLabelBinarizer()
-multiClassEncodedList = one_hot_multiclass.fit_transform(multiclass_feature)
+multiClassEncodedList = one_hot_multiclass.fit_transform(multiclass_feature_Xi)
 
 
 print("# Multi-class encoded features:\n", multiClassEncodedList)
@@ -136,12 +179,12 @@ if DEBUG_PRINT_FLAG:
     print()
 
 ''' 
-Calculate the density of each attribute value in the data entries Xi.
+Calculate the density of each attribute value in the data entries (Xi).
 '''
 entryDensityListNormalize = []
 entryDensityList = []
 for classCounter, entryVector in enumerate(multiClassEncodedList):
-    overallProportion = 1 / (len(uniqueClassesNonNull) * len(multiclass_feature))
+    overallProportion = 1 / (len(uniqueClassesNonNull) * len(multiclass_feature_Xi))
     summationVectorVals = 0
     for entryCounter, entryVectorClassValue in enumerate(entryVector):
         if (uniqueClasses[entryCounter] == ''):
@@ -152,9 +195,9 @@ for classCounter, entryVector in enumerate(multiClassEncodedList):
     entryDensityList.append(summationVectorVals)
 
 if DEBUG_PRINT_FLAG:
-    print("# Density Values list of data-set (Normalized):\n", entryDensityListNormalize)
+    print("# Density Values list of data-set (Normalized Xi):\n", entryDensityListNormalize)
     print()
-    print("# Density Values list of data-set (Real):\n", entryDensityList)
+    print("# Density Values list of data-set (Real Xi):\n", entryDensityList)
     print()
 
 
@@ -167,6 +210,7 @@ standardDeviationDataSet = statistics.stdev(entryDensityList)
 
 print("# Mean:", meanDataSet)
 print("# Standard Deviation:", standardDeviationDataSet)
+print()
 
 ''' 
 Calculate ZScores and Outliers.
@@ -185,16 +229,25 @@ for entryDensityCounter, eachValue in enumerate(entryDensityList):
         print("\t", eachValue,"\t\t\t\t", zScoreMean,"\t\t", zScoreMedian)
 
     # Currently one standard deviation is considered for calculating the outliers.
-    if (zScoreMean >= 1):
-        outliersMean.append(multiclass_feature[entryDensityCounter])
+    if (zScoreMean >= 0.8):
+        outliersMean.append(multiclass_feature_Xi[entryDensityCounter])
 
-    if (zScoreMedian >= 1):
-        outliersMedian.append(multiclass_feature[entryDensityCounter])
+    if (zScoreMedian >= 0.8):
+        outliersMedian.append(multiclass_feature_Xi[entryDensityCounter])
 
+print("#")
+print("# Outliers with Simple outlier threshold of 1/3 on data-set:")
+print("#")
+print(outliersThresholdAppraoch)
+print()
 
-
+print("#")
 print("# Outliers with Mean on data-set:")
+print("#")
 print(outliersMean)
 print()
+
+print("#")
 print("# Outliers with Median on data-set:")
+print("#")
 print(outliersMedian)
