@@ -40,7 +40,7 @@ from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
 
 # Debug Flag
-DEBUG_PRINT_FLAG = True
+DEBUG_PRINT_FLAG = False
 
 # Static Threshold for comparison with density calculation
 OUTLIER_THRESHOLD = 1.0/3.0
@@ -71,7 +71,7 @@ Example list of multiclass features.
 data frames.
 '''
 
-multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2", "1500"),
+multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "3.3.3.3", "1500"),
                       ("3.3.3.3", "", "9100"),
                       ("1.1.1.1",""),
@@ -88,7 +88,7 @@ multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "", ""),
                       ("2.2.2.2","9100")]
 
-multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2"),
+multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", "3.3.3.3"),
                       ("3.3.3.3", ""),
                       ("1.1.1.1", ""),
@@ -105,7 +105,7 @@ multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", ""),
                       ("2.2.2.2","")]
 
-print("# Multi-class feature set is:\n", multiclass_feature_Xi)
+print("# Feature set input:\n", multiclass_feature_Xi)
 print()
 
 
@@ -116,19 +116,20 @@ print()
 
 # Unique instance counter of the elements.
 valueCounterOutCome = Counter(multiclass_feature_Xi)
-print("# Unique Instance Counter:", valueCounterOutCome)
-# print()
+if DEBUG_PRINT_FLAG:
+    print("# Unique Instance Counter:", valueCounterOutCome)
 
 mostCommonElement = valueCounterOutCome.most_common(1)
 print("# Most common element from the input data:", mostCommonElement)
-# print()
 
 mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
-print("# Most common element size:", mostCommonElementSize)
-# print()
+if DEBUG_PRINT_FLAG:
+    print("# Most common element size:", mostCommonElementSize)
+
 
 totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
-print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
+if DEBUG_PRINT_FLAG:
+    print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
 
 outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
 print("# Outlier threshold on data:",outlierThresholdValue)
@@ -236,7 +237,7 @@ for entryDensityCounter, eachValue in enumerate(entryDensityList):
         outliersMedian.append(multiclass_feature_Xi[entryDensityCounter])
 
 print("#")
-print("# Outliers with Simple outlier threshold of 1/3 on data-set:")
+print("# Outliers using simple threshold of 1/3 on data-set:")
 print("#")
 print(outliersThresholdAppraoch)
 print()
