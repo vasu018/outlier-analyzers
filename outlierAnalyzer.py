@@ -28,11 +28,12 @@ Outlier detection:
 
 
 import pandas as pd
-import numpy as np
 from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
 from collections import Counter
+import sys
+from colorama import Fore, Back, Style
 
 # Importing pybatfish APIs.
 from pybatfish.client.commands import *
@@ -45,6 +46,18 @@ DEBUG_PRINT_FLAG = False
 # Static Threshold for comparison with density calculation
 OUTLIER_THRESHOLD = 1.0/3.0
 
+# Help flag
+if len(sys.argv) < 3 or sys.argv[1] == '-h':
+    print("#################################################################################")
+    print(Fore.RED + "# Error: Invalid arguments !!!")
+    print(Style.RESET_ALL)
+    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py <propertiesType> <propertyAttributes>")
+    print("# Examples: python3 outlierAnalyzer.py nodeProperties NTP_Servers")
+    print("#           python3 outlierAnalyzer.py interfaceProperties \"HSRP_GROUPS | MTU\"")
+    print(Style.RESET_ALL)
+    print("#################################################################################")
+    sys.exit(0)
+
 # Loading questions from pybatfish.
 load_questions()
 
@@ -55,20 +68,7 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 bf_init_snapshot('datasets/networks/example')
 
 '''
-[TODO]: Integrate the pybatfish question output to the classification below.
-'''
-
-'''
-Sample Example provided below.
-'''
-# nTPSeversVRFs = bfq.nodeProperties(properties="NTP_Servers|VRFs").answer()
-# print(nTPSeversVRFs)
-
-'''
 Example list of multiclass features.
-
-[TODO]: These static features will be extracted from the pybatfish questions 
-data frames.
 '''
 
 multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2", "1500"),
@@ -105,14 +105,24 @@ multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", ""),
                       ("2.2.2.2", "")]
 
+# Read the question and property from the command line and parse the returned data frame
+command = "result = bfq." + sys.argv[1] + "().answer().frame()"
+exec(command)
+
+prop = sys.argv[2]
+
+data = list(result[prop])
+multiclass_feature_Xi = []
+for d in data:
+   multiclass_feature_Xi.append(tuple(d)) 
+
 print("# Feature set input:\n", multiclass_feature_Xi)
 print()
 
 
-#
-# Approach 1: Simple Threshold-based outlier detection
-# with outlier threshold 1/3
-#
+'''
+Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
+'''
 
 # Unique instance counter of the elements.
 valueCounterOutCome = Counter(multiclass_feature_Xi)
@@ -144,9 +154,10 @@ if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
             outliersThresholdAppraoch.append(entryValue)
             # [TODO]: Just simple code.
             # Required calculation can de done later.
-#
-# Approach 2: Outlier detection using attribute density.
-#
+
+'''
+Approach 2: Outlier detection using attribute density.
+'''
 
 # Create multiclass multilabelbinarizer
 one_hot_multiclass = MultiLabelBinarizer()
