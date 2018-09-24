@@ -38,14 +38,19 @@ import sys
 # Importing pybatfish APIs.
 from pybatfish.client.commands import *
 from pybatfish.question.question import load_questions, list_questions
-# from pybatfish.question import bfq
+from pybatfish.question import bfq
 
 # Debug Flag
 DEBUG_PRINT_FLAG = False 
 
 # Static Threshold for comparison with density calculation
-from pybatfish.question import bfq
 OUTLIER_THRESHOLD = 1.0/3.0
+
+# Help flag
+if sys.argv[1] == '-h':
+    print('First argument is name of question and second argument is name of property.')
+    print('Example usage: python3 newOutlierAnalyzer2.py nodeProperties NTP_Servers')
+    sys.exit(0)
 
 # Loading questions from pybatfish.
 load_questions()
@@ -55,6 +60,7 @@ PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
 bf_init_snapshot('datasets/networks/example')
+
 
 '''
 Example list of multiclass features.
@@ -95,7 +101,7 @@ multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
                       ("2.2.2.2","")]
 
 # Read the question and property from the command line and parse the returned data frame
-command = "result = " + sys.argv[1]
+command = "result = bfq." + sys.argv[1] + "().answer().frame()"
 exec(command)
 
 prop = sys.argv[2]
