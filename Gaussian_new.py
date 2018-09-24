@@ -1,49 +1,57 @@
-"""
-The code calculates gaussian and gaussian-mixture on the data supplied as input.
-
-Reference: https://www.youtube.com/watch?v=JNlEIEwe-Cg&t=1239s
-https://github.com/llSourcell/Gaussian_Mixture_Models
-"""
-
+#train_subset.csv file is used to train the data. It has a mix of positive and negative values for fare_amount. Fare_amount is the only column from this file that is used to train.
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+import calendar
+from sklearn import linear_model
+from scipy.spatial import distance
+from scipy.stats import pearsonr
 from scipy import stats
 import math
 from random import uniform
 
-# x = np.linspace(start=-10, stop=10, num=1000)
-# y = stats.norm.pdf(x, loc=0, scale=1.5)
-# plt.plot(x, y)
-# plt.show()
-training_data = pd.read_csv('./train_subset.csv')
-data = training_data.fare_amount
-sns.distplot(training_data.fare_amount, bins=20, kde=False)
+x = np.linspace(start = -10, stop = 10, num=1000)
+y =stats.norm.pdf(x,loc=0,scale=1.5)
+#scale: standard deviation
+plt.plot(x,y)
 plt.show()
-
-# try to fit a normal distribution to this data
+training_data = pd.read_csv('train_subset.csv')
+data = training_data.fare_amount
+sns.distplot(training_data.fare_amount, bins =20, kde=False)
+plt.show()
+#try to fit a normal distribution to this data
 sns.distplot(data, fit=stats.norm, bins=20, kde=False,)
 plt.show()
 
 class Gaussian:
     "Model univariate Gaussian"
     def __init__(self, mu, sigma):
-        # Mean and standard deviation
+        #mean and standard deviation
         self.mu = mu
         self.sigma = sigma
 
-    # Probability density function
+    #probability density function
     def pdf(self, datum):
         "Probability of a data point given the current parameters"
         u = (datum - self.mu) / abs(self.sigma)
         y = (1 / (math.sqrt(2 * math.pi) * abs(self.sigma))) * math.exp(-u * u / 2)
         return y
-
+    #printing model values
     def __repr__(self):
         return 'Gaussian({0:4.6}, {1:4.6})'.format(self.mu, self.sigma)
 
 
+best_single = Gaussian(np.mean(data), np.std(data))
+print('Best single Gaussian: μ = {:.2}, σ = {:.2}'.format(best_single.mu, best_single.sigma))
+
+
+x = np.linspace(-30, 30, 200)
+g_single = stats.norm(best_single.mu, best_single.sigma).pdf(x)
+sns.distplot(data, bins=20, kde=False, norm_hist=True)
+plt.plot(x, g_single, label='single gaussian')
+plt.legend();
+plt.show()
 
 
 class GaussianMixture:
@@ -106,22 +114,11 @@ class GaussianMixture:
         return 'GaussianMixture({0}, {1}, mix={2.03})'.format(self.one,
                                                               self.two,
                                                               self.mix)
+
     def __str__(self):
         return 'Mixture: {0}, {1}, mix={2:.03})'.format(self.one,
                                                         self.two,
                                                         self.mix)
-
-
-best_single = Gaussian(np.mean(data), np.std(data))
-print('Best single Gaussian: μ = {:.2}, σ = {:.2}'.format(best_single.mu, best_single.sigma))
-
-
-x = np.linspace(-30, 30, 200)
-g_single = stats.norm(best_single.mu, best_single.sigma).pdf(x)
-sns.distplot(data, bins=20, kde=False, norm_hist=True)
-plt.plot(x, g_single, label='single gaussian')
-plt.legend();
-plt.show()
 
 
 n_iterations = 5
@@ -165,3 +162,5 @@ plt.legend();
 plt.show()
 
 
+Reference: https://www.youtube.com/watch?v=JNlEIEwe-Cg&t=1239s
+https://github.com/llSourcell/Gaussian_Mixture_Models

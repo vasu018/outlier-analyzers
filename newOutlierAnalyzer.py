@@ -33,16 +33,18 @@ from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 import statistics
 import numpy
 from collections import Counter
+import sys
 
 # Importing pybatfish APIs.
 from pybatfish.client.commands import *
 from pybatfish.question.question import load_questions, list_questions
-from pybatfish.question import bfq
+# from pybatfish.question import bfq
 
 # Debug Flag
-DEBUG_PRINT_FLAG = False
+DEBUG_PRINT_FLAG = False 
 
 # Static Threshold for comparison with density calculation
+from pybatfish.question import bfq
 OUTLIER_THRESHOLD = 1.0/3.0
 
 # Loading questions from pybatfish.
@@ -55,26 +57,13 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 bf_init_snapshot('datasets/networks/example')
 
 '''
-[TODO]: Integrate the pybatfish question output to the classification below.
-'''
-
-'''
-Sample Example provided below.
-'''
-# nTPSeversVRFs = bfq.nodeProperties(properties="NTP_Servers|VRFs").answer()
-# print(nTPSeversVRFs)
-
-'''
 Example list of multiclass features.
-
-[TODO]: These static features will be extracted from the pybatfish questions 
-data frames.
 '''
 
 multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "3.3.3.3", "1500"),
                       ("3.3.3.3", "", "9100"),
-                      ("1.1.1.1", ""),
+                      ("1.1.1.1",""),
                       ("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "2.2.2.2", "1500"),
                       ("1.1.1.1", "2.2.2.2", "1500"),
@@ -86,7 +75,7 @@ multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2", "1500"),
                       (),
                       ("", "", ""),
                       ("1.1.1.1", "", ""),
-                      ("2.2.2.2", "9100")]
+                      ("2.2.2.2","9100")]
 
 multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
                       ("1.1.1.1", "3.3.3.3"),
@@ -103,7 +92,19 @@ multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
                       (),
                       ("", ""),
                       ("1.1.1.1", ""),
-                      ("2.2.2.2", "")]
+                      ("2.2.2.2","")]
+
+# Read the question and property from the command line and parse the returned data frame
+command = "result = " + sys.argv[1]
+exec(command)
+
+prop = sys.argv[2]
+
+data = list(result[prop])
+multiclass_feature_Xi = []
+for d in data:
+   multiclass_feature_Xi.append(tuple(d)) 
+
 
 print("# Feature set input:\n", multiclass_feature_Xi)
 print()
@@ -132,7 +133,7 @@ if DEBUG_PRINT_FLAG:
     print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
 
 outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
-print("# Outlier threshold on data:", outlierThresholdValue)
+print("# Outlier threshold on data:",outlierThresholdValue)
 print()
 
 
@@ -169,6 +170,9 @@ constructed using the  MultiLabelBinarizer().
 mClassElementCountList = []
 uniqueClassesNonNull = []
 for counter, mClass in enumerate(one_hot_multiclass.classes_):
+
+    print((counter, mClass))
+
     uniqueClassesNonNull.append(mClass)
     mClassDensityValue = 0
     for multiClassElementCode in multiClassEncodedList:
@@ -252,3 +256,5 @@ print("#")
 print("# Outliers with Median on data-set:")
 print("#")
 print(outliersMedian)
+
+
