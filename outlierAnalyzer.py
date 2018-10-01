@@ -1,13 +1,43 @@
+"""
+Module to calculate the outliers for network configurations that is supplied
+as features. Outliers are calculated on the multi-class features using the
+zScore and modified zScore Outlier analyzer technique.
+
+High level design:
+
+Step 1: From the data frames generated as output of the question is converted to
+multi-class feature.
+
+Step 2: The multi-class is feature is encoded using the oneHot Encoding or
+MultiLabel Binarizer.
+
+Step 3: The encoded data is converted to some distribution using techniques such as:
+    (a) rough clustering and
+    (b) ...
+
+Step 4: The distribution is supplied to different outlier Analyzer techniques for
+Outlier detection:
+    (a) zScore
+    (b) modified zScore
+    (c) ...
+
+
+<Input>: question-type, question-parameters, custom-threshold
+<Output>: Outliers
+"""
+
 import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 import sys
+from colorama import Fore, Back, Style
+
+# Importing pybatfish APIs. 
+
 from pybatfish.client.commands import *
 from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
-from colorama import Fore, Back, Style
 
-# setup
-
+# Setup
 load_questions()
 
 pd.compat.PY3 = True
@@ -131,3 +161,41 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+
+sys.exit(0)
+
+'''
+Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
+'''
+
+# Unique instance counter of the elements.
+valueCounterOutCome = Counter(multiclass_feature_Xi)
+if DEBUG_PRINT_FLAG:
+    print("# Unique Instance Counter:", valueCounterOutCome)
+
+mostCommonElement = valueCounterOutCome.most_common(1)
+print("# Most common element from the input data:", mostCommonElement)
+
+mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
+if DEBUG_PRINT_FLAG:
+    print("# Most common element size:", mostCommonElementSize)
+
+
+totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
+if DEBUG_PRINT_FLAG:
+    print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
+
+outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
+print("# Outlier threshold on data:", outlierThresholdValue)
+print()
+
+
+outliersThresholdAppraoch = []
+if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
+    for entryCounter, entryValue in enumerate(valueCounterOutCome.elements()):
+        if (entryValue != valueCounterOutCome.most_common()[0][0]):
+            print("Outlier:", entryValue)
+            outliersThresholdAppraoch.append(entryValue)
+            # [TODO]: Just simple code.
+            # Required calculation can de done later.
