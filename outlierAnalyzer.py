@@ -90,6 +90,7 @@ mlb = MultiLabelBinarizer()
 
 encodedLists = []
 frequencyLists = []
+uniqueClasses = []
 proportion = 0 
 
 
@@ -97,6 +98,7 @@ proportion = 0
 for i, data in enumerate(datas):
     encodedList = mlb.fit_transform(datas[i])
     encodedLists.append(encodedList)
+    uniqueClasses.append(mlb.classes_)
 
     frequencyList = [0] * len(encodedList[0])
 
@@ -120,16 +122,35 @@ for i in range(len(encodedLists)):
 
             densityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
             normalizedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k] / float(proportion)
-            
+
+
+
+for i, prop in enumerate(props):
+    print("%s: %s" % (prop, datas[i]))
+    print()
+    print("Unique classes: %s" % uniqueClasses[i])
+    print()
+    print(encodedLists[i])
+    print()
+
+
+
+# print(encodedLists)
+# print()
+
+# for i, data in enumerate(datas):
+#     print("%s: %s" % (props[i], data))
+#     print()
+
+print('Density list:', densityList)
+print()
 
 # Outlier detection libraries
 
-import newOutlierLibrary
+import outlierLibrary
 
-print(densityList)
-print(datas)
 
-outliers = newOutlierLibrary.tukey(densityList)
+outliers = outlierLibrary.tukey(densityList)
 label = 'Tukey\'s method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -140,7 +161,7 @@ for outlier in outliers:
     print()
 print()
 
-outliers = newOutlierLibrary.z_score(densityList)
+outliers = outlierLibrary.z_score(densityList)
 label = 'Z-Score method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -151,7 +172,7 @@ for outlier in outliers:
     print()
 print()
 
-outliers = newOutlierLibrary.modified_z_score(densityList)
+outliers = outlierLibrary.modified_z_score(densityList)
 label = 'Modified Z-Score method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -162,6 +183,20 @@ for outlier in outliers:
     print()
 print()
 
+cooksDensityList = []
+for i, value in enumerate(densityList):
+    cooksDensityList.append((i, value))
+
+outliers = outlierLibrary.cooks_distance(cooksDensityList)
+label = 'Cook\'s distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
+print()
 
 sys.exit(0)
 

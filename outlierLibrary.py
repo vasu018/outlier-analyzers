@@ -1,5 +1,7 @@
 import numpy as np
 import pandas as pd
+import copy
+import math
 
 def test(densityList):
     print(densityList)
@@ -175,10 +177,11 @@ def cooks_distance(points):
 
         distance /= (3 * s)
 
-        print(distance)
+        # print(distance)
 
         if distance > 1:
-            outliers.append(points[i])
+            # outliers.append(points[i])
+            outliers.append(i)
 
     return outliers
 
