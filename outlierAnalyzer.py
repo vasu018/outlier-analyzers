@@ -30,6 +30,7 @@ import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 import sys
 from colorama import Fore, Back, Style
+import outlierLibrary
 
 # Importing pybatfish APIs. 
 
@@ -45,6 +46,12 @@ PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
 bf_init_snapshot('datasets/networks/example')
+
+# Debug Flag
+DEBUG_PRINT_FLAG = False
+
+# Static Threshold for comparison with density calcuation
+OUTLIER_THRESHOLD = 1.0 / 3.0
 
 # Help flag
 if len(sys.argv) < 3 or sys.argv[1] == '-h':
@@ -145,9 +152,49 @@ for i, prop in enumerate(props):
 print('Density list:', densityList)
 print()
 
+
+'''
+Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
+'''
+
+# Unique instance counter of the elements.
+valueCounterOutCome = Counter(multiclass_feature_Xi)
+if DEBUG_PRINT_FLAG:
+    print("# Unique Instance Counter:", valueCounterOutCome)
+
+mostCommonElement = valueCounterOutCome.most_common(1)
+print("# Most common element from the input data:", mostCommonElement)
+
+mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
+if DEBUG_PRINT_FLAG:
+    print("# Most common element size:", mostCommonElementSize)
+
+
+totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
+if DEBUG_PRINT_FLAG:
+    print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
+
+outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
+print("# Outlier threshold on data:", outlierThresholdValue)
+print()
+
+
+outliersThresholdAppraoch = []
+if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
+    for entryCounter, entryValue in enumerate(valueCounterOutCome.elements()):
+        if (entryValue != valueCounterOutCome.most_common()[0][0]):
+            print("Outlier:", entryValue)
+            outliersThresholdAppraoch.append(entryValue)
+            # [TODO]: Just simple code.
+            # Required calculation can de done later.
+
+'''
+Approach 2: Alternative outlier detection approaches
+'''
+
+
 # Outlier detection libraries
 
-import outlierLibrary
 
 
 outliers = outlierLibrary.tukey(densityList)
