@@ -59,9 +59,9 @@ def error_msg(help_flag):
     if (not help_flag):
         print(Fore.RED + "# Error: Invalid arguments !!!")
         print(Style.RESET_ALL)
-    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py -b <propertiesType> <propertyAttributes>")
-    print("# Examples: python3 outlierAnalyzer.py -b \"nodeProperties()\" NTP_Servers")
-    print("#           python3 outlierAnalyzer.py -b \"interfaceProperties()\" \"HSRP_GROUPS | MTU\"")
+    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py -t <propertiesType> -p <propertyAttributes>")
+    print("# Examples: python3 outlierAnalyzer.py -t \"nodeProperties()\" -p NTP_Servers")
+    print("#           python3 outlierAnalyzer.py -t \"interfaceProperties()\" -p \"HSRP_GROUPS | MTU\"")
     print(Fore.GREEN + "# Usage: python3 outlierAnalyzer.py -i <inputFile>")
     print("#           python3 outlierAnalyzer.py -i input.txt")
     print(Style.RESET_ALL)
@@ -73,8 +73,8 @@ def error_msg(help_flag):
 try:
     if sys.argv[1] == '-h':
         error_msg(True)
-    elif sys.argv[1] == '-b':
-        if len(sys.argv) != 4:
+    elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
+        if len(sys.argv) != 5:
             error_msg(False)
         else:
             READ_FILE_FLAG = False    
@@ -102,10 +102,15 @@ def listify(frame):
 if READ_FILE_FLAG:
     # Read the data in from a text file
 
-    f = open(sys.argv[2], 'r')
+    try:
+        f = open(sys.argv[2], 'r')
+    except FileNotFoundError:
+        print('Invalid file specified!')
+        sys.exit(0)
 
     props = []
-    datas = []
+    
+    datas = [] # an array of selected columns, each of which holds all the entries of the feature in a list of lists
 
     for count, line in enumerate(f):
         if count == 0:
@@ -132,7 +137,7 @@ else:
     exec(command)
     print(result)
 
-    props = sys.argv[3].split('|')
+    props = sys.argv[4].split('|')
     for i in range(len(props)):
         props[i] = props[i].strip()
 
@@ -152,7 +157,6 @@ uniqueClasses = []
 proportion = 0 
 
 
-# datas is an array of selected columns
 # The for loop encodes each column (aka feature) in a binary format where
 # 0 means it a class is absent and 1 means the class is present in that row.
 for i, data in enumerate(datas):
