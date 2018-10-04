@@ -1,0 +1,224 @@
+*** Settings ***
+Log level: INFO
+Configs directory: /users/anubhavnidhi/batfish/backup/Arnes_attrs_simple_16_335/configs/
+Warn assumptions: false
+Routers Only: false
+Waypoints file: null
+Minimum policy group size: 4
+Include entire flowspace: false
+Exclude external policy groups: true
+Generate per-flow ETGs: false
+Generate per-destination ETGs: false
+Use interface descriptions to generate device-based ETG: false
+Parallelize: false
+Graphs directory: null
+Test files: null
+Serialized ETGs file: null
+Minesweeper policies file: /users/anubhavnidhi/batfish/backup/Arnes_attrs_simple_16_335/logs//minesweeper_tocheck.txt
+Netcomplete reqs file: /users/anubhavnidhi/batfish/backup/Arnes_attrs_simple_16_335/req
+Verify currently blocked: false
+Verify always blocked: false
+Verify always reachable: false K=-1
+Verify always traverse waypoint: false
+Verify always isolated: false
+Verify primary path: false
+Verify path equivalence: false VIRL-log=null
+Verify equivalence: false Comparison ETGs=null
+Fault Localize Method: null
+Check Polcies File: null
+Save policies file: null
+Edit policies file: null
+Repair: false Policies=null
+Modifier: null
+Objective: null
+Compare ETGs file: null
+Only repair broken ETGs: false
+Compare configs file: null
+*** Reading configuration files ***
+*** Extract Policy Groups ***
+Parsing Ajdovscina...OK
+Parsing Bled...OK
+Parsing Celje...OK
+Parsing Divaca...OK
+Parsing Dravograd...OK
+Parsing GornjaTTRadgona...OK
+Parsing Izola...OK
+Parsing Jesenice...OK
+Parsing Kamnik...OK
+Parsing Koper...OK
+Parsing Kovevje...OK
+Parsing Kranj...OK
+Parsing Krsko...OK
+Parsing Lasko...OK
+Parsing Ljubljana...OK
+Parsing Ljutomer...OK
+Parsing Maribor...OK
+Parsing MurskaTTSobota...OK
+Parsing NovaTTGorica...OK
+Parsing NovoTTMesto...OK
+Parsing Ormoz...OK
+Parsing PeerCelje_5...OK
+Parsing PeerGornjaTTRadgona_12...OK
+Parsing PeerIzola_13...OK
+Parsing PeerKoper_4...OK
+Parsing PeerKranj_11...OK
+Parsing PeerKrsko_15...OK
+Parsing PeerLjubljana_3...OK
+Parsing PeerMaribor_8...OK
+Parsing PeerMurskaTTSobota_14...OK
+Parsing PeerNovoTTMesto_1...OK
+Parsing PeerOrmoz_2...OK
+Parsing PeerPtuj_7...OK
+Parsing PeerSlovenskaTTBistrica_0...OK
+Parsing PeerTolmin_10...OK
+Parsing PeerTrbovlje_9...OK
+Parsing PeerVelenje_6...OK
+Parsing Portoroz...OK
+Parsing Postojna...OK
+Parsing Ptuj...OK
+Parsing Radenci...OK
+Parsing RavneTTnaTTKoroskem...OK
+Parsing RogasjaTTSlatina...OK
+Parsing Senozece...OK
+Parsing Sezana...OK
+Parsing SlovenjTTGradec...OK
+Parsing SlovenskaTTBistrica...OK
+Parsing Tolmin...OK
+Parsing Trbovlje...OK
+Parsing Velenje...OK
+RESULTS_START: PolicyGroups
+	60.0.1.0-60.0.1.255 INTERNAL
+	60.0.2.0-60.0.2.255 INTERNAL
+	60.0.3.0-60.0.3.255 INTERNAL
+	60.0.4.0-60.0.4.255 INTERNAL
+	60.0.5.0-60.0.5.255 INTERNAL
+	60.0.6.0-60.0.6.255 INTERNAL
+	60.0.7.0-60.0.7.255 INTERNAL
+	60.0.8.0-60.0.8.255 INTERNAL
+	60.0.9.0-60.0.9.255 INTERNAL
+	60.0.10.0-60.0.10.255 INTERNAL
+	60.0.11.0-60.0.11.255 INTERNAL
+	60.0.12.0-60.0.12.255 INTERNAL
+	60.0.13.0-60.0.13.255 INTERNAL
+	60.0.14.0-60.0.14.255 INTERNAL
+	60.0.15.0-60.0.15.255 INTERNAL
+	60.0.16.0-60.0.16.255 INTERNAL
+	80.0.1.0-80.0.1.255 INTERNAL
+	80.0.2.0-80.0.2.255 INTERNAL
+	80.0.3.0-80.0.3.255 INTERNAL
+	80.0.4.0-80.0.4.255 INTERNAL
+	80.0.5.0-80.0.5.255 INTERNAL
+	80.0.6.0-80.0.6.255 INTERNAL
+	80.0.7.0-80.0.7.255 INTERNAL
+	80.0.8.0-80.0.8.255 INTERNAL
+	80.0.9.0-80.0.9.255 INTERNAL
+	80.0.10.0-80.0.10.255 INTERNAL
+	80.0.11.0-80.0.11.255 INTERNAL
+	80.0.12.0-80.0.12.255 INTERNAL
+	80.0.13.0-80.0.13.255 INTERNAL
+	80.0.14.0-80.0.14.255 INTERNAL
+	80.0.15.0-80.0.15.255 INTERNAL
+	80.0.16.0-80.0.16.255 INTERNAL
+	128.0.0.0-128.0.0.255 INTERNAL
+	128.0.1.0-128.0.1.255 INTERNAL
+	128.0.2.0-128.0.2.255 INTERNAL
+	128.0.3.0-128.0.3.255 INTERNAL
+	128.0.4.0-128.0.4.255 INTERNAL
+	128.0.5.0-128.0.5.255 INTERNAL
+	128.0.6.0-128.0.6.255 INTERNAL
+	128.0.7.0-128.0.7.255 INTERNAL
+	128.0.8.0-128.0.8.255 INTERNAL
+	128.0.9.0-128.0.9.255 INTERNAL
+	128.0.10.0-128.0.10.255 INTERNAL
+	128.0.11.0-128.0.11.255 INTERNAL
+	128.0.12.0-128.0.12.255 INTERNAL
+	128.0.13.0-128.0.13.255 INTERNAL
+	128.0.14.0-128.0.14.255 INTERNAL
+	128.0.15.0-128.0.15.255 INTERNAL
+RESULTS_END: PolicyGroups
+COUNT: policyGroups 48
+COUNT: devices 50
+Devices:
+	Ajdovscina
+	Bled
+	Celje
+	Divaca
+	Dravograd
+	GornjaTTRadgona
+	Izola
+	Jesenice
+	Kamnik
+	Koper
+	Kovevje
+	Kranj
+	Krsko
+	Lasko
+	Ljubljana
+	Ljutomer
+	Maribor
+	MurskaTTSobota
+	NovaTTGorica
+	NovoTTMesto
+	Ormoz
+	PeerCelje_5
+	PeerGornjaTTRadgona_12
+	PeerIzola_13
+	PeerKoper_4
+	PeerKranj_11
+	PeerKrsko_15
+	PeerLjubljana_3
+	PeerMaribor_8
+	PeerMurskaTTSobota_14
+	PeerNovoTTMesto_1
+	PeerOrmoz_2
+	PeerPtuj_7
+	PeerSlovenskaTTBistrica_0
+	PeerTolmin_10
+	PeerTrbovlje_9
+	PeerVelenje_6
+	Portoroz
+	Postojna
+	Ptuj
+	Radenci
+	RavneTTnaTTKoroskem
+	RogasjaTTSlatina
+	Senozece
+	Sezana
+	SlovenjTTGradec
+	SlovenskaTTBistrica
+	Tolmin
+	Trbovlje
+	Velenje
+*** Generate Minesweeper policy list ***
+Senozece  SlovenskaTTBistrica
+Senozece  NovoTTMesto
+Senozece  Ormoz
+Senozece  Ljubljana
+Senozece  Koper
+Senozece  Celje
+Senozece  Velenje
+Senozece  Ptuj
+Senozece  Maribor
+Senozece  Trbovlje
+Senozece  Tolmin
+Senozece  Kranj
+Senozece  GornjaTTRadgona
+Senozece  Izola
+Senozece  MurskaTTSobota
+Senozece  Krsko
+*** Generate device-based ETG ***
+COUNT: deviceETGVertices 50
+COUNT: deviceETGEdges 62
+*** Generate process-based ETG ***
+COUNT: baseETGVertices 100
+COUNT: baseETGEdges 174
+COUNT: ospfProcesses 0
+COUNT: bgpProcesses 50
+COUNT: staticProcesses 0
+*** Generate instance-based ETG ***
+COUNT: instanceETGVertices 1
+COUNT: instanceETGEdges 0
+COUNT: ospfInstances 0
+COUNT: bgpInstances 1
+COUNT: staticInstances 0
+PROP: instanceIsDag true
