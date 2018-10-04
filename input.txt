@@ -1,0 +1,9 @@
+Node_Name | NTP_Servers | MTU
+router1 | 1.1.1.1, 2.2.2.2 | 1200
+router2 | 2.2.2.2 | 1800
+router3 | | 1500
+router4 | 2.2.2.2 | 1200
+router5 | 1.1.1.1, 2.2.2.2 | 1200
+router6 | 1.1.1.1 | 1800
+router7 | 2.2.2.2 | 1800
+router8 | 1.1.1.1, 2.2.2.2 | 1200
