@@ -31,6 +31,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 import sys
 from colorama import Fore, Back, Style
 import outlierLibrary
+from collections import Counter
 
 # Importing pybatfish APIs. 
 
@@ -47,23 +48,46 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
 bf_init_snapshot('datasets/networks/example')
 
-# Debug Flag
-DEBUG_PRINT_FLAG = False
+# Debug flags
+DEBUG_PRINT_FLAG = True
 
 # Static Threshold for comparison with density calcuation
 OUTLIER_THRESHOLD = 1.0 / 3.0
 
-# Help flag
-if len(sys.argv) < 3 or sys.argv[1] == '-h':
+def error_msg(help_flag):
     print("#################################################################################")
-    print(Fore.RED + "# Error: Invalid arguments !!!")
-    print(Style.RESET_ALL)
-    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py <propertiesType> <propertyAttributes>")
-    print("# Examples: python3 outlierAnalyzer.py \"nodeProperties()\" NTP_Servers")
-    print("#           python3 outlierAnalyzer.py \"interfaceProperties()\" \"HSRP_GROUPS | MTU\"")
+    if (not help_flag):
+        print(Fore.RED + "# Error: Invalid arguments !!!")
+        print(Style.RESET_ALL)
+    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py -b <propertiesType> <propertyAttributes>")
+    print("# Examples: python3 outlierAnalyzer.py -b \"nodeProperties()\" NTP_Servers")
+    print("#           python3 outlierAnalyzer.py -b \"interfaceProperties()\" \"HSRP_GROUPS | MTU\"")
+    print(Fore.GREEN + "# Usage: python3 outlierAnalyzer.py -i <inputFile>")
+    print("#           python3 outlierAnalyzer.py -i input.txt")
     print(Style.RESET_ALL)
     print("#################################################################################")
     sys.exit(0)
+
+
+# Check if user input is correct
+try:
+    if sys.argv[1] == '-h':
+        error_msg(True)
+    elif sys.argv[1] == '-b':
+        if len(sys.argv) != 4:
+            error_msg(False)
+        else:
+            READ_FILE_FLAG = False    
+    elif sys.argv[1] == '-i':
+        if len(sys.argv) != 3:
+            error_msg(False)
+        else:
+            READ_FILE_FLAG = True
+    else:
+        error_msg(False)
+except:
+    error_msg(False)
+
 
 # utility functions
 
@@ -74,23 +98,50 @@ def listify(frame):
            outputList[i] = [outputList[i]] 
     return outputList
 
-# Read the question and property from the command line and parse the returned data frame
-command = "result = bfq." + sys.argv[1] + ".answer().frame()"
-exec(command)
-print(result)
 
-props = sys.argv[2].split('|')
-for i in range(len(props)):
-    props[i] = props[i].strip()
+if READ_FILE_FLAG:
+    # Read the data in from a text file
 
-datas = []
-for prop in props:
-    data = listify(result[prop])
-    datas.append(data)
+    f = open(sys.argv[2], 'r')
+
+    props = []
+    datas = []
+
+    for count, line in enumerate(f):
+        if count == 0:
+            props = line.split('|')
+            for i in range(len(props)):
+                props[i] = props[i].strip()
+                datas.append([])
+        else:
+            tokens = line.split('|')
+            for i, token in enumerate(tokens):
+
+                values = token.split(',')
+                for j in range(len(values)):
+                    values[j] = values[j].strip().rstrip('\n')
+
+                if len(values) == 1 and values[0] == '':
+                    values = []
+
+                datas[i].append(values)
+else:
+
+    # Or read the question and property from the command line and parse the returned data frame
+    command = "result = bfq." + sys.argv[2] + ".answer().frame()"
+    exec(command)
+    print(result)
+
+    props = sys.argv[3].split('|')
+    for i in range(len(props)):
+        props[i] = props[i].strip()
+
+    datas = []
+    for prop in props:
+        data = listify(result[prop])
+        datas.append(data)
 
 
-# TODO
-# include other information along with the density value, maybe use object-oriented
 
 # Encode using multi label binarizer and calculate frequency
 mlb = MultiLabelBinarizer()
@@ -101,8 +152,12 @@ uniqueClasses = []
 proportion = 0 
 
 
-
+# datas is an array of selected columns
+# The for loop encodes each column (aka feature) in a binary format where
+# 0 means it a class is absent and 1 means the class is present in that row.
 for i, data in enumerate(datas):
+    # fit_transform calculates the size of each category automatically based on the input data
+    # and then encodes it into the multilabel bit encoding
     encodedList = mlb.fit_transform(datas[i])
     encodedLists.append(encodedList)
     uniqueClasses.append(mlb.classes_)
@@ -118,6 +173,9 @@ for i, data in enumerate(datas):
     frequencyLists.append(frequencyList)
 
 # Calculate density
+# For each matrix, first sum up each column. Then for each row, add the corresponding
+# value to the density value if the matching row value is 1.
+# Do this for each matrix, and then sum up all those values to get the final density value for the column/feature.
 
 densityList = [0] * len(encodedLists[0])
 normalizedDensityList = [0] * len(encodedLists[0])
@@ -142,12 +200,6 @@ for i, prop in enumerate(props):
 
 
 
-# print(encodedLists)
-# print()
-
-# for i, data in enumerate(datas):
-#     print("%s: %s" % (props[i], data))
-#     print()
 
 print('Density list:', densityList)
 print()
@@ -157,8 +209,22 @@ print()
 Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
 '''
 
+# Aggregate all the input data
+aggregated = []
+
+for i in range(len(datas[0])):
+    value = []
+    for data in datas:
+        for element in data[i]:
+            value.append(element)
+    
+    
+    aggregated.append(tuple(value))
+
+
+
 # Unique instance counter of the elements.
-valueCounterOutCome = Counter(multiclass_feature_Xi)
+valueCounterOutCome = Counter(aggregated)
 if DEBUG_PRINT_FLAG:
     print("# Unique Instance Counter:", valueCounterOutCome)
 
@@ -170,7 +236,7 @@ if DEBUG_PRINT_FLAG:
     print("# Most common element size:", mostCommonElementSize)
 
 
-totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
+totalSizeOfmultiClassSet = len(aggregated)
 if DEBUG_PRINT_FLAG:
     print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
 
@@ -194,8 +260,6 @@ Approach 2: Alternative outlier detection approaches
 
 
 # Outlier detection libraries
-
-
 
 outliers = outlierLibrary.tukey(densityList)
 label = 'Tukey\'s method outliers: ' + str(outliers)
@@ -247,37 +311,3 @@ print()
 
 sys.exit(0)
 
-'''
-Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
-'''
-
-# Unique instance counter of the elements.
-valueCounterOutCome = Counter(multiclass_feature_Xi)
-if DEBUG_PRINT_FLAG:
-    print("# Unique Instance Counter:", valueCounterOutCome)
-
-mostCommonElement = valueCounterOutCome.most_common(1)
-print("# Most common element from the input data:", mostCommonElement)
-
-mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
-if DEBUG_PRINT_FLAG:
-    print("# Most common element size:", mostCommonElementSize)
-
-
-totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
-if DEBUG_PRINT_FLAG:
-    print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
-
-outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
-print("# Outlier threshold on data:", outlierThresholdValue)
-print()
-
-
-outliersThresholdAppraoch = []
-if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
-    for entryCounter, entryValue in enumerate(valueCounterOutCome.elements()):
-        if (entryValue != valueCounterOutCome.most_common()[0][0]):
-            print("Outlier:", entryValue)
-            outliersThresholdAppraoch.append(entryValue)
-            # [TODO]: Just simple code.
-            # Required calculation can de done later.
