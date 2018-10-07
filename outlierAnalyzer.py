@@ -32,6 +32,8 @@ import sys
 from colorama import Fore, Back, Style
 import outlierLibrary
 from collections import Counter
+import json
+from pprint import pprint
 
 # Importing pybatfish APIs. 
 
@@ -102,34 +104,26 @@ def listify(frame):
 if READ_FILE_FLAG:
     # Read the data in from a text file
 
-    try:
-        f = open(sys.argv[2], 'r')
-    except FileNotFoundError:
-        print('Invalid file specified!')
-        sys.exit(0)
-
     props = []
+    datas = []
+
+    with open(sys.argv[2]) as f:
+        json_object = json.load(f)
+
+    # Extract the property names from the json object
+    props = []
+    for i, prop in enumerate(json_object[0]):
+        if i > 0:
+            props.append(prop)
+            datas.append([])
+
+    # Extract data
+
+    for i in range(len(json_object)):
     
-    datas = [] # an array of selected columns, each of which holds all the entries of the feature in a list of lists
+        for j, prop in enumerate(props):
+            datas[j].append(json_object[i][prop])
 
-    for count, line in enumerate(f):
-        if count == 0:
-            props = line.split('|')
-            for i in range(len(props)):
-                props[i] = props[i].strip()
-                datas.append([])
-        else:
-            tokens = line.split('|')
-            for i, token in enumerate(tokens):
-
-                values = token.split(',')
-                for j in range(len(values)):
-                    values[j] = values[j].strip().rstrip('\n')
-
-                if len(values) == 1 and values[0] == '':
-                    values = []
-
-                datas[i].append(values)
 else:
 
     # Or read the question and property from the command line and parse the returned data frame
@@ -181,18 +175,23 @@ for i, data in enumerate(datas):
 # value to the density value if the matching row value is 1.
 # Do this for each matrix, and then sum up all those values to get the final density value for the column/feature.
 
-densityList = [0] * len(encodedLists[0])
-normalizedDensityList = [0] * len(encodedLists[0])
-
+densityLists = []
+normalizedDensityLists = []
+aggregatedDensityList = [0] * len(encodedLists[0])
 
 for i in range(len(encodedLists)):
+    densityList = [0] * len(encodedLists[i])
+    normalizedDensityList = [0] * len(encodedLists[i])
+
     for j in range(len(densityList)):
         for k in range(len(encodedLists[i][j])): 
 
             densityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
             normalizedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k] / float(proportion)
+            aggregatedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
 
-
+    densityLists.append(densityList)
+    normalizedDensityLists.append(normalizedDensityList)
 
 for i, prop in enumerate(props):
     print("%s: %s" % (prop, datas[i]))
@@ -201,12 +200,6 @@ for i, prop in enumerate(props):
     print()
     print(encodedLists[i])
     print()
-
-
-
-
-print('Density list:', densityList)
-print()
 
 
 '''
@@ -225,8 +218,6 @@ for i in range(len(datas[0])):
     
     aggregated.append(tuple(value))
 
-
-
 # Unique instance counter of the elements.
 valueCounterOutCome = Counter(aggregated)
 if DEBUG_PRINT_FLAG:
@@ -238,7 +229,6 @@ print("# Most common element from the input data:", mostCommonElement)
 mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
 if DEBUG_PRINT_FLAG:
     print("# Most common element size:", mostCommonElementSize)
-
 
 totalSizeOfmultiClassSet = len(aggregated)
 if DEBUG_PRINT_FLAG:
@@ -258,14 +248,14 @@ if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
             # [TODO]: Just simple code.
             # Required calculation can de done later.
 
+
 '''
 Approach 2: Alternative outlier detection approaches
 '''
 
-
 # Outlier detection libraries
 
-outliers = outlierLibrary.tukey(densityList)
+outliers = outlierLibrary.tukey(aggregatedDensityList)
 label = 'Tukey\'s method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -276,7 +266,7 @@ for outlier in outliers:
     print()
 print()
 
-outliers = outlierLibrary.z_score(densityList)
+outliers = outlierLibrary.z_score(aggregatedDensityList)
 label = 'Z-Score method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -287,7 +277,7 @@ for outlier in outliers:
     print()
 print()
 
-outliers = outlierLibrary.modified_z_score(densityList)
+outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
 label = 'Modified Z-Score method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
@@ -299,7 +289,7 @@ for outlier in outliers:
 print()
 
 cooksDensityList = []
-for i, value in enumerate(densityList):
+for i, value in enumerate(aggregatedDensityList):
     cooksDensityList.append((i, value))
 
 outliers = outlierLibrary.cooks_distance(cooksDensityList)
@@ -312,6 +302,19 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+
+outliers = outlierLibrary.mahalanobis_distance(densityLists)
+label = 'Malanobis distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
+print()
+
 
 sys.exit(0)
 
