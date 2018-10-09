@@ -26,39 +26,22 @@ Outlier detection:
 <Output>: Outliers
 """
 
-
 import pandas as pd
-from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
-import statistics
-import numpy
-from collections import Counter
+from sklearn.preprocessing import MultiLabelBinarizer
 import sys
 from colorama import Fore, Back, Style
+import outlierLibrary
+from collections import Counter
+import json
+from pprint import pprint
 
-# Importing pybatfish APIs.
+# Importing pybatfish APIs. 
+
 from pybatfish.client.commands import *
 from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
 
-# Debug Flag
-DEBUG_PRINT_FLAG = False
-
-# Static Threshold for comparison with density calculation
-OUTLIER_THRESHOLD = 1.0/3.0
-
-# Help flag
-if len(sys.argv) < 3 or sys.argv[1] == '-h':
-    print("#################################################################################")
-    print(Fore.RED + "# Error: Invalid arguments !!!")
-    print(Style.RESET_ALL)
-    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py <propertiesType> <propertyAttributes>")
-    print("# Examples: python3 outlierAnalyzer.py nodeProperties NTP_Servers")
-    print("#           python3 outlierAnalyzer.py interfaceProperties \"HSRP_GROUPS | MTU\"")
-    print(Style.RESET_ALL)
-    print("#################################################################################")
-    sys.exit(0)
-
-# Loading questions from pybatfish.
+# Setup
 load_questions()
 
 pd.compat.PY3 = True
@@ -67,65 +50,176 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
 bf_init_snapshot('datasets/networks/example')
 
-'''
-Example list of multiclass features.
-'''
+# Debug flags
+DEBUG_PRINT_FLAG = True
 
-multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2", "1500"),
-                      ("1.1.1.1", "3.3.3.3", "1500"),
-                      ("3.3.3.3", "", "9100"),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "2.2.2.2", "1500"),
-                      ("1.1.1.1", "2.2.2.2", "1500"),
-                      ("1.1.1.1", "2.2.2.2", "1500"),
-                      ("1.1.1.1", "2.2.2.2", "1500"),
-                      ("1.1.1.1", "3.3.3.3", "9100"),
-                      ("1.1.1.1", "3.3.3.3", "9100"),
-                      ("1.1.1.1", "", "1500"),
-                      ("1.1.1.1", "2.2.2.2", "1500"),
-                      (),
-                      ("", "", ""),
-                      ("1.1.1.1", "", ""),
-                      ("2.2.2.2", "9100")]
+# Static Threshold for comparison with density calcuation
+OUTLIER_THRESHOLD = 1.0 / 3.0
 
-multiclass_feature_Xi2 = [("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("3.3.3.3", ""),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "3.3.3.3"),
-                      (),
-                      ("", ""),
-                      ("1.1.1.1", ""),
-                      ("2.2.2.2", "")]
+def error_msg(help_flag):
+    print("#################################################################################")
+    if (not help_flag):
+        print(Fore.RED + "# Error: Invalid arguments !!!")
+        print(Style.RESET_ALL)
+    print(Fore.BLUE + "# Usage: python3 outlierAnalyzer.py -t <propertiesType> -p <propertyAttributes>")
+    print("# Examples: python3 outlierAnalyzer.py -t \"nodeProperties()\" -p NTP_Servers")
+    print("#           python3 outlierAnalyzer.py -t \"interfaceProperties()\" -p \"HSRP_GROUPS | MTU\"")
+    print(Fore.GREEN + "# Usage: python3 outlierAnalyzer.py -i <inputFile>")
+    print("#           python3 outlierAnalyzer.py -i input.txt")
+    print(Style.RESET_ALL)
+    print("#################################################################################")
+    sys.exit(0)
 
-# Read the question and property from the command line and parse the returned data frame
-command = "result = bfq." + sys.argv[1] + "().answer().frame()"
-exec(command)
 
-prop = sys.argv[2]
+# Check if user input is correct
+try:
+    if sys.argv[1] == '-h':
+        error_msg(True)
+    elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
+        if len(sys.argv) != 5:
+            error_msg(False)
+        else:
+            READ_FILE_FLAG = False    
+    elif sys.argv[1] == '-i':
+        if len(sys.argv) != 3:
+            error_msg(False)
+        else:
+            READ_FILE_FLAG = True
+    else:
+        error_msg(False)
+except:
+    error_msg(False)
 
-data = list(result[prop])
-multiclass_feature_Xi = []
-for d in data:
-   multiclass_feature_Xi.append(tuple(d)) 
 
-print("# Feature set input:\n", multiclass_feature_Xi)
-print()
+# utility functions
+
+def listify(frame):
+    outputList = list(frame)
+    for i in range(len(outputList)):
+        if type(outputList[i]) is not list:
+           outputList[i] = [outputList[i]] 
+    return outputList
+
+
+if READ_FILE_FLAG:
+    # Read the data in from a text file
+
+    props = []
+    datas = []
+
+    with open(sys.argv[2]) as f:
+        json_object = json.load(f)
+
+    # Extract the property names from the json object
+    props = []
+    for i, prop in enumerate(json_object[0]):
+        if i > 0:
+            props.append(prop)
+            datas.append([])
+
+    # Extract data
+
+    for i in range(len(json_object)):
+    
+        for j, prop in enumerate(props):
+            datas[j].append(json_object[i][prop])
+
+else:
+
+    # Or read the question and property from the command line and parse the returned data frame
+    command = "result = bfq." + sys.argv[2] + ".answer().frame()"
+    exec(command)
+    print(result)
+
+    props = sys.argv[4].split('|')
+    for i in range(len(props)):
+        props[i] = props[i].strip()
+
+    datas = []
+    for prop in props:
+        data = listify(result[prop])
+        datas.append(data)
+
+
+
+# Encode using multi label binarizer and calculate frequency
+mlb = MultiLabelBinarizer()
+
+encodedLists = []
+frequencyLists = []
+uniqueClasses = []
+proportion = 0 
+
+
+# The for loop encodes each column (aka feature) in a binary format where
+# 0 means it a class is absent and 1 means the class is present in that row.
+for i, data in enumerate(datas):
+    # fit_transform calculates the size of each category automatically based on the input data
+    # and then encodes it into the multilabel bit encoding
+    encodedList = mlb.fit_transform(datas[i])
+    encodedLists.append(encodedList)
+    uniqueClasses.append(mlb.classes_)
+
+    frequencyList = [0] * len(encodedList[0])
+
+    proportion += len(encodedList[0]) * len(encodedList)
+
+    for e in encodedList:
+        for i in range(len(e)):
+            frequencyList[i] += e[i] 
+            
+    frequencyLists.append(frequencyList)
+
+# Calculate density
+# For each matrix, first sum up each column. Then for each row, add the corresponding
+# value to the density value if the matching row value is 1.
+# Do this for each matrix, and then sum up all those values to get the final density value for the column/feature.
+
+densityLists = []
+normalizedDensityLists = []
+aggregatedDensityList = [0] * len(encodedLists[0])
+
+for i in range(len(encodedLists)):
+    densityList = [0] * len(encodedLists[i])
+    normalizedDensityList = [0] * len(encodedLists[i])
+
+    for j in range(len(densityList)):
+        for k in range(len(encodedLists[i][j])): 
+
+            densityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
+            normalizedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k] / float(proportion)
+            aggregatedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
+
+    densityLists.append(densityList)
+    normalizedDensityLists.append(normalizedDensityList)
+
+for i, prop in enumerate(props):
+    print("%s: %s" % (prop, datas[i]))
+    print()
+    print("Unique classes: %s" % uniqueClasses[i])
+    print()
+    print(encodedLists[i])
+    print()
 
 
 '''
 Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
 '''
 
+# Aggregate all the input data
+aggregated = []
+
+for i in range(len(datas[0])):
+    value = []
+    for data in datas:
+        for element in data[i]:
+            value.append(element)
+    
+    
+    aggregated.append(tuple(value))
+
 # Unique instance counter of the elements.
-valueCounterOutCome = Counter(multiclass_feature_Xi)
+valueCounterOutCome = Counter(aggregated)
 if DEBUG_PRINT_FLAG:
     print("# Unique Instance Counter:", valueCounterOutCome)
 
@@ -136,8 +230,7 @@ mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
 if DEBUG_PRINT_FLAG:
     print("# Most common element size:", mostCommonElementSize)
 
-
-totalSizeOfmultiClassSet = len(multiclass_feature_Xi)
+totalSizeOfmultiClassSet = len(aggregated)
 if DEBUG_PRINT_FLAG:
     print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
 
@@ -155,111 +248,73 @@ if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
             # [TODO]: Just simple code.
             # Required calculation can de done later.
 
+
 '''
-Approach 2: Outlier detection using attribute density.
+Approach 2: Alternative outlier detection approaches
 '''
 
-# Create multiclass multilabelbinarizer
-one_hot_multiclass = MultiLabelBinarizer()
-multiClassEncodedList = one_hot_multiclass.fit_transform(multiclass_feature_Xi)
+# Outlier detection libraries
 
-
-print("# Multi-class encoded features:\n", multiClassEncodedList)
+outliers = outlierLibrary.tukey(aggregatedDensityList)
+label = 'Tukey\'s method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print("Outlier index: %d" % outlier)
+    for i, data in enumerate(datas):
+        print("\t%s: %s" % (props[i], data[outlier]))
+    print()
 print()
 
-uniqueClasses = one_hot_multiclass.classes_
-
-if DEBUG_PRINT_FLAG:
-    print("# Unique Classes:", uniqueClasses)
+outliers = outlierLibrary.z_score(aggregatedDensityList)
+label = 'Z-Score method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
     print()
-
-'''
-Count the frequency of specific attribute value in the complete data that is 
-constructed using the  MultiLabelBinarizer(). 
-'''
-mClassElementCountList = []
-uniqueClassesNonNull = []
-for counter, mClass in enumerate(one_hot_multiclass.classes_):
-    uniqueClassesNonNull.append(mClass)
-    mClassDensityValue = 0
-    for multiClassElementCode in multiClassEncodedList:
-        mClassDensityValue = mClassDensityValue + multiClassElementCode[counter]
-    mClassElementCountList.append(mClassDensityValue)
-
-if DEBUG_PRINT_FLAG:
-    print("# Each class count:", mClassElementCountList)
-    print()
-
-''' 
-Calculate the density of each attribute value in the data entries (Xi).
-'''
-entryDensityListNormalize = []
-entryDensityList = []
-for classCounter, entryVector in enumerate(multiClassEncodedList):
-    overallProportion = 1 / (len(uniqueClassesNonNull) * len(multiclass_feature_Xi))
-    summationVectorVals = 0
-    for entryCounter, entryVectorClassValue in enumerate(entryVector):
-        if (uniqueClasses[entryCounter] == ''):
-            continue
-        summationVectorVals = summationVectorVals + (entryVectorClassValue * mClassElementCountList[entryCounter])
-    densityXi = overallProportion * summationVectorVals
-    entryDensityListNormalize.append(densityXi)
-    entryDensityList.append(summationVectorVals)
-
-if DEBUG_PRINT_FLAG:
-    print("# Density Values list of data-set (Normalized Xi):\n", entryDensityListNormalize)
-    print()
-    print("# Density Values list of data-set (Real Xi):\n", entryDensityList)
-    print()
-
-
-''' 
-Calculate Mean and Standard deviation on the density values of data set.
-'''
-meanDataSet =  numpy.mean(entryDensityList)
-medianDataSet = numpy.median(entryDensityList)
-standardDeviationDataSet = statistics.stdev(entryDensityList)
-
-print("# Mean:", meanDataSet)
-print("# Standard Deviation:", standardDeviationDataSet)
 print()
 
-''' 
-Calculate ZScores and Outliers.
-'''
-if DEBUG_PRINT_FLAG:
+outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
+label = 'Modified Z-Score method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
     print()
-    print("## Actual Value \t | zScore (Mean) \t | zScore (Median)")
-
-outliersMean = []
-outliersMedian = []
-for entryDensityCounter, eachValue in enumerate(entryDensityList):
-    zScoreMean = abs((eachValue - meanDataSet) / (standardDeviationDataSet))
-    zScoreMedian = abs((eachValue - medianDataSet) / (standardDeviationDataSet))
-
-    if DEBUG_PRINT_FLAG:
-        print("\t", eachValue,"\t\t\t\t", zScoreMean,"\t\t", zScoreMedian)
-
-    # Currently one standard deviation is considered for calculating the outliers.
-    if (zScoreMean >= 1):
-        outliersMean.append(multiclass_feature_Xi[entryDensityCounter])
-
-    if (zScoreMedian >= 1):
-        outliersMedian.append(multiclass_feature_Xi[entryDensityCounter])
-
-print("#")
-print("# Outliers using simple threshold of 1/3 on data-set:")
-print("#")
-print(outliersThresholdAppraoch)
 print()
 
-print("#")
-print("# Outliers with Mean on data-set:")
-print("#")
-print(outliersMean)
+cooksDensityList = []
+for i, value in enumerate(aggregatedDensityList):
+    cooksDensityList.append((i, value))
+
+outliers = outlierLibrary.cooks_distance(cooksDensityList)
+label = 'Cook\'s distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
 print()
 
-print("#")
-print("# Outliers with Median on data-set:")
-print("#")
-print(outliersMedian)
+
+outliers = outlierLibrary.mahalanobis_distance(densityLists)
+label = 'Malanobis distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
+print()
+
+
+sys.exit(0)
+

@@ -1,176 +1,66 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import style
-from scipy.spatial import distance
-style.use('ggplot')
-from sklearn.cluster import KMeans
-
 import pandas as pd
-import random
-from math import log
-import math
 import copy
+import math
 
-# Importing pybatfish APIs.
-from pybatfish.client.commands import *
-from pybatfish.question.question import load_questions, list_questions
-from pybatfish.question import bfq
+def test(densityList):
+    print(densityList)
+    for d in densityList:
+        print(d)
 
-from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
+#TODO
+#Correct z_score
 
-class Outlier():
+def tukey(densityList):
 
-    def __init__(self, question, prop):
-                
-        load_questions()
-        bf_init_snapshot('datasets/networks/example')
+    q1 = np.percentile(densityList, 25)
+    q3 = np.percentile(densityList, 75)
 
-        command = "self.result = " + question
-        exec(command)
+    iqr = q3 - q1
 
-        
-        data = list(self.result[prop])
-        self.multiclass_feature = []
-        for d in data:
-            self.multiclass_feature.append(tuple(d))
+    lower_distance = q1 - 1.5 * iqr
+    upper_distance = q3 + 1.5 * iqr
 
-        # self.multiclass_feature = [("1.1.1.1", "2.2.2.2", "1500"),
-        #                       ("1.1.1.1", "3.3.3.3", "1500"),
-        #                       ("3.3.3.3", "", "9100"),
-        #                       ("1.1.1.1",""),
-        #                       ("1.1.1.1", "2.2.2.2", "1500"),
-        #                       ("1.1.1.1", "2.2.2.2", "1500"),
-        #                       ("1.1.1.1", "2.2.2.2", "1500"),
-        #                       ("1.1.1.1", "2.2.2.2", "1500"),
-        #                       ("1.1.1.1", "3.3.3.3", "9100"),
-        #                       ("1.1.1.1", "3.3.3.3", "9100"),
-        #                       ("1.1.1.1", "", "1500"),
-        #                       ("1.1.1.1", "2.2.2.2", "1500"),
-        #                       (),
-        #                       ("", "", ""),
-        #                       ("1.1.1.1", "", ""),
-        #                       ("2.2.2.2","9100")]
+    outliers = []
+
+    for i, n in enumerate(densityList):
+        if n < lower_distance or n > upper_distance:
+            outliers.append(i)
+
+    return outliers
 
 
-    def encode(self):
-        # Create multiclass multilabelbinarizer
-        one_hot_multiclass = MultiLabelBinarizer()
-        multiClassEncodedList = one_hot_multiclass.fit_transform(self.multiclass_feature)
+def z_score(densityList):
+
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+
+    return outliers
 
 
-        print("# Multi-class encoded features:\n", multiClassEncodedList)
-        print()
+def modified_z_score(densityList):
 
-        uniqueClasses = one_hot_multiclass.classes_
+    median = np.median(densityList)
 
-        print("# Unique Classes:", uniqueClasses)
-        print()
+    df = pd.DataFrame()
+    df['a'] = densityList
+    mad = df['a'].mad()
 
-        '''
-        Count the frequency of specific attribute value in the complete data that is 
-        constructed using the  MultiLabelBinarizer(). 
-        '''
-        mClassElementCountList = []
-        uniqueClassesNonNull = []
-        for counter, mClass in enumerate(one_hot_multiclass.classes_):
-            uniqueClassesNonNull.append(mClass)
-            mClassDensityValue = 0
-            for multiClassElementCode in multiClassEncodedList:
-                mClassDensityValue = mClassDensityValue + multiClassElementCode[counter]
-            mClassElementCountList.append(mClassDensityValue)
+    outliers = []
 
-        print("# Each class count:", mClassElementCountList)
-        print()
+    for i, n in enumerate(densityList):
+        z = (n - median) / mad
+        if abs(z) >= 1:
+            outliers.append(i)
 
-        ''' 
-        Calculate the density of each attribute value in the data entries (Xi).
-        '''
-        entryDensityListNormalize = []
-        self.entryDensityList = []
-        for classCounter, entryVector in enumerate(multiClassEncodedList):
-            overallProportion = 1 / (len(uniqueClassesNonNull) * len(self.multiclass_feature))
-            summationVectorVals = 0
-            for entryCounter, entryVectorClassValue in enumerate(entryVector):
-                if (uniqueClasses[entryCounter] == ''):
-                    continue
-                summationVectorVals = summationVectorVals + (entryVectorClassValue * mClassElementCountList[entryCounter])
-            densityXi = overallProportion * summationVectorVals
-            entryDensityListNormalize.append(densityXi)
-            self.entryDensityList.append(summationVectorVals)
-        print(self.entryDensityList)
-
-    def tukey(self):
-
-        # nums = np.array(nums)
-
-        q1 = np.percentile(self.entryDensityList, 25)
-        q3 = np.percentile(self.entryDensityList, 75)
-
-        iqr = q3 - q1
-
-        lower_distance = q1 - 1.5 * iqr
-        upper_distance = q3 + 1.5 * iqr
-
-        outliers = []
-
-        for n in self.entryDensityList:
-            if n < lower_distance or n > upper_distance:
-                outliers.append(n)
-
-        return outliers
-
-
-    def z_score(self):
-        # nums should be a list of integers
-
-        # nums = np.array(nums)
-
-        mean = np.mean(self.entryDensityList)
-        std = np.std(self.entryDensityList)
-
-        lower_boundary = mean - std * 3
-        upper_boundary = mean + std * 3
-
-        outliers = []
-
-        for n in self.entryDensityList:
-            if n <= lower_boundary or n >= upper_boundary:
-                outliers.append(n)
-
-        return outliers
-
-
-    def modified_z_score(self):
-        # nums should be a list of integers
-
-        median = np.median(self.entryDensityList)
-
-        df = pd.DataFrame()
-        df['a'] = self.entryDensityList
-        mad = df['a'].mad()
-
-        lower_boundary = median - mad * 3
-        upper_boundary = median + mad * 3
-
-        outliers = []
-
-        for n in self.entryDensityList:
-            if n <= lower_boundary or n >= upper_boundary:
-                outliers.append(n)
-
-        return outliers
-
-
-
-out = Outlier("bfq.nodeProperties().answer().frame()", "NTP_Servers")
-# out = Outlier("bfq.interfaceProperties().answer().frame()", "Interface_Type")
-out.encode()
-# print(out.tukey())
-# print(out.z_score())
-# print(out.modified_z_score())
-
-
-
+    return outliers
 
 
 def log_normalize(nums):
@@ -287,93 +177,57 @@ def cooks_distance(points):
 
         distance /= (3 * s)
 
-        print(distance)
+        # print(distance)
 
         if distance > 1:
-            outliers.append(points[i])
+            # outliers.append(points[i])
+            outliers.append(i)
 
     return outliers
 
+from scipy.spatial import distance
 
 
-#def read_values():
-#    l = []
-#    for i in range(100):
-#        l.append(list(np.random.randint(100, size=2)))
-#    print(l)
-#    return l
-#l = read_values()
+def mahalanobis_distance(densityLists):
 
-#no_clusters = 2
-#clf = KMeans(n_clusters = no_clusters)
-#clf.fit(l)
-#centroids = clf.cluster_centers_
-#print("hey centroids are")
-#print(centroids)
+    vectors = []
+    
+    for i in range(len(densityLists[0])):
 
-#labels = clf.labels_
-#colors = 5*["g.", "c.", "b.", "r.", "k." ]
-#for i in range(len(l)):
-#    print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
-#    plt.plot(l[i][0], l[i][1], colors[labels[i]], markersize = 20)
+        vector = []
 
-#a = (1, 2, 3)
-#b = (4, 5, 6)
-#print("distance is")
-#print(distance.euclidean(centroids[0], centroids[1]))
-#def criteria1(weight,labels,l):
+        for j in range(len(densityLists)):
+            vector.append(densityLists[j][i]) 
 
-#    cluster_distances = []
-#    for i in range(len(centroids) ):
-#        j = i + 1
-#        while(j < len (centroids)):
-#            cluster_distances.append(distance.euclidean(centroids[i], centroids[j]))
-#            j = j + 1
-
-#    print(cluster_distances)
-#    print("minimum inter-cluster distance is")
-#    min_intercluster_dist = min(cluster_distances)
-
-#    #weighing parameter
-#    w = weight
-#    outliers = []
-#    for i in range(len(l)):
-#        if(distance.euclidean(l[i], centroids[labels[i]]) > min_intercluster_dist*w ):
-#            outliers.append(l[i])
-#            plt.plot(l[i][0], l[i][1], colors[labels[0]], markersize=50)
-#    plt.scatter(centroids[:,0], centroids[:,1], marker = 'x', s = 150, linewidths=5, zorder=10)
-
-#    plt.show()
-#    print("outliers by criterai 1 are")
-#    print(outliers)
-#    print("total number of outliers is ")
-#    print(len(outliers))
+        vectors.append(vector) 
 
 
-## criteria 2
-#def criteria2(t,labels,l):
-#    print("new criteria 2")
-#    points_cluster_dist= []
-#    for i in range(no_clusters):
-#        points_cluster_dist.append([])
-#    for i in range(len(l)):
-#        points_cluster_dist[labels[i]].append( distance.euclidean(l[i], centroids[labels[i]]) )
-#    threshold = t
-#    outliers2=[]
-#    for i in range(len(l)):
-#        mini = min(points_cluster_dist[labels[i]])
-#        center_dist = distance.euclidean(l[i], centroids[labels[i]])
-#        if(mini < threshold *center_dist ):
-#            outliers2.append(l[i])
-#    print("outliers are")
-#    print(outliers2)
-#    print("total number of outliers is ")
-#    print(len(outliers2))
-#criteria1(1,labels,l)
-#criteria2(0.001, labels, l)
+    # calculate average vector
+
+    average_vector = [0] * len(densityLists)
+    for vector in vectors:
+       for i in range(len(vector)):
+           average_vector[i] += vector[i]
+
+    for i in range(len(average_vector)):
+        average_vector[i] /= len(vectors)
 
 
+    # calculate mahalanobis distance for each point
+
+    outliers = []
+
+    for i, vector in enumerate(vectors):
+
+        combination = np.vstack((vector, average_vector))
+        
+        covariance_matrix = np.cov(combination)
+
+        mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
+
+        if mahalanobis_dist > 500:
+            outliers.append(i)
 
 
-
-
+    return outliers
+        
