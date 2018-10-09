@@ -74,8 +74,8 @@ def read_values_inter_cluster_criteria(main_list):
 
     return outliers1
 
-#This is the intracluster distance criteria. 
-# In this criteria, the minimum distance between the centroid and the own cluster elements is used as the parameter 
+#This is the intracluster distance criteria.
+# In this criteria, the minimum distance between the centroid and the own cluster elements is used as the parameter
 # Optimal value for the threshold has to be set.
 
 def read_values_intra_cluster_criteria(main_list):
@@ -85,7 +85,6 @@ def read_values_intra_cluster_criteria(main_list):
     for i in range(len(main_list[0])):
         temp = []
         for j in range(dimensions):
-            print("appending", main_list[j][i])
             temp.append(main_list[j][i])
         l.append(temp)
     print(l)
@@ -101,7 +100,7 @@ def read_values_intra_cluster_criteria(main_list):
     if(debug_flag == 1):
         for i in range(len(l)):
             print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
-            
+
     threshold = 0.05
     if(debug_flag == 1):
         print("threshold is")
@@ -121,7 +120,7 @@ def read_values_intra_cluster_criteria(main_list):
                 print("outlier detected at index:", i)
                 print("encoded outlier is", l[i])
             outliers2.append(i)
-    if(debug_flag == 1):        
+    if(debug_flag == 1):
         print("outliers by intra-cluster criteria are")
         print(outliers2)
     return outliers2
