@@ -9,7 +9,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelBinarizer, MultiLabelBinarizer
 
 
-def read_values(main_list):
+def read_values_inter_cluster_criteria(main_list):
     l = []
     dimensions = len(main_list)
     for i in range(len(main_list[0])):
@@ -21,80 +21,28 @@ def read_values(main_list):
         l.append(temp)
         #l.append([main_list[0][i],main_list[1][i]])
     print(l)
-    return l
-l = read_values([[1,2,3,4,5], [6,7,8,9,10], [11,12,13,14,15]])
-print("value of l is")
-print(l)
 
 
 
+    no_clusters = 2
+    clf = KMeans(n_clusters = no_clusters)
+    clf.fit(l)
+    centroids = clf.cluster_centers_
+    print(" Centroids are")
+    print(centroids)
 
+    labels = clf.labels_
 
-multiclass_feature_Xi = [("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("3.3.3.3", ""),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "3.3.3.3"),
-                      (),
-                      ("", ""),
-                      ("1.1.1.1", ""),
-                      ("2.2.2.2", "")]
-
-
-NTP_Servers = [("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("3.3.3.3", ""),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "2.2.2.2"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", "3.3.3.3"),
-                      ("1.1.1.1", ""),
-                      ("1.1.1.1", "3.3.3.3"),
-                      (),
-                      ("", ""),
-                      ("1.1.1.1", ""),
-                      ("2.2.2.2", "")]
-
-
-
-one_hot_multiclass = MultiLabelBinarizer()
-multiClassEncodedList = one_hot_multiclass.fit_transform(multiclass_feature_Xi)
-
-print("# Multi-class encoded features:\n", multiClassEncodedList)
-print()
-
-
-
-
-no_clusters = 2
-clf = KMeans(n_clusters = no_clusters)
-clf.fit(l)
-centroids = clf.cluster_centers_
-print(" Centroids are")
-print(centroids)
-
-labels = clf.labels_
-
-for i in range(len(l)):
-    print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
-    #plt.plot(l[i][0], l[i][1], colors[labels[i]], markersize = 20)
-#plt.scatter(centroids[:,0], centroids[:,1], marker = 'x', s = 150, linewidths=5, zorder=10)
-#plt.show()
+    for i in range(len(l)):
+        print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
+        #plt.plot(l[i][0], l[i][1], colors[labels[i]], markersize = 20)
+    #plt.scatter(centroids[:,0], centroids[:,1], marker = 'x', s = 150, linewidths=5, zorder=10)
+    #plt.show()
 
 
 #print("distance is")
 #print(distance.euclidean(centroids[0], centroids[1]))
-def criteria1(weight,labels,l):
+    weight = 0.8
     print("weight is")
     print(weight)
     cluster_distances = []
@@ -126,16 +74,46 @@ def criteria1(weight,labels,l):
     #plt.show()
     #print("outliers by criterai 1 are")
     #print(outliers)
-    print("outliers are ")
+    print("outliers by inter cluster criteria are ")
     print(outliers1)
 
-
+    return outliers1
 
 # criteria 2
-def criteria2(t,labels,l):
+def read_values_intra_cluster_criteria(main_list):
+    l = []
+    dimensions = len(main_list)
+    for i in range(len(main_list[0])):
+        temp = []
+        for j in range(dimensions):
+            print("appending", main_list[j][i])
+            temp.append(main_list[j][i])
+        l.append(temp)
+        # l.append([main_list[0][i],main_list[1][i]])
+    print(l)
+
+    no_clusters = 2
+    clf = KMeans(n_clusters=no_clusters)
+    clf.fit(l)
+    centroids = clf.cluster_centers_
+    print(" Centroids are")
+    print(centroids)
+
+    labels = clf.labels_
+
+    for i in range(len(l)):
+        print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
+        # plt.plot(l[i][0], l[i][1], colors[labels[i]], markersize = 20)
+    # plt.scatter(centroids[:,0], centroids[:,1], marker = 'x', s = 150, linewidths=5, zorder=10)
+    # plt.show()
+
+# print("distance is")
+# print(distance.euclidean(centroids[0], centroids[1]))
+         
+    threshold = 0.05
     print("Criteria 2")
     print("threshold is")
-    print(t)
+    print(threshold)
     points_cluster_dist= []
     for i in range(no_clusters):
         points_cluster_dist.append([])
@@ -147,7 +125,7 @@ def criteria2(t,labels,l):
 #print(len(points_cluster_dist))
 #print("labels is")
 #print(labels)
-    threshold = t
+
     outliers2=[]
     for i in range(len(l)):
         mini = min(points_cluster_dist[labels[i]])
@@ -162,16 +140,12 @@ def criteria2(t,labels,l):
     #plt.show()
     #print("outliers are")
     #print(outliers2)
-    print("outliers are")
+    print("outliers by intra-cluster criteria are")
     print(outliers2)
+    return outliers2
 #plt.show()
 
-criteria1(0.8,labels,l)
 
-
-#criteria1(0.75,labels,l)
-#criteria1(1,labels,l)
-#criteria2(0.05, labels, l)
 
 
 
