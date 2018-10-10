@@ -107,6 +107,7 @@ if READ_FILE_FLAG:
     props = []
     datas = []
 
+    # Handling json file input to load as the json object
     with open(sys.argv[2]) as f:
         json_object = json.load(f)
 
@@ -119,8 +120,7 @@ if READ_FILE_FLAG:
 
     # Extract data
 
-    for i in range(len(json_object)):
-    
+    for i in range(len(json_object)): 
         for j, prop in enumerate(props):
             datas[j].append(json_object[i][prop])
 
@@ -139,7 +139,6 @@ else:
     for prop in props:
         data = listify(result[prop])
         datas.append(data)
-
 
 
 # Encode using multi label binarizer and calculate frequency
@@ -303,7 +302,9 @@ for outlier in outliers:
     print()
 print()
 
-
+# Calcules the outliers using mahalanobis distance method.
+# Then for each outlier, print out the associated information related to
+# its features and their values.
 outliers = outlierLibrary.mahalanobis_distance(densityLists)
 label = 'Malanobis distance method outliers: ' + str(outliers)
 print(label)
