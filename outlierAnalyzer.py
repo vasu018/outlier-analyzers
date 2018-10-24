@@ -51,7 +51,8 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 bf_init_snapshot('datasets/networks/example')
 
 # Debug flags
-DEBUG_PRINT_FLAG = True
+DEBUG_PRINT_FLAG = False
+STEP_TWO_FLAG = True
 
 # Static Threshold for comparison with density calcuation
 OUTLIER_THRESHOLD = 1.0 / 3.0
@@ -75,8 +76,8 @@ def error_msg(help_flag):
 try:
     if sys.argv[1] == '-h':
         error_msg(True)
-    elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
-        if len(sys.argv) != 5:
+    elif sys.argv[1] == '-t' and sys.argv[3] == '-p' and sys.argv[5] == '-s':
+        if len(sys.argv) != 7:
             error_msg(False)
         else:
             READ_FILE_FLAG = False    
@@ -100,6 +101,70 @@ def listify(frame):
            outputList[i] = [outputList[i]] 
     return outputList
 
+
+def extract_keys(the_dict, prefix=''):
+    # TODO
+    # fix bug with list of dicts not being extracted
+    # but only first element
+
+    key_list = []
+    
+    for key, value in the_dict.items():
+        
+        # set the prefix
+        if len(prefix) == 0:
+            new_prefix = key
+        else:
+            new_prefix = prefix + '.' + key
+
+        # recursively call extract_keys for nested dicts 
+        if type(value) == dict:
+            key_list.extend(extract_keys(value, new_prefix))
+        elif type(value) == list and type(value[0]) == dict:
+            key_list.extend(extract_keys(value[0], new_prefix))
+        else:
+            key_list.append(new_prefix)
+
+
+    return key_list
+
+def isHomogeneous(input_dict):
+
+    counter = {}
+
+    for key in input_dict:
+        if key not in counter:
+            counter[key] = 1
+        else:
+            counter[key] += 1
+
+    values = list(counter.values())
+
+    print(values)
+
+    # calculate variance
+
+    mean = 0
+    for value in values:
+        mean += value
+
+    mean /= len(values)
+
+    variance = 0 
+    for value in values:
+        squared_diff = pow(abs(value - mean), 2)
+        variance += squared_diff
+    variance /= len(values)
+
+    print("variance:", variance)
+    if variance > 3:
+        return False
+    else:
+        return True
+        
+
+
+###
 
 if READ_FILE_FLAG:
     # Read the data in from a text file
@@ -129,7 +194,7 @@ else:
     # Or read the question and property from the command line and parse the returned data frame
     command = "result = bfq." + sys.argv[2] + ".answer().frame()"
     exec(command)
-    print(result)
+    # print(result)
 
     props = sys.argv[4].split('|')
     for i in range(len(props)):
@@ -138,7 +203,80 @@ else:
     datas = []
     for prop in props:
         data = listify(result[prop])
+
+
+        overall = {}
+
+        # handle dicts in ACLs 
+        for i in range(len(data)):
+
+            item = data[i][0]
+
+            if type(item) != str:
+                
+                if type(data[i][0]) == dict and STEP_TWO_FLAG:
+
+                    exclude_list = sys.argv[6].split(',')
+                    for n in range(len(exclude_list)):
+                        exclude_list[n] = exclude_list[n].strip()
+                        data[i][0].pop(exclude_list[n], None)
+
+
+                    # # make signature by removing value
+                    # data[i][0].pop('name', None)
+                    # data[i][0].pop('sourceName', None)
+                    # data[i][0].pop('sourceType', None)
+
+                # 
+                if type(item) == dict:
+
+                    result = extract_keys(item)
+                    # print(result)
+
+                    for element in result:
+
+                        value = item
+                        for key in element.split('.'):
+
+                            new_value = value[key]
+                            if type(new_value) == list:
+                                new_value = new_value[0]
+
+                            value = new_value
+
+                        # print(element, value)
+                        if element not in overall: 
+                            overall[element] = [value]
+                        else:
+                            overall[element].append(value)
+
+
+
+                data[i][0] = str(data[i][0])
+
+                # print(data[i])
+
+
         datas.append(data)
+
+
+#TEMP
+for key, value in overall.items():
+    if isHomogeneous(value):
+        print(Fore.GREEN + key, ": ", value)
+    else:
+        print(Fore.RED + key, ": ", value)
+    print(Style.RESET_ALL)
+    print()
+print()
+
+# for d in data:
+#     if type(d[0]) == dict:
+#         for key,value in d[0].items():
+#             print("%s: %s" % (key, value))
+#     else:
+#         print(d[0])
+#     print()
 
 
 # Encode using multi label binarizer and calculate frequency
@@ -200,6 +338,8 @@ for i, prop in enumerate(props):
     print(encodedLists[i])
     print()
 
+# print(densityLists)
+# print(aggregatedDensityList)
 
 '''
 Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
