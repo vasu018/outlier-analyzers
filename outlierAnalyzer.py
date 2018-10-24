@@ -36,7 +36,6 @@ import json
 from pprint import pprint
 
 # Importing pybatfish APIs. 
-
 from pybatfish.client.commands import *
 from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
@@ -92,7 +91,6 @@ except:
 
 
 # utility functions
-
 def listify(frame):
     outputList = list(frame)
     for i in range(len(outputList)):
@@ -101,12 +99,12 @@ def listify(frame):
     return outputList
 
 
+# Read the data in from a text file
 if READ_FILE_FLAG:
-    # Read the data in from a text file
-
     props = []
     datas = []
 
+    # Handling json file input to load as the json object
     with open(sys.argv[2]) as f:
         json_object = json.load(f)
 
@@ -118,9 +116,7 @@ if READ_FILE_FLAG:
             datas.append([])
 
     # Extract data
-
     for i in range(len(json_object)):
-    
         for j, prop in enumerate(props):
             datas[j].append(json_object[i][prop])
 
@@ -141,7 +137,6 @@ else:
         datas.append(data)
 
 
-
 # Encode using multi label binarizer and calculate frequency
 mlb = MultiLabelBinarizer()
 
@@ -159,9 +154,7 @@ for i, data in enumerate(datas):
     encodedList = mlb.fit_transform(datas[i])
     encodedLists.append(encodedList)
     uniqueClasses.append(mlb.classes_)
-
     frequencyList = [0] * len(encodedList[0])
-
     proportion += len(encodedList[0]) * len(encodedList)
 
     for e in encodedList:
@@ -170,10 +163,11 @@ for i, data in enumerate(datas):
             
     frequencyLists.append(frequencyList)
 
-# Calculate density
-# For each matrix, first sum up each column. Then for each row, add the corresponding
+# Calculate density for each matrix: 
+# First sum up each column and then for each row add the corresponding
 # value to the density value if the matching row value is 1.
-# Do this for each matrix, and then sum up all those values to get the final density value for the column/feature.
+# For each matrix, sum up all those values to get the final density 
+# value for the column/feature.
 
 densityLists = []
 normalizedDensityLists = []
@@ -185,11 +179,9 @@ for i in range(len(encodedLists)):
 
     for j in range(len(densityList)):
         for k in range(len(encodedLists[i][j])): 
-
             densityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
             normalizedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k] / float(proportion)
             aggregatedDensityList[j] += encodedLists[i][j][k] * frequencyLists[i][k]
-
     densityLists.append(densityList)
     normalizedDensityLists.append(normalizedDensityList)
 
@@ -202,9 +194,9 @@ for i, prop in enumerate(props):
     print()
 
 
-'''
-Approach 1: Simple Threshold-based outlier detection with outlier threshold 1/3
-'''
+#
+# Approach 1: Baseline Threshold-based  outlier detection mechanism (Threshold = 1/3).
+#
 
 # Aggregate all the input data
 aggregated = []
@@ -214,14 +206,14 @@ for i in range(len(datas[0])):
     for data in datas:
         for element in data[i]:
             value.append(element)
-    
-    
     aggregated.append(tuple(value))
 
-# Unique instance counter of the elements.
+# Calculate the most common element and unique elements 
+# from the input dataset.
+
 valueCounterOutCome = Counter(aggregated)
 if DEBUG_PRINT_FLAG:
-    print("# Unique Instance Counter:", valueCounterOutCome)
+    print("# Unique instance counter:", valueCounterOutCome)
 
 mostCommonElement = valueCounterOutCome.most_common(1)
 print("# Most common element from the input data:", mostCommonElement)
@@ -249,12 +241,12 @@ if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
             # Required calculation can de done later.
 
 
-'''
-Approach 2: Alternative outlier detection approaches
-'''
+#
+# Approach 2: Alternative outlier detection approaches using 
+# statistical methods.
+#
 
-# Outlier detection libraries
-
+# Calculate the outliers using Tukey's method.
 outliers = outlierLibrary.tukey(aggregatedDensityList)
 label = 'Tukey\'s method outliers: ' + str(outliers)
 print(label)
@@ -266,6 +258,7 @@ for outlier in outliers:
     print()
 print()
 
+# Calculate the outliers using Z-Score method.
 outliers = outlierLibrary.z_score(aggregatedDensityList)
 label = 'Z-Score method outliers: ' + str(outliers)
 print(label)
@@ -277,6 +270,7 @@ for outlier in outliers:
     print()
 print()
 
+# Calculate the outliers using modified Z-Score method.
 outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
 label = 'Modified Z-Score method outliers: ' + str(outliers)
 print(label)
@@ -288,6 +282,7 @@ for outlier in outliers:
     print()
 print()
 
+# Calculate the outliers using cooks distance method.
 cooksDensityList = []
 for i, value in enumerate(aggregatedDensityList):
     cooksDensityList.append((i, value))
@@ -303,7 +298,9 @@ for outlier in outliers:
     print()
 print()
 
-
+# Calculate the outliers using mahalanobis distance method.
+# Then for each outlier, print out the associated information related to
+# its features and their values.
 outliers = outlierLibrary.mahalanobis_distance(densityLists)
 label = 'Malanobis distance method outliers: ' + str(outliers)
 print(label)
@@ -317,6 +314,13 @@ print()
 
 outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
 label = 'Inter-cluster distance method outliers: ' + str(outliers)
+print()
+
+# Calculate the outliers using mahalanobis distance method.
+# Then for each outlier, print out the associated information related to
+# its features and their values.
+outliers = outlierLibrary.mahalanobis_distance(densityLists)
+label = 'Malanobis distance method outliers: ' + str(outliers)
 print(label)
 print('=' * len(label), end='\n\n')
 for outlier in outliers:
@@ -336,7 +340,6 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
-
 
 sys.exit(0)
 

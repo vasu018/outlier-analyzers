@@ -3,7 +3,7 @@ import pandas as pd
 import copy
 import math
 from sklearn.cluster import KMeans
-
+from scipy.spatial import distance
 
 def test(densityList):
     print(densityList)
@@ -187,25 +187,18 @@ def cooks_distance(points):
 
     return outliers
 
-from scipy.spatial import distance
-
 
 def mahalanobis_distance(densityLists):
 
     vectors = []
-    
     for i in range(len(densityLists[0])):
-
         vector = []
 
         for j in range(len(densityLists)):
             vector.append(densityLists[j][i]) 
-
         vectors.append(vector) 
 
-
     # calculate average vector
-
     average_vector = [0] * len(densityLists)
     for vector in vectors:
        for i in range(len(vector)):
@@ -214,17 +207,12 @@ def mahalanobis_distance(densityLists):
     for i in range(len(average_vector)):
         average_vector[i] /= len(vectors)
 
-
     # calculate mahalanobis distance for each point
-
     outliers = []
 
     for i, vector in enumerate(vectors):
-
         combination = np.vstack((vector, average_vector))
-        
         covariance_matrix = np.cov(combination)
-
         mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
 
         if mahalanobis_dist > 500:
