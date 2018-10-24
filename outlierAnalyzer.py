@@ -211,6 +211,7 @@ else:
         for i in range(len(data)):
 
             item = data[i][0]
+            print(type(item))
 
             if type(item) != str:
                 
