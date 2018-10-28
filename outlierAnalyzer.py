@@ -193,6 +193,17 @@ for i, prop in enumerate(props):
     print(encodedLists[i])
     print()
 
+#Gaussian Mixture Model
+likelihood = outlierLibrary.Gaussian(encodedLists)
+print("Likelihood given by G.M.M is",likelihood)
+print()
+
+#Severity
+outlierLibrary.severity(densityLists)
+
+
+
+
 
 #
 # Approach 1: Baseline Threshold-based  outlier detection mechanism (Threshold = 1/3).
@@ -298,37 +309,14 @@ for outlier in outliers:
     print()
 print()
 
-# Calculate the outliers using mahalanobis distance method.
-# Then for each outlier, print out the associated information related to
-# its features and their values.
-outliers = outlierLibrary.mahalanobis_distance(densityLists)
-label = 'Malanobis distance method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
-    print()
-print()
+
 
 outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
 label = 'Inter-cluster distance method outliers: ' + str(outliers)
+print(label)
 print()
 
-# Calculate the outliers using mahalanobis distance method.
-# Then for each outlier, print out the associated information related to
-# its features and their values.
-outliers = outlierLibrary.mahalanobis_distance(densityLists)
-label = 'Malanobis distance method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
-    print()
-print()
+
 
 outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
 label = 'Intra-cluster distance method outliers: ' + str(outliers)
@@ -340,6 +328,22 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+# Calculate the outliers using mahalanobis distance method.
+# Then for each outlier, print out the associated information related to
+# its features and their values.
+outliers = outlierLibrary.mahalanobis_distance(densityLists)
+label = 'Malanobis distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
+print()
+
+
 
 sys.exit(0)
 
