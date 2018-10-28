@@ -4,6 +4,8 @@ import copy
 import math
 from sklearn.cluster import KMeans
 from scipy.spatial import distance
+from sklearn import mixture
+
 
 def test(densityList):
     print(densityList)
@@ -337,4 +339,39 @@ def read_values_intra_cluster_criteria(main_list):
         print("outliers by intra-cluster criteria are")
         print(outliers2)
     return outliers2
+
+
+
+def Gaussian(encodedLists):
+    #Gaussian Mixture is used for soft clustering. Insted of assigning points to specific classes it assigns probability.
+    #The n_components parameter in the Gaussian is used to specify the number of Gaussians.
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    clf = mixture.GaussianMixture(n_components=2, covariance_type='full')
+    clf.fit(concatenated_features)
+    Z = -clf.score_samples(np.array(concatenated_features))
+    return Z
+
+def severity(density_list):
+    print("In severity function:")
+    for feature1 in range(len(density_list) - 1):
+        feature2 = feature1 + 1
+        while(feature2<len(density_list)):
+            print("correlation between features indexed" ,feature1)
+            print("and")
+            print(feature2)
+            print(np.corrcoef(density_list[feature1], density_list[feature2])[0, 1])
+            feature2 = feature2 + 1
+
+
+
+
+
 
