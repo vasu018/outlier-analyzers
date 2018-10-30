@@ -116,7 +116,7 @@ if READ_FILE_FLAG:
             datas.append([])
 
     # Extract data
-    for i in range(len(json_object)): 
+    for i in range(len(json_object)):
         for j, prop in enumerate(props):
             datas[j].append(json_object[i][prop])
 
@@ -192,6 +192,17 @@ for i, prop in enumerate(props):
     print()
     print(encodedLists[i])
     print()
+
+#Gaussian Mixture Model
+likelihood = outlierLibrary.Gaussian(encodedLists)
+print("Likelihood given by G.M.M is",likelihood)
+print()
+
+#Severity
+outlierLibrary.severity(densityLists)
+
+
+
 
 
 #
@@ -298,6 +309,26 @@ for outlier in outliers:
     print()
 print()
 
+
+
+outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
+label = 'Inter-cluster distance method outliers: ' + str(outliers)
+print(label)
+print()
+
+
+
+outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
+label = 'Intra-cluster distance method outliers: ' + str(outliers)
+print(label)
+print('=' * len(label), end='\n\n')
+for outlier in outliers:
+    print('Outlier index: %d' % outlier)
+    for i, data in enumerate(datas):
+        print('\t%s: %s' % (props[i], data[outlier]))
+    print()
+print()
+
 # Calculate the outliers using mahalanobis distance method.
 # Then for each outlier, print out the associated information related to
 # its features and their values.
@@ -311,6 +342,7 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
 
 
 sys.exit(0)

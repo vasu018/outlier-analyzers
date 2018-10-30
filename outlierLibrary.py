@@ -2,7 +2,10 @@ import numpy as np
 import pandas as pd
 import copy
 import math
+from sklearn.cluster import KMeans
 from scipy.spatial import distance
+from sklearn import mixture
+
 
 def test(densityList):
     print(densityList)
@@ -213,9 +216,165 @@ def mahalanobis_distance(densityLists):
         combination = np.vstack((vector, average_vector))
         covariance_matrix = np.cov(combination)
         mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
-        
+
         if mahalanobis_dist > 500:
             outliers.append(i)
 
+
     return outliers
         
+
+#This is the intercluster distance criteria.
+#In this criteria, the minimum distance between the centroids is used as the parameter.
+#Optimal value for the weight has to be set.
+
+def read_values_inter_cluster_criteria(main_list):
+    debug_flag = 0
+    l = []
+    dimensions = len(main_list)
+    for i in range(len(main_list[0])):
+        temp = []
+        for j in range(dimensions):
+            temp.append(main_list[j][i])
+        l.append(temp)
+    if(debug_flag == 1):
+        print("list of properties is")
+        print(l)
+
+    no_clusters = 2
+    clf = KMeans(n_clusters = no_clusters)
+    clf.fit(l)
+    centroids = clf.cluster_centers_
+    if(debug_flag == 1):
+        print(" Centroids are")
+        print(centroids)
+
+    labels = clf.labels_
+
+    if(debug_flag == 1):
+        for i in range(len(l)):
+            print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
+
+    weight = 0.1
+    if(debug_flag == 1):
+        print("weight is")
+        print(weight)
+    cluster_distances = []
+    for i in range(len(centroids) ):
+        j = i + 1
+        while(j < len (centroids)):
+            cluster_distances.append(distance.euclidean(centroids[i], centroids[j]))
+            j = j + 1
+    if(debug_flag == 1):
+        print("distance between the various clusters is as follows:")
+        print(cluster_distances)
+        print("minimum inter-cluster distance is")
+    min_intercluster_dist = min(cluster_distances)
+    if(debug_flag == 1):
+        print("minimum distance between the clsuters is")
+        print(min_intercluster_dist)
+    #weighing parameter
+    w = weight
+    outliers1 = []
+    for i in range(len(l)):
+        if(distance.euclidean(l[i], centroids[labels[i]]) > min_intercluster_dist*w ):
+            if(debug_flag == 1):
+                print("outlier detected at index:", i)
+                print("encoded outlier is", l[i])
+            outliers1.append(i)
+
+
+    if(debug_flag == 1):
+        print("outliers by inter cluster criteria are ")
+        print(outliers1)
+
+    return outliers1
+
+#This is the intracluster distance criteria.
+# In this criteria, the minimum distance between the centroid and the own cluster elements is used as the parameter
+# Optimal value for the threshold has to be set.
+
+def read_values_intra_cluster_criteria(main_list):
+    l = []
+    debug_flag = 0
+    dimensions = len(main_list)
+    for i in range(len(main_list[0])):
+        temp = []
+        for j in range(dimensions):
+            temp.append(main_list[j][i])
+        l.append(temp)
+
+    no_clusters = 2
+    clf = KMeans(n_clusters=no_clusters)
+    clf.fit(l)
+    centroids = clf.cluster_centers_
+    if(debug_flag == 1):
+        print(" Centroids are")
+        print(centroids)
+    labels = clf.labels_
+    if(debug_flag == 1):
+        for i in range(len(l)):
+            print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
+
+    threshold = 0.05
+    if(debug_flag == 1):
+        print("threshold is")
+        print(threshold)
+    points_cluster_dist= []
+    for i in range(no_clusters):
+        points_cluster_dist.append([])
+    for i in range(len(l)):
+        points_cluster_dist[labels[i]].append( distance.euclidean(l[i], centroids[labels[i]]) )
+
+    outliers2=[]
+    for i in range(len(l)):
+        mini = min(points_cluster_dist[labels[i]])
+        center_dist = distance.euclidean(l[i], centroids[labels[i]])
+        if(mini < threshold *center_dist ):
+            if(debug_flag == 1):
+                print("outlier detected at index:", i)
+                print("encoded outlier is", l[i])
+            outliers2.append(i)
+    if(debug_flag == 1):
+        print("outliers by intra-cluster criteria are")
+        print(outliers2)
+    return outliers2
+
+
+
+def Gaussian(encodedLists):
+    #Gaussian Mixture is used for soft clustering. Insted of assigning points to specific classes it assigns probability.
+    #The n_components parameter in the Gaussian is used to specify the number of Gaussians.
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    clf = mixture.GaussianMixture(n_components=2, covariance_type='full')
+    clf.fit(concatenated_features)
+    Z = -clf.score_samples(np.array(concatenated_features))
+    return Z
+
+def severity(density_list):
+    # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
+    # Currently, we are calculating severity based on correlation coefficients.  
+    # Correlation coefficient gives how closely two features are linked to each other.
+    print("In severity function:")
+    for feature1 in range(len(density_list) - 1):
+        feature2 = feature1 + 1
+        while(feature2<len(density_list)):
+            print("correlation between features indexed" ,feature1)
+            print("and")
+            print(feature2)
+            print(np.corrcoef(density_list[feature1], density_list[feature2])[0, 1])
+            feature2 = feature2 + 1
+
+
+
+
+
+
