@@ -360,6 +360,9 @@ def Gaussian(encodedLists):
     return Z
 
 def severity(density_list):
+    # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
+    # Currently, we are calculating severity based on correlation coefficients.  
+    # Correlation coefficient gives how closely two features are linked to each other.
     print("In severity function:")
     for feature1 in range(len(density_list) - 1):
         feature2 = feature1 + 1
