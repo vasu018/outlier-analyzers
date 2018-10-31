@@ -1,9 +1,51 @@
 [
+
 	{
-		"name": "alfred"
+		"name" : "103",
+		"lines" : {
+			"action" : "PERMIT",
+			"matchCondition":
+			{
+				"class" : "org.batfish.datamodel.acl.MatchHeaderSpace",
+				"ipWildCard" : "255.255.255.0"
+			}
+		},
+		"negate" : "False",
+		"sourceType" : "extended ipv4 access-list",
+		"testNumber" : "75"
+
 	},
 
 	{
-		"name": "george"
+		"name" : "105",
+		"lines" : {
+			"action" : "PERMIT",
+			"matchCondition":
+			{
+				"class" : "org.batfish.datamodel.acl.MatchHeaderSpace",
+				"ipWildCard" : "255.255.255.0"
+			}
+		},
+		"negate" : "False",
+		"sourceType" : "extended ipv4 access-list",
+		"testNumber" : "1-75"
+
+	},
+
+	{
+		"name" : "104",
+		"lines" : {
+			"action" : "PERMIT",
+			"matchCondition":
+			{
+				"class" : "org.batfish.datamodel.acl.MatchHeaderSpace",
+				"ipWildCard" : "192.168.1.1"
+			}
+		},
+		"negate" : "False",
+		"sourceType" : "extended ipv4 access-list",
+		"testNumber" : "60"
+
 	}
+
 ]
