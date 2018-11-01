@@ -7,11 +7,13 @@ from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
 import pandas as pd
 
-DEBUG_PROPERTY = True 
+GRANULARITY_OF_PROPERTY = True 
 load_questions()
 
+JSON_OUTPUT = False 
+
 # Configuration snapshot
-bf_init_snapshot('../../pybatfish-new-clone/Viszisas_Anonymized') 
+bf_init_snapshot('../../pybatfish-new-clone/Mixed_V_CampusNet_Anonymized') 
 
 if len(sys.argv) > 1:
     questionDir = sys.argv[1]
@@ -21,7 +23,7 @@ load_questions(questionDir)
 
 bf_session.printAnswers = True
 
-print("loading the Viszisas_Anonymized testrig")
+print("loading the Mixed_V_CampusNet_Anonymized testrig")
 
 def listify(frame):
     outputList = list(frame)
@@ -55,44 +57,26 @@ for i in range(len(named_structures_properties)):
     named_structures_properties[i] = named_structures_properties[i].strip()
 
 
-# Extracting the data specific to each named Structure property.
 datas = []
-#with open('./namedStructureProperties.json', 'w') as namedStructFile:
-if (DEBUG_PROPERTY):
-    for named_struct_property in named_structures_properties:
-        print("Named Structure Property is:", named_struct_property)
-        named_structures_property_frame =  bfq.namedStructures(nodes='.*',properties=named_struct_property).answer().frame()
-        named_structure_property_columns = named_structures_property_frame.columns
-        for column in named_structure_property_columns:
-            print(named_structures_property_frame)
-            datas.append(named_structures_property_frame)
+for named_struct_property in named_structures_properties:
+    named_structures_property_frames=  bfq.namedStructures(nodes='.*',properties=named_struct_property).answer().frame()
+    named_structure_property_columns = named_structures_property_frames.columns
+    print("# Data for Structure Property:", named_struct_property)
+    for column in named_structure_property_columns:
+        print("# Column data of the property:", column)
+        if (JSON_OUTPUT):
+            #json_output = named_structures_property_frames[column].to_json(orient='records')[1:-1].replace('},{', '} {')
+            json_output = named_structures_property_frames[column].to_json(orient='records')[1:-1]
+            print(json_output)
+            datas.append(json_output)
+        else:
+            data = listify(named_structures_property_frames[column])
+            print(data)
+            #print(named_structures_property_frames[column])
+            datas.append(data)
 
-# Extract the data specific at granularity of each instance of the property.
-else:
-    named_structures_properties_all =  bfq.namedStructures(nodes='.*').answer().frame()
-    for prop in named_structures_properties_all.columns:
-        print("Property is:", prop)
-        data = listify(named_structures_properties_all[prop])
-        print(named_structures_properties_all[prop])
-        #print(data)
-        datas.append(data)
-        namedStructFile.write("%s\n" % data)
-
-#close(namedStructFile)
-#print(datas)
-#with open('./namedStructureProperties.json', 'w') as namedStructFile:
-#    for item in datas:
-#        namedStructFile.write("%s\n" % item)
-
-
-#named_structures_frame =  bfq.namedStructures(nodes='.*',properties="routing-policies").answer().frame()
-#
-#print("Frame for routing-policies:")
-#print(named_structures_frame)
-
-#datas = []
-#for prop in props:
-#    data = listify(named_structures_frame[prop])
-#    datas.append(data)
+with open('./namedStructureProperties_ip-accesslist.json', 'w') as namedStructFile:
+    for item in datas:
+        namedStructFile.write(item)
 
 
