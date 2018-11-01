@@ -12,8 +12,8 @@ load_questions()
 
 JSON_OUTPUT = True 
 
-ipaccesslist_file = "./namedStructureProperties_ip-accesslist.json"
-routingpolicies_file = "./namedStructureProperties_routepolicies.json"
+ipaccesslist_file = "../datasets/flat-sample/namedStructureProperties_ip-accesslist.json"
+routingpolicies_file = "../datasets/flat-sample/namedStructureProperties_routepolicies.json"
 
 # Configuration snapshot
 bf_init_snapshot('../Mixed_V_CampusNet_Anonymized') 
