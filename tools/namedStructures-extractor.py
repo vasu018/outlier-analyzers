@@ -13,7 +13,7 @@ load_questions()
 JSON_OUTPUT = False 
 
 # Configuration snapshot
-bf_init_snapshot('../../pybatfish-new-clone/Mixed_V_CampusNet_Anonymized') 
+bf_init_snapshot('../pybatfish-new-clone/Mixed_V_CampusNet_Anonymized') 
 
 if len(sys.argv) > 1:
     questionDir = sys.argv[1]
