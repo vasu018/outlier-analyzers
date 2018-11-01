@@ -10,10 +10,13 @@ import pandas as pd
 GRANULARITY_OF_PROPERTY = True 
 load_questions()
 
-JSON_OUTPUT = False 
+JSON_OUTPUT = True 
+
+ipaccesslist_file = "./namedStructureProperties_ip-accesslist.json"
+routingpolicies_file = "./namedStructureProperties_routepolicies.json"
 
 # Configuration snapshot
-bf_init_snapshot('../pybatfish-new-clone/Mixed_V_CampusNet_Anonymized') 
+bf_init_snapshot('../Mixed_V_CampusNet_Anonymized') 
 
 if len(sys.argv) > 1:
     questionDir = sys.argv[1]
@@ -50,7 +53,8 @@ named_structures_properties2 = [
     "zones"]
 
 named_structures_properties = [
-    "ip-access-lists"]
+    #"ip-access-lists"]
+    "routing-policies"]
 
 
 for i in range(len(named_structures_properties)):
@@ -75,8 +79,15 @@ for named_struct_property in named_structures_properties:
             #print(named_structures_property_frames[column])
             datas.append(data)
 
-with open('./namedStructureProperties_ip-accesslist.json', 'w') as namedStructFile:
+#with open(ipaccesslist_file, 'w') as namedStructFile:
+with open(routingpolicies_file, 'w') as namedStructFile:
+    index = 0
     for item in datas:
+        if index == 0:
+            columnName = "ColumnName:" + named_structure_property_columns[index] + "=>"
+        else:
+            columnName = ";\nColumnName:" + named_structure_property_columns[index] + "=>"
+        namedStructFile.write(columnName)
         namedStructFile.write(item)
-
+        index = index +1
 
