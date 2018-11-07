@@ -33,26 +33,32 @@ from colorama import Fore, Back, Style
 import outlierLibrary
 from collections import Counter
 import json
+import re
 from pprint import pprint
 
 # Importing pybatfish APIs. 
 
-from pybatfish.client.commands import *
-from pybatfish.question.question import load_questions, list_questions
-from pybatfish.question import bfq
+# TODO
+# from pybatfish.client.commands import *
+# from pybatfish.question.question import load_questions, list_questions
+# from pybatfish.question import bfq
 
 # Setup
-load_questions()
+# TODO
+# load_questions()
 
 pd.compat.PY3 = True
 PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
-bf_init_snapshot('datasets/networks/example')
+# TODO
+# bf_init_snapshot('datasets/networks/example')
 
 # Debug flags
 DEBUG_PRINT_FLAG = False
 STEP_TWO_FLAG = True
+
+JSON_INPUT = True
 
 # Static Threshold for comparison with density calcuation
 OUTLIER_THRESHOLD = 1.0 / 3.0
@@ -166,7 +172,40 @@ def isHomogeneous(input_dict):
 
 ###
 
-if READ_FILE_FLAG:
+if JSON_INPUT:
+
+    props = []
+    datas = []
+
+    f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+
+    count = 0
+    for line in f:
+        # print(line)
+        # print()
+
+        match = re.match('.*:(.*)=>(.*);', line)
+
+        props.append(match.group(1))
+
+        extracted = match.group(2)
+        extracted = '[' + extracted + ']'
+
+        data = json.loads(extracted)
+
+        for i in range(len(data)):
+            data[i] = str(data[i])
+            data[i] = [data[i]]
+
+
+        datas.append(data)
+
+        count += 1
+        if count == 2:
+            break
+
+
+elif READ_FILE_FLAG:
     # Read the data in from a text file
 
     props = []
@@ -261,15 +300,15 @@ else:
         datas.append(data)
 
 
-#TEMP
-for key, value in overall.items():
-    if isHomogeneous(value):
-        print(Fore.GREEN + key, ": ", value)
-    else:
-        print(Fore.RED + key, ": ", value)
-    print(Style.RESET_ALL)
-    print()
-print()
+# #TEMP
+# for key, value in overall.items():
+#     if isHomogeneous(value):
+#         print(Fore.GREEN + key, ": ", value)
+#     else:
+#         print(Fore.RED + key, ": ", value)
+#     print(Style.RESET_ALL)
+#     print()
+# print()
 
 # for d in data:
 #     if type(d[0]) == dict:
