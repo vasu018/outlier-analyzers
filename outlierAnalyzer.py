@@ -198,6 +198,12 @@ likelihood = outlierLibrary.Gaussian(encodedLists)
 print("Likelihood given by G.M.M is",likelihood)
 print()
 
+
+#KNN
+outlierLibrary.KNN(encodedLists)
+print()
+
+
 #Severity
 outlierLibrary.severity(densityLists)
 
@@ -328,6 +334,9 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+
+
 
 # Calculate the outliers using mahalanobis distance method.
 # Then for each outlier, print out the associated information related to

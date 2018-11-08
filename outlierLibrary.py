@@ -5,6 +5,7 @@ import math
 from sklearn.cluster import KMeans
 from scipy.spatial import distance
 from sklearn import mixture
+from sklearn.neighbors import NearestNeighbors
 
 
 def test(densityList):
@@ -358,6 +359,28 @@ def Gaussian(encodedLists):
     clf.fit(concatenated_features)
     Z = -clf.score_samples(np.array(concatenated_features))
     return Z
+
+def KNN(encodedLists):
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(concatenated_features)
+    distances, indices = nbrs.kneighbors(concatenated_features)
+    print("indices in KNN are")
+    print(indices)
+    print("distances in KNN are")
+    print(distances)
+
+
+
+
+
 
 def severity(density_list):
     # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
