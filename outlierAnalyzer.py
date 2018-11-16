@@ -51,6 +51,11 @@ bf_init_snapshot('datasets/networks/example')
 
 # Debug flags
 DEBUG_PRINT_FLAG = True
+READ_FILE_FLAG = False
+
+# Option flags
+MULTI = True
+METHOD = 0
 
 # Static Threshold for comparison with density calcuation
 OUTLIER_THRESHOLD = 1.0 / 3.0
@@ -75,20 +80,25 @@ try:
     if sys.argv[1] == '-h':
         error_msg(True)
     elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
-        if len(sys.argv) != 5:
-            error_msg(False)
-        else:
-            READ_FILE_FLAG = False    
+        if sys.argv[5] == '-m':
+            MULTI = False
+            METHOD = int(sys.argv[6])
+        READ_FILE_FLAG = False
     elif sys.argv[1] == '-i':
         if len(sys.argv) != 3:
             error_msg(False)
         else:
             READ_FILE_FLAG = True
+    elif sys.argv[1] == '-l':
+        print('Supported methods:')
+        print('Tukey\'s method')
+        print('Z-score method')
+        sys.exit(0)
     else:
         error_msg(False)
 except:
     error_msg(False)
-
+    
 
 # utility functions
 def listify(frame):
@@ -257,91 +267,94 @@ if (OUTLIER_THRESHOLD > 0 and outlierThresholdValue < OUTLIER_THRESHOLD):
 # statistical methods.
 #
 
-# Calculate the outliers using Tukey's method.
-outliers = outlierLibrary.tukey(aggregatedDensityList)
-label = 'Tukey\'s method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print("Outlier index: %d" % outlier)
-    for i, data in enumerate(datas):
-        print("\t%s: %s" % (props[i], data[outlier]))
+if MULTI == True or METHOD == 0:
+    # Calculate the outliers using Tukey's method.
+    outliers = outlierLibrary.tukey(aggregatedDensityList)
+    label = 'Tukey\'s method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print("Outlier index: %d" % outlier)
+        for i, data in enumerate(datas):
+            print("\t%s: %s" % (props[i], data[outlier]))
+        print()
     print()
-print()
 
-# Calculate the outliers using Z-Score method.
-outliers = outlierLibrary.z_score(aggregatedDensityList)
-label = 'Z-Score method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
+elif MULTI == True or METHOD == 1:
+    # Calculate the outliers using Z-Score method.
+    outliers = outlierLibrary.z_score(aggregatedDensityList)
+    label = 'Z-Score method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print('Outlier index: %d' % outlier)
+        for i, data in enumerate(datas):
+            print('\t%s: %s' % (props[i], data[outlier]))
+        print()
     print()
-print()
 
-# Calculate the outliers using modified Z-Score method.
-outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
-label = 'Modified Z-Score method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
+elif MULTI == True or METHOD == 2:
+    # Calculate the outliers using modified Z-Score method.
+    outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
+    label = 'Modified Z-Score method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print('Outlier index: %d' % outlier)
+        for i, data in enumerate(datas):
+            print('\t%s: %s' % (props[i], data[outlier]))
+        print()
     print()
-print()
 
-# Calculate the outliers using cooks distance method.
-cooksDensityList = []
-for i, value in enumerate(aggregatedDensityList):
-    cooksDensityList.append((i, value))
+elif MULTI == True or METHOD == 3:
+    # Calculate the outliers using cooks distance method.
+    cooksDensityList = []
+    for i, value in enumerate(aggregatedDensityList):
+        cooksDensityList.append((i, value))
 
-outliers = outlierLibrary.cooks_distance(cooksDensityList)
-label = 'Cook\'s distance method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
+    outliers = outlierLibrary.cooks_distance(cooksDensityList)
+    label = 'Cook\'s distance method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print('Outlier index: %d' % outlier)
+        for i, data in enumerate(datas):
+            print('\t%s: %s' % (props[i], data[outlier]))
+        print()
     print()
-print()
 
-
-
-outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
-label = 'Inter-cluster distance method outliers: ' + str(outliers)
-print(label)
-print()
-
-
-
-outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
-label = 'Intra-cluster distance method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
+elif MULTI == True or METHOD == 4:
+    outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
+    label = 'Inter-cluster distance method outliers: ' + str(outliers)
+    print(label)
     print()
-print()
 
-# Calculate the outliers using mahalanobis distance method.
-# Then for each outlier, print out the associated information related to
-# its features and their values.
-outliers = outlierLibrary.mahalanobis_distance(densityLists)
-label = 'Malanobis distance method outliers: ' + str(outliers)
-print(label)
-print('=' * len(label), end='\n\n')
-for outlier in outliers:
-    print('Outlier index: %d' % outlier)
-    for i, data in enumerate(datas):
-        print('\t%s: %s' % (props[i], data[outlier]))
+elif MULTI == True or METHOD == 5:
+    outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
+    label = 'Intra-cluster distance method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print('Outlier index: %d' % outlier)
+        for i, data in enumerate(datas):
+            print('\t%s: %s' % (props[i], data[outlier]))
+        print()
     print()
-print()
+
+elif MULTI == True or METHOD == 6:
+    # Calculate the outliers using mahalanobis distance method.
+    # Then for each outlier, print out the associated information related to
+    # its features and their values.
+    outliers = outlierLibrary.mahalanobis_distance(densityLists)
+    label = 'Malanobis distance method outliers: ' + str(outliers)
+    print(label)
+    print('=' * len(label), end='\n\n')
+    for outlier in outliers:
+        print('Outlier index: %d' % outlier)
+        for i, data in enumerate(datas):
+            print('\t%s: %s' % (props[i], data[outlier]))
+        print()
+    print()
 
 
 
