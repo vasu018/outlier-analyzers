@@ -91,12 +91,17 @@ try:
             READ_FILE_FLAG = True
     elif sys.argv[1] == '-l':
         print('Supported methods:')
-        print('Tukey\'s method')
-        print('Z-score method')
-        sys.exit(0)
+        print('Tukey\'s method = 0')
+        print('Z-score method = 1')
+        print('Modified Z-score method = 2')
+        print('Cook\'s distance method = 3')
+        print('Intercluster distance = 4')
+        print('Intracluster distance = 5')
+        print('Mahalnobis distance = 6')
+        sys.exit()
     else:
         error_msg(False)
-except:
+except Exception as ex:
     error_msg(False)
     
 
