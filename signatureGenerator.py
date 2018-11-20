@@ -2,6 +2,8 @@ import re
 import json
 from colorama import Fore, Back, Style
 import sys
+import pickle
+
 
 props = []
 datas = []
@@ -121,17 +123,8 @@ for key, value in overall.items():
 #     print()
 #
 
-print()
-for key, value in overall.items():
-    print(key, ':', value)
-    print()
-
-print(Fore.MAGENTA)
-print(signature)
-print(Style.RESET_ALL)
 
 
-import pickle
 
 pickle.dump(signature, open('signature.txt', 'wb'))
 
