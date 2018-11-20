@@ -39,37 +39,6 @@ for line in f:
         break
 
 
-def isHomogeneous(input_dict):
-
-    # counter = {}
-    #
-    # for key in input_dict:
-    #     if key not in counter:
-    #         counter[key] = 1
-    #     else:
-    #         counter[key] += 1
-    #
-    # values = list(counter.values())
-
-    values = list(input_dict.values())
-
-    print(values)
-
-    sum = 0
-    max = 0
-    for value in values:
-        if value > max:
-            max = value
-        sum += value
-
-    ratio = max / sum
-    print(ratio)
-
-    if ratio < 0.7:
-        return False
-    else:
-        return True
-
 
 def extract_keys(the_dict, prefix=''):
     # TODO
@@ -96,13 +65,6 @@ def extract_keys(the_dict, prefix=''):
 
     return key_list
 
-
-# for item in datas[0]:
-#     key_list = extract_keys(item[0])
-#
-#     print(item[0])
-#     print(key_list)
-#     print()
 
 
 overall = {}
@@ -135,19 +97,6 @@ for data in datas:
             else:
                 overall[element][value] += 1
 
-excluded = []
-
-for key, value in overall.items():
-    if isHomogeneous(value):
-        print(Fore.GREEN + key, ": ", value)
-    else:
-        print(Fore.RED + key, ": ", value)
-        excluded.append(key)
-    print(Style.RESET_ALL)
-    print()
-print()
-
-print('Excluded:', excluded)
 
 # create signature
 
@@ -181,64 +130,8 @@ print(Fore.MAGENTA)
 print(signature)
 print(Style.RESET_ALL)
 
-# compare to signature
 
-for i, item in enumerate(datas[0]):
+import pickle
 
-    match = 0
-    total = 0
+pickle.dump(signature, open('signature.txt', 'wb'))
 
-    print('=' * 141, end='\n\n')
-    print("Entry #%d" % i, end='\n\n')
-
-    for data in datas:
-
-        item = data[i]
-
-        print(item, end='\n\n')
-
-        for key, value in signature.items():
-
-            if key in excluded:
-                continue
-
-            current = item[0]
-
-            key_list = key.split('.')
-
-            for k in key_list:
-                # print(k)
-                if k in current:
-                    current = current[k]
-                    if type(current) == list:
-                        current = current[0]
-                else:
-                    break
-
-            if type(current) == dict:
-                continue
-
-            # print(current)
-            # print()
-
-            print(key)
-
-            if current == value[0]:
-                match += value[1]
-                print(Fore.BLUE, end='')
-            else:
-                print(Fore.RED, end='')
-
-            print('Entry value: ', current)
-            print('Signature value: ', value[0])
-            print(Style.RESET_ALL)
-
-            total += value[1]
-
-    print(Fore.GREEN, end='')
-    print(match, '/', total)
-    print(Style.RESET_ALL)
-
-
-    # print(item)
-    # print()
