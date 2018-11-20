@@ -322,8 +322,8 @@ label = 'Inter-cluster distance method outliers: ' + str(outliers)
 print(label)
 print()
 
-
-
+outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
 label = 'Intra-cluster distance method outliers: ' + str(outliers)
 print(label)
