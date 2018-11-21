@@ -5,6 +5,11 @@ import math
 from sklearn.cluster import KMeans
 from scipy.spatial import distance
 from sklearn import mixture
+from sklearn.neighbors import NearestNeighbors
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import IsolationForest
+
 
 
 def test(densityList):
@@ -359,6 +364,28 @@ def Gaussian(encodedLists):
     Z = -clf.score_samples(np.array(concatenated_features))
     return Z
 
+def KNN(encodedLists):
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(concatenated_features)
+    distances, indices = nbrs.kneighbors(concatenated_features)
+    print("indices in KNN are")
+    print(indices)
+    print("distances in KNN are")
+    print(distances)
+
+
+
+
+
+
 def severity(density_list):
     # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
     # Currently, we are calculating severity based on correlation coefficients.  
@@ -372,6 +399,99 @@ def severity(density_list):
             print(feature2)
             print(np.corrcoef(density_list[feature1], density_list[feature2])[0, 1])
             feature2 = feature2 + 1
+
+
+
+def RandomForests(densityList,encodedLists):
+    #First apply an existing outlier detection technique as RandomForests works on supervised data.
+
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In RandomForests method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+
+
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    
+    clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
+
+
+    clf.fit(X_train, y_train)
+    print("RandomForests predictions are")
+    print(clf.predict(X_test))
+    print("Actual classification is")
+    print(y_test)
+
+
+def isolationForests(densityList,encodedLists):
+    #First apply an existing outlier detection technique as RandomForests works on supervised data.
+
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In RandomForests method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    clf = IsolationForest(max_samples=100)
+                      
+    clf.fit(X_train)
+    y_pred_train = clf.predict(X_train)
+    y_pred_test = clf.predict(X_test)
+    print("isolationForests predictions on train data are")
+    print(y_pred_train)
+    print("isolationForests predictions on test data are")
+    print(y_pred_test)
+
+
+    
+                      
+
+                             
+          
+    
 
 
 

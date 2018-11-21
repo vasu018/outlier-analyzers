@@ -198,6 +198,12 @@ likelihood = outlierLibrary.Gaussian(encodedLists)
 print("Likelihood given by G.M.M is",likelihood)
 print()
 
+
+#KNN
+outlierLibrary.KNN(encodedLists)
+print()
+
+
 #Severity
 outlierLibrary.severity(densityLists)
 
@@ -316,8 +322,8 @@ label = 'Inter-cluster distance method outliers: ' + str(outliers)
 print(label)
 print()
 
-
-
+outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
 label = 'Intra-cluster distance method outliers: ' + str(outliers)
 print(label)
@@ -328,6 +334,9 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+
+
 
 # Calculate the outliers using mahalanobis distance method.
 # Then for each outlier, print out the associated information related to
