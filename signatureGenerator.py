@@ -10,7 +10,9 @@ datas = []
 
 f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
 
-selection = [1, 5, 10]
+# selection = [1, 5, 10]
+selection = sys.argv[2].split(',')
+
 
 count = 0
 for line in f:
@@ -20,7 +22,8 @@ for line in f:
     match = re.match('.*?:(.*)=>(.*);', line)
 
     try:
-        props.append(match.group(1))
+        prop = match.group(1)
+        props.append(prop)
 
         extracted = match.group(2)
         extracted = '[' + extracted + ']'
@@ -33,8 +36,12 @@ for line in f:
         # data[i] = str(data[i])
         data[i] = [data[i]]
 
-    if count in selection:
+    # if count in selection:
+    #     datas.append(data)
+
+    if prop in selection:
         datas.append(data)
+
 
     count += 1
     if count > max(selection):
