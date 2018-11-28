@@ -300,25 +300,6 @@ else:
         datas.append(data)
 
 
-# #TEMP
-# for key, value in overall.items():
-#     if isHomogeneous(value):
-#         print(Fore.GREEN + key, ": ", value)
-#     else:
-#         print(Fore.RED + key, ": ", value)
-#     print(Style.RESET_ALL)
-#     print()
-# print()
-
-# for d in data:
-#     if type(d[0]) == dict:
-#         for key,value in d[0].items():
-#             print("%s: %s" % (key, value))
-#     else:
-#         print(d[0])
-#     print()
-
-
 # Encode using multi label binarizer and calculate frequency
 mlb = MultiLabelBinarizer()
 

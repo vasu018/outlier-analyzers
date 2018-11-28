@@ -4,20 +4,20 @@ from colorama import Fore, Back, Style
 import sys
 import pickle
 
+# this file generates a signature and saves it to a file
 
 props = []
 datas = []
 
 f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
 
-# selection = [1, 5, 10]
+# selected features inputted as command line argument
 selection = sys.argv[2].split(',')
 
-
+# go through each line of the file (which represents a feature)
+# and add each feature that corresponds to a selection
 count = 0
 for line in f:
-    # print(line)
-    # print()
 
     match = re.match('.*?:(.*)=>(.*);', line)
 
@@ -33,22 +33,17 @@ for line in f:
         pass
 
     for i in range(len(data)):
-        # data[i] = str(data[i])
         data[i] = [data[i]]
-
-    # if count in selection:
-    #     datas.append(data)
 
     if prop in selection:
         datas.append(data)
-
 
     count += 1
     if count > max(selection):
         break
 
 
-
+# go through the dict and recursively build up a list of fields in the dict
 def extract_keys(the_dict, prefix=''):
     # TODO
     # fix bug with list of dicts not being extracted
@@ -74,10 +69,12 @@ def extract_keys(the_dict, prefix=''):
 
     return key_list
 
-
-
+# overall represents a mapping of fields to list of values (over all the entries)
 overall = {}
 
+# for each feature/column, go through each row of that feature
+# and extract the key/values recursively using the extract_keys() function
+# and add them to the overall dict.
 for data in datas:
 
     for item in data:
@@ -107,7 +104,10 @@ for data in datas:
                 overall[element][value] += 1
 
 
-# create signature
+# Create signature by going through the overall dict
+# and for each field, picking the most common value.
+# The weight is determined by seeing what percentage
+# of the total list of values the most common value is.
 
 signature = {}
 
@@ -131,7 +131,6 @@ for key, value in overall.items():
 #
 
 
-
-
+# write signature to file
 pickle.dump(signature, open('signature.txt', 'wb'))
 

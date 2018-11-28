@@ -2,6 +2,7 @@ import re
 import json
 from colorama import Fore, Back, Style
 import sys
+import pickle
 
 props = []
 datas = []
@@ -12,8 +13,6 @@ selection = [1, 5, 10]
 
 count = 0
 for line in f:
-    # print(line)
-    # print()
 
     match = re.match('.*?:(.*)=>(.*);', line)
 
@@ -41,16 +40,6 @@ for line in f:
 
 def isHomogeneous(input_dict):
 
-    # counter = {}
-    #
-    # for key in input_dict:
-    #     if key not in counter:
-    #         counter[key] = 1
-    #     else:
-    #         counter[key] += 1
-    #
-    # values = list(counter.values())
-
     values = list(input_dict.values())
 
     print(values)
@@ -71,6 +60,7 @@ def isHomogeneous(input_dict):
         return True
 
 
+# This function re
 def extract_keys(the_dict, prefix=''):
     # TODO
     # fix bug with list of dicts not being extracted
@@ -95,14 +85,6 @@ def extract_keys(the_dict, prefix=''):
             key_list.append(new_prefix)
 
     return key_list
-
-
-# for item in datas[0]:
-#     key_list = extract_keys(item[0])
-#
-#     print(item[0])
-#     print(key_list)
-#     print()
 
 
 overall = {}
@@ -151,7 +133,6 @@ print('Excluded:', excluded)
 
 
 
-import pickle
 signature = pickle.load(open('signature.txt', 'rb'))
 
 
@@ -201,9 +182,6 @@ for i, item in enumerate(datas[0]):
             if type(current) == dict:
                 continue
 
-            # print(current)
-            # print()
-
             print(key)
 
             if current == value[0]:
@@ -221,7 +199,3 @@ for i, item in enumerate(datas[0]):
     print(Fore.GREEN, end='')
     print(match, '/', total)
     print(Style.RESET_ALL)
-
-
-    # print(item)
-    # print()
