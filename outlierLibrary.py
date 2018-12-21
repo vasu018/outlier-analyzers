@@ -5,6 +5,10 @@ import math
 from sklearn.cluster import KMeans
 from scipy.spatial import distance
 from sklearn import mixture
+from sklearn.neighbors import NearestNeighbors
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import IsolationForest
 
 
 def test(densityList):
@@ -30,12 +34,10 @@ def tukey(densityList):
     for i, n in enumerate(densityList):
         if n < lower_distance or n > upper_distance:
             outliers.append(i)
-
     return outliers
 
 
 def z_score(densityList):
-
     mean = np.mean(densityList)
     std = np.std(densityList)
 
@@ -45,14 +47,11 @@ def z_score(densityList):
         z = (n - mean) / std
         if abs(z) >= 1:
             outliers.append(i)
-
     return outliers
 
 
 def modified_z_score(densityList):
-
     median = np.median(densityList)
-
     df = pd.DataFrame()
     df['a'] = densityList
     mad = df['a'].mad()
@@ -71,21 +70,16 @@ def log_normalize(nums):
     return [log(n) for n in nums]
 
 
-
 def regression(points):
     # pointers should be a list of pairs of numbers (tuples)
-
     n = len(points)
-
     sum_x = 0.0
     sum_y = 0.0
     sum_xy = 0.0
     sum_x2 = 0.0
     sum_y2 = 0.0
 
-
     for i in range(n):
-
         x = points[i][0]
         y = points[i][1]
 
@@ -96,13 +90,8 @@ def regression(points):
         sum_y2 += y * y
 
     a = (sum_y * sum_x2 - sum_x * sum_xy) / (n * sum_x2 - sum_x * sum_x)
-
     b = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
-
     return a, b
-
-
-
 
 
 def generate_list():
@@ -341,7 +330,6 @@ def read_values_intra_cluster_criteria(main_list):
     return outliers2
 
 
-
 def Gaussian(encodedLists):
     #Gaussian Mixture is used for soft clustering. Insted of assigning points to specific classes it assigns probability.
     #The n_components parameter in the Gaussian is used to specify the number of Gaussians.
@@ -359,6 +347,25 @@ def Gaussian(encodedLists):
     Z = -clf.score_samples(np.array(concatenated_features))
     return Z
 
+
+def KNN(encodedLists):
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(concatenated_features)
+    distances, indices = nbrs.kneighbors(concatenated_features)
+    print("indices in KNN are")
+    print(indices)
+    print("distances in KNN are")
+    print(distances)
+
+
 def severity(density_list):
     # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
     # Currently, we are calculating severity based on correlation coefficients.  
@@ -374,7 +381,85 @@ def severity(density_list):
             feature2 = feature2 + 1
 
 
+def RandomForests(densityList,encodedLists):
+    #First apply an existing outlier detection technique as RandomForests works on supervised data.
+
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In RandomForests method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    
+    clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
 
 
+    clf.fit(X_train, y_train)
+    print("RandomForests predictions are")
+    print(clf.predict(X_test))
+    print("Actual classification is")
+    print(y_test)
 
+
+def isolationForests(densityList,encodedLists):
+    #First apply an existing outlier detection technique as RandomForests works on supervised data.
+
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In RandomForests method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    clf = IsolationForest(max_samples=100)
+                      
+    clf.fit(X_train)
+    y_pred_train = clf.predict(X_train)
+    y_pred_test = clf.predict(X_test)
+    print("isolationForests predictions on train data are")
+    print(y_pred_train)
+    print("isolationForests predictions on test data are")
+    print(y_pred_test)
 

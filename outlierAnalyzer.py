@@ -33,6 +33,7 @@ from colorama import Fore, Back, Style
 import outlierLibrary
 from collections import Counter
 import json
+import re
 from pprint import pprint
 import re
 
@@ -42,16 +43,21 @@ from pybatfish.question.question import load_questions, list_questions
 from pybatfish.question import bfq
 
 # Setup
-load_questions()
+# TODO
+# load_questions()
 
 pd.compat.PY3 = True
 PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
-bf_init_snapshot('datasets/networks/example')
+# TODO
+# bf_init_snapshot('datasets/networks/example')
 
 # Debug flags
-DEBUG_PRINT_FLAG = True
+DEBUG_PRINT_FLAG = False
+STEP_TWO_FLAG = True
+
+JSON_INPUT = True
 
 # Option flag
 DEFINITION = True
@@ -78,8 +84,8 @@ def error_msg(help_flag):
 try:
     if sys.argv[1] == '-h':
         error_msg(True)
-    elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
-        if len(sys.argv) != 5:
+    elif sys.argv[1] == '-t' and sys.argv[3] == '-p' and sys.argv[5] == '-s':
+        if len(sys.argv) != 7:
             error_msg(False)
         else:
             READ_FILE_FLAG = False    
@@ -102,6 +108,106 @@ def listify(frame):
            outputList[i] = [outputList[i]] 
     return outputList
 
+
+def extract_keys(the_dict, prefix=''):
+    # TODO
+    # fix bug with list of dicts not being extracted
+    # but only first element
+
+    key_list = []
+    
+    for key, value in the_dict.items():
+        
+        # set the prefix
+        if len(prefix) == 0:
+            new_prefix = key
+        else:
+            new_prefix = prefix + '.' + key
+
+        # recursively call extract_keys for nested dicts 
+        if type(value) == dict:
+            key_list.extend(extract_keys(value, new_prefix))
+        elif type(value) == list and type(value[0]) == dict:
+            key_list.extend(extract_keys(value[0], new_prefix))
+        else:
+            key_list.append(new_prefix)
+
+
+    return key_list
+
+def isHomogeneous(input_dict):
+
+    counter = {}
+
+    for key in input_dict:
+        if key not in counter:
+            counter[key] = 1
+        else:
+            counter[key] += 1
+
+    values = list(counter.values())
+
+    print(values)
+
+    # calculate variance
+
+    mean = 0
+    for value in values:
+        mean += value
+
+    mean /= len(values)
+
+    variance = 0 
+    for value in values:
+        squared_diff = pow(abs(value - mean), 2)
+        variance += squared_diff
+    variance /= len(values)
+
+    print("variance:", variance)
+    if variance > 3:
+        return False
+    else:
+        return True
+        
+
+
+###
+
+if JSON_INPUT:
+
+    props = []
+    datas = []
+
+    f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+
+    count = 0
+    for line in f:
+        # print(line)
+        # print()
+
+        match = re.match('.*:(.*)=>(.*);', line)
+
+        props.append(match.group(1))
+
+        extracted = match.group(2)
+        extracted = '[' + extracted + ']'
+
+        data = json.loads(extracted)
+
+        for i in range(len(data)):
+            data[i] = str(data[i])
+            data[i] = [data[i]]
+
+
+        datas.append(data)
+
+        count += 1
+        if count == 2:
+            break
+
+
+elif READ_FILE_FLAG:
+    # Read the data in from a text file
 
 # Read the data in from a text file
 if READ_FILE_FLAG:
@@ -127,7 +233,6 @@ if READ_FILE_FLAG:
 else:
 
     if DEFINITION == False:
-
         # Or read the question and property from the command line and parse the returned data frame
         command = "result = bfq." + sys.argv[2] + ".answer().frame()"
         exec(command)
@@ -210,10 +315,45 @@ else:
             for d in pre_data:
                 data.append(extract_keys(d[0]))
 
+    datas = []
+    for prop in props:
+        data = listify(result[prop])
+        overall = {}
+
+        # handle dicts in ACLs 
+        for i in range(len(data)):
+            item = data[i][0]
+            print(type(item))
+
+            if type(item) != str:
+                if type(data[i][0]) == dict and STEP_TWO_FLAG:
+                    exclude_list = sys.argv[6].split(',')
+                    for n in range(len(exclude_list)):
+                        exclude_list[n] = exclude_list[n].strip()
+                        data[i][0].pop(exclude_list[n], None)
+
+                if type(item) == dict:
+                    result = extract_keys(item)
+                    # print(result)
+
+                    for element in result:
+                        value = item
+                        for key in element.split('.'):
+                            new_value = value[key]
+                            if type(new_value) == list:
+                                new_value = new_value[0]
+                            value = new_value
+
+                        # print(element, value)
+                        if element not in overall: 
+                            overall[element] = [value]
+                        else:
+                            overall[element].append(value)
+
+                data[i][0] = str(data[i][0])
+
+                # print(data[i])
         datas.append(data)
-
-
-
 
 
 # Encode using multi label binarizer and calculate frequency
@@ -277,12 +417,14 @@ likelihood = outlierLibrary.Gaussian(encodedLists)
 print("Likelihood given by G.M.M is",likelihood)
 print()
 
+
+#KNN
+outlierLibrary.KNN(encodedLists)
+print()
+
+
 #Severity
 outlierLibrary.severity(densityLists)
-
-
-
-
 
 #
 # Approach 1: Baseline Threshold-based  outlier detection mechanism (Threshold = 1/3).
@@ -395,8 +537,11 @@ label = 'Inter-cluster distance method outliers: ' + str(outliers)
 print(label)
 print()
 
+#Random Forest Outliers
+outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 
-
+#Intra Cluser Outliers
 outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
 label = 'Intra-cluster distance method outliers: ' + str(outliers)
 print(label)
@@ -407,6 +552,9 @@ for outlier in outliers:
         print('\t%s: %s' % (props[i], data[outlier]))
     print()
 print()
+
+
+
 
 # Calculate the outliers using mahalanobis distance method.
 # Then for each outlier, print out the associated information related to
