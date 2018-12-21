@@ -35,6 +35,7 @@ from collections import Counter
 import json
 import re
 from pprint import pprint
+import re
 
 # Importing pybatfish APIs. 
 from pybatfish.client.commands import *
@@ -57,6 +58,9 @@ DEBUG_PRINT_FLAG = False
 STEP_TWO_FLAG = True
 
 JSON_INPUT = True
+
+# Option flag
+DEFINITION = True
 
 # Static Threshold for comparison with density calcuation
 OUTLIER_THRESHOLD = 1.0 / 3.0
@@ -105,7 +109,6 @@ def listify(frame):
     return outputList
 
 
-<<<<<<< HEAD
 def extract_keys(the_dict, prefix=''):
     # TODO
     # fix bug with list of dicts not being extracted
@@ -229,58 +232,116 @@ if READ_FILE_FLAG:
 
 else:
 
-    # Or read the question and property from the command line and parse the returned data frame
-    command = "result = bfq." + sys.argv[2] + ".answer().frame()"
-    exec(command)
-    # print(result)
+    if DEFINITION == False:
+        # Or read the question and property from the command line and parse the returned data frame
+        command = "result = bfq." + sys.argv[2] + ".answer().frame()"
+        exec(command)
+        print(result)
 
-    props = sys.argv[4].split('|')
-    for i in range(len(props)):
-        props[i] = props[i].strip()
+        props = sys.argv[4].split('|')
+        for i in range(len(props)):
+            props[i] = props[i].strip()
+
+        datas = []
+        for prop in props:
+            data = listify(result[prop])
+            datas.append(data)
+
+
+    else:
+
+        props = []
+        pre_datas = []
+
+        f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+
+        count = 0
+        for line in f:
+
+            match = re.match('.*?:(.*)=>(.*);', line)
+
+            # props.append(match.group(1))
+    
+            extracted = match.group(2)
+            extracted = '[' + extracted + ']'
+
+            pre_data = json.loads(extracted)
+
+            for i in range(len(pre_data)):
+                # data[i] = str(data[i])
+                pre_data[i] = [pre_data[i]]
+
+            if count == 1:
+                pre_datas.append(pre_data)
+                props.append(match.group(1))
+
+            count += 1
+            if count == 2:
+                break
+
+
+        def extract_keys(the_dict, prefix=''):
+            # TODO
+            # fix bug with list of dicts not being extracted
+            # but only first element
+
+            key_list = []
+
+            for key, value in the_dict.items():
+
+                # set the prefix
+                if len(prefix) == 0:
+                    new_prefix = key
+                else:
+                    new_prefix = prefix + '.' + key
+
+                # recursively call extract_keys for nested dicts
+                if type(value) == dict:
+                    key_list.extend(extract_keys(value, new_prefix))
+                elif type(value) == list and type(value[0]) == dict:
+                    key_list.extend(extract_keys(value[0], new_prefix))
+                else:
+                    new_item = new_prefix + '{' + str(the_dict[key]) + '}'
+                    key_list.append(new_item)
+
+            return key_list
+
+
+        datas = []
+
+        for pre_data in pre_datas:
+            data = []
+
+            for d in pre_data:
+                data.append(extract_keys(d[0]))
 
     datas = []
     for prop in props:
         data = listify(result[prop])
-
-
         overall = {}
 
         # handle dicts in ACLs 
         for i in range(len(data)):
-
             item = data[i][0]
             print(type(item))
 
             if type(item) != str:
-                
                 if type(data[i][0]) == dict and STEP_TWO_FLAG:
-
                     exclude_list = sys.argv[6].split(',')
                     for n in range(len(exclude_list)):
                         exclude_list[n] = exclude_list[n].strip()
                         data[i][0].pop(exclude_list[n], None)
 
-
-                    # # make signature by removing value
-                    # data[i][0].pop('name', None)
-                    # data[i][0].pop('sourceName', None)
-                    # data[i][0].pop('sourceType', None)
-
-                # 
                 if type(item) == dict:
-
                     result = extract_keys(item)
                     # print(result)
 
                     for element in result:
-
                         value = item
                         for key in element.split('.'):
-
                             new_value = value[key]
                             if type(new_value) == list:
                                 new_value = new_value[0]
-
                             value = new_value
 
                         # print(element, value)
@@ -289,13 +350,9 @@ else:
                         else:
                             overall[element].append(value)
 
-
-
                 data[i][0] = str(data[i][0])
 
                 # print(data[i])
-
-
         datas.append(data)
 
 
