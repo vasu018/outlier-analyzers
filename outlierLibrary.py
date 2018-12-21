@@ -11,7 +11,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import IsolationForest
 
 
-
 def test(densityList):
     print(densityList)
     for d in densityList:
@@ -402,6 +401,10 @@ def severity(density_list):
 
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin
 def RandomForests(densityList,encodedLists):
     #First apply an existing outlier detection technique as RandomForests works on supervised data.
 
@@ -495,6 +498,11 @@ def isolationForests(densityList,encodedLists):
 
 
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> origin
+>>>>>>> origin
 
 
 
