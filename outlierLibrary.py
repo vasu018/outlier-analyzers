@@ -402,6 +402,9 @@ def severity(density_list):
 
 
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> origin
 def RandomForests(densityList,encodedLists):
     #First apply an existing outlier detection technique as RandomForests works on supervised data.
 
@@ -495,7 +498,10 @@ def isolationForests(densityList,encodedLists):
 
 
 
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> origin
 >>>>>>> origin
 
 
