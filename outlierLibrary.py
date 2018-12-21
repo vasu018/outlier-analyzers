@@ -34,12 +34,10 @@ def tukey(densityList):
     for i, n in enumerate(densityList):
         if n < lower_distance or n > upper_distance:
             outliers.append(i)
-
     return outliers
 
 
 def z_score(densityList):
-
     mean = np.mean(densityList)
     std = np.std(densityList)
 
@@ -49,14 +47,11 @@ def z_score(densityList):
         z = (n - mean) / std
         if abs(z) >= 1:
             outliers.append(i)
-
     return outliers
 
 
 def modified_z_score(densityList):
-
     median = np.median(densityList)
-
     df = pd.DataFrame()
     df['a'] = densityList
     mad = df['a'].mad()
@@ -75,21 +70,16 @@ def log_normalize(nums):
     return [log(n) for n in nums]
 
 
-
 def regression(points):
     # pointers should be a list of pairs of numbers (tuples)
-
     n = len(points)
-
     sum_x = 0.0
     sum_y = 0.0
     sum_xy = 0.0
     sum_x2 = 0.0
     sum_y2 = 0.0
 
-
     for i in range(n):
-
         x = points[i][0]
         y = points[i][1]
 
@@ -100,13 +90,8 @@ def regression(points):
         sum_y2 += y * y
 
     a = (sum_y * sum_x2 - sum_x * sum_xy) / (n * sum_x2 - sum_x * sum_x)
-
     b = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
-
     return a, b
-
-
-
 
 
 def generate_list():
@@ -345,7 +330,6 @@ def read_values_intra_cluster_criteria(main_list):
     return outliers2
 
 
-
 def Gaussian(encodedLists):
     #Gaussian Mixture is used for soft clustering. Insted of assigning points to specific classes it assigns probability.
     #The n_components parameter in the Gaussian is used to specify the number of Gaussians.
@@ -362,6 +346,7 @@ def Gaussian(encodedLists):
     clf.fit(concatenated_features)
     Z = -clf.score_samples(np.array(concatenated_features))
     return Z
+
 
 def KNN(encodedLists):
     concatenated_features = []
@@ -381,10 +366,6 @@ def KNN(encodedLists):
     print(distances)
 
 
-
-
-
-
 def severity(density_list):
     # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
     # Currently, we are calculating severity based on correlation coefficients.  
@@ -400,11 +381,6 @@ def severity(density_list):
             feature2 = feature2 + 1
 
 
-
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> origin
 def RandomForests(densityList,encodedLists):
     #First apply an existing outlier detection technique as RandomForests works on supervised data.
 
@@ -434,7 +410,6 @@ def RandomForests(densityList,encodedLists):
     
     print("concateanted feature is")
     print(concatenated_features)
-
 
     X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
     
@@ -487,22 +462,4 @@ def isolationForests(densityList,encodedLists):
     print(y_pred_train)
     print("isolationForests predictions on test data are")
     print(y_pred_test)
-
-
-    
-                      
-
-                             
-          
-    
-
-
-
-<<<<<<< HEAD
-=======
-=======
->>>>>>> origin
->>>>>>> origin
-
-
 
