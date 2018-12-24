@@ -9,6 +9,9 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import IsolationForest
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+import time
 
 
 def test(densityList):
@@ -20,7 +23,7 @@ def test(densityList):
 #Correct z_score
 
 def tukey(densityList):
-
+    t1=time.time()
     q1 = np.percentile(densityList, 25)
     q3 = np.percentile(densityList, 75)
 
@@ -34,10 +37,13 @@ def tukey(densityList):
     for i, n in enumerate(densityList):
         if n < lower_distance or n > upper_distance:
             outliers.append(i)
+    print("Time taken by  Tukey's is")
+    print(time.time()-t1)
     return outliers
 
 
 def z_score(densityList):
+    t1=time.time()
     mean = np.mean(densityList)
     std = np.std(densityList)
 
@@ -47,11 +53,15 @@ def z_score(densityList):
         z = (n - mean) / std
         if abs(z) >= 1:
             outliers.append(i)
+    print("Time taken by  z-score is")
+    print(time.time()-t1)
     return outliers
 
 
 def modified_z_score(densityList):
+    t1=time.time()
     median = np.median(densityList)
+
     df = pd.DataFrame()
     df['a'] = densityList
     mad = df['a'].mad()
@@ -62,6 +72,8 @@ def modified_z_score(densityList):
         z = (n - median) / mad
         if abs(z) >= 1:
             outliers.append(i)
+    print("Time taken by modified z-score is")
+    print(time.time()-t1)
 
     return outliers
 
@@ -70,16 +82,21 @@ def log_normalize(nums):
     return [log(n) for n in nums]
 
 
+
 def regression(points):
     # pointers should be a list of pairs of numbers (tuples)
+
     n = len(points)
+
     sum_x = 0.0
     sum_y = 0.0
     sum_xy = 0.0
     sum_x2 = 0.0
     sum_y2 = 0.0
 
+
     for i in range(n):
+
         x = points[i][0]
         y = points[i][1]
 
@@ -90,8 +107,13 @@ def regression(points):
         sum_y2 += y * y
 
     a = (sum_y * sum_x2 - sum_x * sum_xy) / (n * sum_x2 - sum_x * sum_x)
+
     b = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x)
+
     return a, b
+
+
+
 
 
 def generate_list():
@@ -148,7 +170,7 @@ def mean_squared_error(points, a, b):
 
 def cooks_distance(points):
     # points should be a list of pairs of numbers (tuples)
-
+    t1=time.time()
     a, b = regression(points)
 
     outliers = []
@@ -175,12 +197,14 @@ def cooks_distance(points):
         if distance > 1:
             # outliers.append(points[i])
             outliers.append(i)
+    print("Time taken by cook's distance is")
+    print(time.time()-t1)
 
     return outliers
 
 
 def mahalanobis_distance(densityLists):
-
+    t1=time.time()
     vectors = []
     for i in range(len(densityLists[0])):
         vector = []
@@ -209,6 +233,8 @@ def mahalanobis_distance(densityLists):
         if mahalanobis_dist > 500:
             outliers.append(i)
 
+    print("Time taken by  mahalanobis is")
+    print(time.time()-t1)
 
     return outliers
         
@@ -218,6 +244,7 @@ def mahalanobis_distance(densityLists):
 #Optimal value for the weight has to be set.
 
 def read_values_inter_cluster_criteria(main_list):
+    t1=time.time()
     debug_flag = 0
     l = []
     dimensions = len(main_list)
@@ -277,6 +304,9 @@ def read_values_inter_cluster_criteria(main_list):
         print("outliers by inter cluster criteria are ")
         print(outliers1)
 
+    print("Time taken by inter-cluster criterion is")
+    print(time.time()-t1)
+
     return outliers1
 
 #This is the intracluster distance criteria.
@@ -284,6 +314,7 @@ def read_values_inter_cluster_criteria(main_list):
 # Optimal value for the threshold has to be set.
 
 def read_values_intra_cluster_criteria(main_list):
+    t1=time.time()
     l = []
     debug_flag = 0
     dimensions = len(main_list)
@@ -305,7 +336,7 @@ def read_values_intra_cluster_criteria(main_list):
         for i in range(len(l)):
             print("coordinate:", l[i], "label:", labels[i], "centroid:", centroids[labels[i]])
 
-    threshold = 0.05
+    threshold = 0.1
     if(debug_flag == 1):
         print("threshold is")
         print(threshold)
@@ -327,12 +358,16 @@ def read_values_intra_cluster_criteria(main_list):
     if(debug_flag == 1):
         print("outliers by intra-cluster criteria are")
         print(outliers2)
+    print("Time taken by intra-cluster criterion is")
+    print(time.time()-t1)
+
     return outliers2
 
 
 def Gaussian(encodedLists):
     #Gaussian Mixture is used for soft clustering. Insted of assigning points to specific classes it assigns probability.
     #The n_components parameter in the Gaussian is used to specify the number of Gaussians.
+    t1=time.time()
     concatenated_features = []
     for i in range(len(encodedLists[0])):
         temp = []
@@ -345,10 +380,14 @@ def Gaussian(encodedLists):
     clf = mixture.GaussianMixture(n_components=2, covariance_type='full')
     clf.fit(concatenated_features)
     Z = -clf.score_samples(np.array(concatenated_features))
+    print("Time taken by Gaussian is")
+    print(time.time()-t1)
+
     return Z
 
 
 def KNN(encodedLists):
+    t1=time.time()
     concatenated_features = []
     for i in range(len(encodedLists[0])):
         temp = []
@@ -358,15 +397,19 @@ def KNN(encodedLists):
     
     print("concateanted feature is")
     print(concatenated_features)
-    nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(concatenated_features)
+    nbrs = NearestNeighbors(n_neighbors=3, algorithm='ball_tree').fit(concatenated_features)
     distances, indices = nbrs.kneighbors(concatenated_features)
     print("indices in KNN are")
     print(indices)
     print("distances in KNN are")
     print(distances)
+    print("Time taken by KNN is")
+    print(time.time()-t1)
+
 
 
 def severity(density_list):
+    t1=time.time()
     # Severity between features is calculated. To calculate severity we need to pass density lists of features. 
     # Currently, we are calculating severity based on correlation coefficients.  
     # Correlation coefficient gives how closely two features are linked to each other.
@@ -379,11 +422,15 @@ def severity(density_list):
             print(feature2)
             print(np.corrcoef(density_list[feature1], density_list[feature2])[0, 1])
             feature2 = feature2 + 1
+    print("Time taken to calculate correlations is")
+    print(time.time()-t1)
+
 
 
 def RandomForests(densityList,encodedLists):
+    t1=time.time()
     #First apply an existing outlier detection technique as RandomForests works on supervised data.
-
+    #So, first we are using z-score threshold to train the RandomForest Classifier.
     mean = np.mean(densityList)
     std = np.std(densityList)
 
@@ -414,18 +461,19 @@ def RandomForests(densityList,encodedLists):
     X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
     
     clf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
-
-
     clf.fit(X_train, y_train)
     print("RandomForests predictions are")
     print(clf.predict(X_test))
     print("Actual classification is")
     print(y_test)
+    print("Time taken by Random Forests is")
+    print(time.time()-t1)
+
 
 
 def isolationForests(densityList,encodedLists):
     #First apply an existing outlier detection technique as RandomForests works on supervised data.
-
+    t1=time.time()
     mean = np.mean(densityList)
     std = np.std(densityList)
 
@@ -462,4 +510,105 @@ def isolationForests(densityList,encodedLists):
     print(y_pred_train)
     print("isolationForests predictions on test data are")
     print(y_pred_test)
+    print("Time taken by isolation Forests is")
+    print(time.time()-t1)
+
+
+
+def NaiveBayes(densityList,encodedLists):
+    #First apply an existing outlier detection technique as Naive Bayes works on supervised data.
+    #So, first we are using z-score threshold to train the Naive Bayes Classifier.
+    t1=time.time()
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In Naive Bayes method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    clf = GaussianNB()
+    clf.fit(X_train, y_train)
+    print("Naive Bayes predictions are")
+    print(clf.predict(X_test))
+    print("Actual classification is")
+    print(y_test)
+    print("Time taken by NaiveBayes is")
+    print(time.time()-t1)
+
+
+def Logistic_Regression(densityList,encodedLists):
+    t1 = time.time()
+    mean = np.mean(densityList)
+    std = np.std(densityList)
+
+    outliers = []
+    labels = []
+    print("In Logistic Regression method")
+    print("density list is", densityList)
+
+    for i, n in enumerate(densityList):
+        z = (n - mean) / std
+        if abs(z) >= 1:
+            outliers.append(i)
+            labels.append(1)
+        else:
+            labels.append(0)
+    print("labels are", labels)
+
+    concatenated_features = []
+    for i in range(len(encodedLists[0])):
+        temp = []
+        for j in range(len(encodedLists)):
+            temp.extend(encodedLists[j][i])    
+        concatenated_features.append(temp)   
+    
+    print("concateanted feature is")
+    print(concatenated_features)
+
+    X_train, X_test, y_train, y_test = train_test_split(concatenated_features, labels, test_size=0.33, random_state=42)
+    clf =  LogisticRegression(random_state=0, solver='lbfgs',
+                        multi_class='multinomial')
+    clf.fit(X_train, y_train)
+    print(" Logistic Regression predictions are")
+    print(clf.predict(X_test))
+    print("Actual classification is")
+    print(y_test)
+    print("Time taken by Logistic Regression is")
+    print(time.time()-t1)
+
+
+
+
+ 
+                      
+
+                             
+          
+    
+
+
+
+
+
 
