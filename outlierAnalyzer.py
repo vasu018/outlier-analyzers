@@ -225,7 +225,7 @@ elif READ_FILE_FLAG:
     # Read the data in from a text file
 
 # Read the data in from a text file
-if READ_FILE_FLAG:
+# if READ_FILE_FLAG:
     props = []
     datas = []
 
@@ -427,11 +427,21 @@ for i, prop in enumerate(props):
     print(encodedLists[i])
     print()
 
+#Clustering
+outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
+label = 'Inter-cluster distance method outliers: ' + str(outliers)
+print(label)
+print()
+
+outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
+label = 'Intra-cluster distance method outliers: ' + str(outliers)
+print(label)
+print()
+
 #Gaussian Mixture Model
 likelihood = outlierLibrary.Gaussian(encodedLists)
 print("Likelihood given by G.M.M is",likelihood)
 print()
-
 
 #KNN
 outlierLibrary.KNN(encodedLists)
@@ -440,6 +450,13 @@ print()
 
 #Severity
 outlierLibrary.severity(densityLists)
+
+#Supervised
+outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
+outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
+outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
+
 
 #
 # Approach 1: Baseline Threshold-based  outlier detection mechanism (Threshold = 1/3).
@@ -556,7 +573,9 @@ elif MULTI == True or METHOD == 4:
     print()
 
 elif MULTI == True or METHOD == 5:
-    #Random Forest Outliers
+    #Supervised learning techniques
+    outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
+    outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
     outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
     outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 
