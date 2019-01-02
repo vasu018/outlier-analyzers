@@ -57,10 +57,10 @@ pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 DEBUG_PRINT_FLAG = False
 STEP_TWO_FLAG = True
 
-JSON_INPUT = True
+JSON_INPUT = False
 
 # Option flag
-DEFINITION = True
+DEFINITION = False
 MULTI = True
 METHOD = 0
 
@@ -86,19 +86,31 @@ def error_msg(help_flag):
 try:
     if sys.argv[1] == '-h':
         error_msg(True)
-    elif sys.argv[1] == '-t' and sys.argv[3] == '-p' and sys.argv[5] == '-s':
-        if len(sys.argv) < 7:
+    elif sys.argv[1] == '-t' and sys.argv[3] == '-p':
+        if len(sys.argv) < 5:
             error_msg(False)
         else:
             READ_FILE_FLAG = False
-            if sys.argv[7] == '-m':
+            if len(sys.argv) > 5 and sys.argv[5] == '-m':
                 MULTI = False
-                METHOD = int(sys.argv[8])
+                METHOD = int(sys.argv[6])
     elif sys.argv[1] == '-i':
-        if len(sys.argv) != 3:
+        if len(sys.argv) < 3:
             error_msg(False)
         else:
             READ_FILE_FLAG = True
+            if len(sys.argv) > 3 and sys.argv[3] == '-m':
+                MULTI = False
+                METHOD = int(sys.argv[4])
+    elif sys.argv[1] == '-ij':
+        if len(sys.argv) < 3:
+            error_msg(False)
+        else:
+            READ_FILE_FLAG = True
+            JSON_INPUT = True
+            if len(sys.argv) > 3 and sys.argv[3] == '-m':
+                MULTI = False
+                METHOD = int(sys.argv[4])
     elif sys.argv[1] == '-l':
         print('Supported methods:')
         print('Tukey\'s method = 0')
@@ -188,62 +200,68 @@ def isHomogeneous(input_dict):
 
 ###
 
-if JSON_INPUT:
-
-    props = []
-    datas = []
-
-    f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
-
-    count = 0
-    for line in f:
-        # print(line)
-        # print()
-
-        match = re.match('.*:(.*)=>(.*);', line)
-
-        props.append(match.group(1))
-
-        extracted = match.group(2)
-        extracted = '[' + extracted + ']'
-
-        data = json.loads(extracted)
-
-        for i in range(len(data)):
-            data[i] = str(data[i])
-            data[i] = [data[i]]
 
 
-        datas.append(data)
 
-        count += 1
-        if count == 2:
-            break
+if READ_FILE_FLAG:
 
 
-elif READ_FILE_FLAG:
+    if JSON_INPUT:
+
     # Read the data in from a text file
+        props = []
+        datas = []
 
-# Read the data in from a text file
-# if READ_FILE_FLAG:
-    props = []
-    datas = []
+        # Handling json file input to load as the json object
+        with open(sys.argv[2]) as f:
+            json_object = json.load(f)
 
-    # Handling json file input to load as the json object
-    with open(sys.argv[2]) as f:
-        json_object = json.load(f)
+        # Extract the property names from the json object
+        props = []
+        for i, prop in enumerate(json_object[0]):
+            if i > 0:
+                props.append(prop)
+                datas.append([])
 
-    # Extract the property names from the json object
-    props = []
-    for i, prop in enumerate(json_object[0]):
-        if i > 0:
-            props.append(prop)
-            datas.append([])
+        # Extract data
+        for i in range(len(json_object)):
+            for j, prop in enumerate(props):
+                datas[j].append(json_object[i][prop])
 
-    # Extract data
-    for i in range(len(json_object)):
-        for j, prop in enumerate(props):
-            datas[j].append(json_object[i][prop])
+
+    else:
+
+        props = []
+        datas = []
+
+        # f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+        # f = open('datasets/flat-sample/namedStructureProperties_routepolicies.json')
+
+        f = open(sys.argv[2])
+
+        count = 0
+        for line in f:
+
+            match = re.match('.*:(.*)=>(.*);', line)
+
+            props.append(match.group(1))
+
+            extracted = match.group(2)
+            extracted = '[' + extracted + ']'
+
+            data = json.loads(extracted)
+
+            for i in range(len(data)):
+                data[i] = str(data[i])
+                data[i] = [data[i]]
+
+
+            datas.append(data)
+
+            count += 1
+            if count == 2:
+                break
+
 
 else:
 
@@ -276,7 +294,7 @@ else:
             match = re.match('.*?:(.*)=>(.*);', line)
 
             # props.append(match.group(1))
-    
+
             extracted = match.group(2)
             extracted = '[' + extracted + ']'
 
@@ -523,7 +541,7 @@ if MULTI == True or METHOD == 0:
         print()
     print()
 
-elif MULTI == True or METHOD == 1:
+if MULTI == True or METHOD == 1:
     # Calculate the outliers using Z-Score method.
     outliers = outlierLibrary.z_score(aggregatedDensityList)
     label = 'Z-Score method outliers: ' + str(outliers)
@@ -536,7 +554,7 @@ elif MULTI == True or METHOD == 1:
         print()
     print()
 
-elif MULTI == True or METHOD == 2:
+if MULTI == True or METHOD == 2:
     # Calculate the outliers using modified Z-Score method.
     outliers = outlierLibrary.modified_z_score(aggregatedDensityList)
     label = 'Modified Z-Score method outliers: ' + str(outliers)
@@ -549,7 +567,7 @@ elif MULTI == True or METHOD == 2:
         print()
     print()
 
-elif MULTI == True or METHOD == 3:
+if MULTI == True or METHOD == 3:
     # Calculate the outliers using cooks distance method.
     cooksDensityList = []
     for i, value in enumerate(aggregatedDensityList):
@@ -566,18 +584,18 @@ elif MULTI == True or METHOD == 3:
         print()
     print()
 
-elif MULTI == True or METHOD == 4:
+if MULTI == True or METHOD == 4:
     outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
     label = 'Inter-cluster distance method outliers: ' + str(outliers)
     print(label)
     print()
 
-elif MULTI == True or METHOD == 5:
-    #Supervised learning techniques
-    outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
-    outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
-    outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
-    outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
+if MULTI == True or METHOD == 5:
+    # #Supervised learning techniques
+    # outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
+    # outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
+    # outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+    # outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 
     #Intra Cluser Outliers
     outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
@@ -591,7 +609,7 @@ elif MULTI == True or METHOD == 5:
         print()
     print()
 
-elif MULTI == True or METHOD == 5:
+if MULTI == True or METHOD == 5:
     # Calculate the outliers using mahalanobis distance method.
     # Then for each outlier, print out the associated information related to
     # its features and their values.

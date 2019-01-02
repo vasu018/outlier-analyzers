@@ -175,7 +175,7 @@ def cooks_distance(points):
 
         # print(distance)
 
-        if distance > 1:
+        if distance > 0.05:
             # outliers.append(points[i])
             outliers.append(i)
 
@@ -209,7 +209,7 @@ def mahalanobis_distance(densityLists):
         covariance_matrix = np.cov(combination)
         mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
 
-        if mahalanobis_dist > 500:
+        if mahalanobis_dist > 200:
             outliers.append(i)
 
 
