@@ -9,7 +9,8 @@ import pickle
 props = []
 datas = []
 
-f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+# f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+f = open(sys.argv[1])
 
 # selected features inputted as command line argument
 selection = sys.argv[2].split(',')

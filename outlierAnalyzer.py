@@ -44,14 +44,14 @@ from pybatfish.question import bfq
 
 # Setup
 # TODO
-# load_questions()
+load_questions()
 
 pd.compat.PY3 = True
 PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
 # TODO
-# bf_init_snapshot('datasets/networks/example')
+bf_init_snapshot('datasets/networks/example')
 
 # Debug flags
 DEBUG_PRINT_FLAG = False

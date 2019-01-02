@@ -6,6 +6,8 @@ props = []
 datas = []
 
 f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+# f = open('datasets/flat-sample/namedStructureProperties_routepolicies.json')
+
 
 count = 0
 for line in f:

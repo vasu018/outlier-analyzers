@@ -204,14 +204,17 @@ def mahalanobis_distance(densityLists):
     # calculate mahalanobis distance for each point
     outliers = []
 
-    for i, vector in enumerate(vectors):
-        combination = np.vstack((vector, average_vector))
-        covariance_matrix = np.cov(combination)
-        mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
+    try:
+        for i, vector in enumerate(vectors):
+            combination = np.vstack((vector, average_vector))
+            covariance_matrix = np.cov(combination)
+            mahalanobis_dist = distance.mahalanobis(vector, average_vector, covariance_matrix)
 
-        if mahalanobis_dist > 200:
-            outliers.append(i)
-
+            if mahalanobis_dist > 200:
+                outliers.append(i)
+    except:
+        # matrices not aligned, no mahalanobis distance outliers
+        pass
 
     return outliers
         
