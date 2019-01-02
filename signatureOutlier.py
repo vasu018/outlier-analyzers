@@ -7,9 +7,10 @@ import pickle
 props = []
 datas = []
 
-f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
+f = open(sys.argv[1])
 
-selection = [1, 5, 10]
+# selected features indexes inputted as command line argument
+selection = [5, 10]
 
 count = 0
 for line in f:
@@ -28,7 +29,7 @@ for line in f:
 
     for i in range(len(data)):
         # data[i] = str(data[i])
-        data[i] = [data[i]]
+        data[i] = [data[i]]a
 
     if count in selection:
         datas.append(data)
@@ -60,7 +61,7 @@ def isHomogeneous(input_dict):
         return True
 
 
-# This function re
+# Recursively extract keys from a dictionary
 def extract_keys(the_dict, prefix=''):
     # TODO
     # fix bug with list of dicts not being extracted
@@ -91,7 +92,11 @@ overall = {}
 
 for data in datas:
 
+
     for item in data:
+
+        if item[0] is None:
+            continue
 
         result = extract_keys(item[0])
         # print(result)
@@ -132,8 +137,21 @@ print()
 print('Excluded:', excluded)
 
 
+signature = {}
 
-signature = pickle.load(open('signature.txt', 'rb'))
+for key, value in overall.items():
+    # print(key, value)
+    max = 0
+    sum = 0
+    most = None
+    for k, v in value.items():
+        sum += v
+        if v > max:
+            max = v
+            most = k
+    weight = int(max / sum * 100)
+
+    signature[key] = (most, weight)
 
 
 print()
@@ -159,6 +177,7 @@ for i, item in enumerate(datas[0]):
 
         item = data[i]
 
+
         print(item, end='\n\n')
 
         for key, value in signature.items():
@@ -167,6 +186,8 @@ for i, item in enumerate(datas[0]):
                 continue
 
             current = item[0]
+            if current is None:
+                continue
 
             key_list = key.split('.')
 
