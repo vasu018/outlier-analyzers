@@ -7,11 +7,10 @@ import pickle
 props = []
 datas = []
 
-# f = open('datasets/flat-sample/namedStructureProperties_ip-accesslist.json')
 f = open(sys.argv[1])
 
-# selected features inputted as command line argument
-selection = [5]
+# selected features indexes inputted as command line argument
+selection = [5, 10]
 
 count = 0
 for line in f:
@@ -30,7 +29,7 @@ for line in f:
 
     for i in range(len(data)):
         # data[i] = str(data[i])
-        data[i] = [data[i]]
+        data[i] = [data[i]]a
 
     if count in selection:
         datas.append(data)
