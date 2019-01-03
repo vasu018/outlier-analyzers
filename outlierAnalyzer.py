@@ -437,43 +437,43 @@ for i in range(len(encodedLists)):
     densityLists.append(densityList)
     normalizedDensityLists.append(normalizedDensityList)
 
-for i, prop in enumerate(props):
-    print("%s: %s" % (prop, datas[i]))
-    print()
-    print("Unique classes: %s" % uniqueClasses[i])
-    print()
-    print(encodedLists[i])
-    print()
-
-#Clustering
-outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
-label = 'Inter-cluster distance method outliers: ' + str(outliers)
-print(label)
-print()
-
-outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
-label = 'Intra-cluster distance method outliers: ' + str(outliers)
-print(label)
-print()
-
-#Gaussian Mixture Model
-likelihood = outlierLibrary.Gaussian(encodedLists)
-print("Likelihood given by G.M.M is",likelihood)
-print()
-
-#KNN
-outlierLibrary.KNN(encodedLists)
-print()
-
-
-#Severity
-outlierLibrary.severity(densityLists)
-
-#Supervised
-outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
-outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
-outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
-outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
+# for i, prop in enumerate(props):
+#     print("%s: %s" % (prop, datas[i]))
+#     print()
+#     print("Unique classes: %s" % uniqueClasses[i])
+#     print()
+#     print(encodedLists[i])
+#     print()
+#
+# #Clustering
+# outliers = outlierLibrary.read_values_inter_cluster_criteria(densityLists)
+# label = 'Inter-cluster distance method outliers: ' + str(outliers)
+# print(label)
+# print()
+#
+# outliers = outlierLibrary.read_values_intra_cluster_criteria(densityLists)
+# label = 'Intra-cluster distance method outliers: ' + str(outliers)
+# print(label)
+# print()
+#
+# #Gaussian Mixture Model
+# likelihood = outlierLibrary.Gaussian(encodedLists)
+# print("Likelihood given by G.M.M is",likelihood)
+# print()
+#
+# #KNN
+# outlierLibrary.KNN(encodedLists)
+# print()
+#
+#
+# #Severity
+# outlierLibrary.severity(densityLists)
+#
+# #Supervised
+# outlierLibrary.NaiveBayes(aggregatedDensityList,encodedLists)
+# outlierLibrary.Logistic_Regression(aggregatedDensityList,encodedLists)
+# outlierLibrary.RandomForests(aggregatedDensityList,encodedLists)
+# outlierLibrary.isolationForests(aggregatedDensityList,encodedLists)
 
 
 #
@@ -498,7 +498,7 @@ if DEBUG_PRINT_FLAG:
     print("# Unique instance counter:", valueCounterOutCome)
 
 mostCommonElement = valueCounterOutCome.most_common(1)
-print("# Most common element from the input data:", mostCommonElement)
+# print("# Most common element from the input data:", mostCommonElement)
 
 mostCommonElementSize = valueCounterOutCome.most_common()[0][1]
 if DEBUG_PRINT_FLAG:
@@ -509,8 +509,8 @@ if DEBUG_PRINT_FLAG:
     print("# Overall size of input data-Set:", totalSizeOfmultiClassSet)
 
 outlierThresholdValue = (totalSizeOfmultiClassSet - mostCommonElementSize) / totalSizeOfmultiClassSet
-print("# Outlier threshold on data:", outlierThresholdValue)
-print()
+# print("# Outlier threshold on data:", outlierThresholdValue)
+# print()
 
 
 outliersThresholdAppraoch = []
