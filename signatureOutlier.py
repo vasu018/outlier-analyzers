@@ -29,7 +29,7 @@ for line in f:
 
     for i in range(len(data)):
         # data[i] = str(data[i])
-        data[i] = [data[i]]
+        data[i] = [data[i]]a
 
     if count in selection:
         datas.append(data)
