@@ -1,0 +1,351 @@
+st75hr92#show running-config
+Building configuration...
+
+Current configuration : 9781 bytes
+!
+! Last configuration change at 20:32:33 GMT Fri Apr 6 2018 by solarwind
+! NVRAM config last updated at 07:36:04 GMT Mon May 7 2018 by intell3c6dbden
+!
+version 12.2
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname st75hr92
+!
+boot-start-marker
+boot-end-marker
+!
+logging buffered 16384
+no logging console
+no logging monitor
+enable secret 5 $1$0000$w7V7FIGWIr.K6rpHA/KfX.
+!
+!
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ line
+aaa authentication login no_tacacs+ line
+aaa authentication enable default group tacacs+ enable
+aaa authorization exec default group tacacs+ if-authenticated 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+system mtu routing 1500
+no ip source-route
+!
+!
+no ip domain-lookup
+ip domain-name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+!
+!
+crypto pki trustpoint HTTPS_SS_CERT_KEYPAIR
+ enrollment selfsigned
+ serial-number
+ revocation-check none
+ rsakeypair HTTPS_SS_CERT_KEYPAIR
+!
+!
+crypto pki certificate chain HTTPS_SS_CERT_KEYPAIR
+ certificate self-signed 01
+  3082029E 30820207 A0030201 02020101 300D0609 2A864886 F70D0101 04050030 
+  59311F30 1D060355 04031316 73743735 68723932 2E696E74 6C2E7669 73612E6E 
+  65743136 300F0603 55040513 08413145 43383538 30302306 092A8648 86F70D01 
+  09021616 73743735 68723932 2E696E74 6C2E7669 73612E6E 6574301E 170D3134 
+  30383233 30343533 31355A17 0D323030 31303130 30303030 305A3059 311F301D 
+  06035504 03131673 74373568 7239322E 696E746C 2E766973 612E6E65 74313630 
+  0F060355 04051308 41314543 38353830 30230609 2A864886 F70D0109 02161673 
+  74373568 7239322E 696E746C 2E766973 612E6E65 7430819F 300D0609 2A864886 
+  F70D0101 01050003 818D0030 81890281 8100F164 EC1C64C1 6FD99F24 A3127B51 
+  50C63EB1 3383BC33 DA8B407B 4FFC1E2D C66ABA8E 43AEBD96 693973AB D9FD04E4 
+  8D42719A 63F344EB C13940CE 827D3788 F96554FF 5897EB14 E3724BB1 619200DB 
+  67648783 48EAD04C 6403F14B 487CFA33 B023F5C4 9B87E476 7B82689E D1376701 
+  0E942B44 D4E71857 BCCE3E09 DB3B463A 3FD70203 010001A3 76307430 0F060355 
+  1D130101 FF040530 030101FF 30210603 551D1104 1A301882 16737437 35687239 
+  322E696E 746C2E76 6973612E 6E657430 1F060355 1D230418 30168014 2984DD03 
+  85B4BA5B 7CE95AFA D5DCF918 14B51096 301D0603 551D0E04 16041429 84DD0385 
+  B4BA5B7C E95AFAD5 DCF91814 B5109630 0D06092A 864886F7 0D010104 05000381 
+  81006199 ED54CC04 F7A5F0D5 2E3FB58F 60FF52C4 2437BD22 ABDCF3C5 A892D46F 
+  AC2CAD18 A9E3A8D0 6F674F0B C94301A3 2844D57D C1DDED4F 9491DE10 93185037 
+  907AA4D5 4F8A454F A4042AB8 EFC7505C 5E7C37E3 B64780C1 E6F8AC98 C83A1F3D 
+  2A659C73 1478AD10 0014833A 1B115CEF D080B958 9666685B E269BE55 0139DD2C 845A
+  quit
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-3c6dbd
+!
+vlan internal allocation policy ascending
+!
+ip tcp path-mtu-discovery
+ip ssh version 2
+!
+!
+interface GigabitEthernet0/1
+ description nomon-
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/2
+ description nomon-
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/3
+ description nomon-
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/4
+ description DHMC01 
+ switchport access vlan 192
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet0/5
+ description DCPUI SE Top 
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/6
+ description DCPUD EC12 SE Top 
+ switchport access vlan 192
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet0/7
+ description nomon-
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/8
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/9
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/10
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/11
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/12
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/13
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/14
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/15
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/16
+ switchport access vlan 192
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet0/17
+ description DCPUDSE1 196.1.16.218 ETH1 WO1165756
+ switchport access vlan 192
+ switchport mode access
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet0/18
+ description DCPUASE1 196.1.16.145 ETH1 WO1154255
+ switchport access vlan 192
+ switchport mode access
+ speed 100
+ spanning-tree portfast
+!
+interface GigabitEthernet0/19
+ description nomon-
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/20
+ description nomon- sw750dcpuaec12se1 
+ switchport access vlan 192
+ switchport mode access
+ no logging event link-status
+ spanning-tree portfast
+!
+interface GigabitEthernet0/21
+ description link to ST75HR82_Port2/5
+ switchport access vlan 405
+ switchport mode access
+!
+interface GigabitEthernet0/22
+ description link to ST75HR83_Port2/5
+ switchport access vlan 407
+ switchport mode access
+!
+interface GigabitEthernet0/23
+ description link to ST55HR90_Port0/23
+ switchport access vlan 192
+ switchport trunk allowed vlan 192,401
+ switchport mode trunk
+!
+interface GigabitEthernet0/24
+ description link to ST75HR93_Port0/24
+ switchport access vlan 192
+ switchport trunk allowed vlan 192,401
+ switchport mode trunk
+!
+interface Vlan1
+ no ip address
+ no ip route-cache
+ shutdown
+!
+interface Vlan401
+ ip address 126.218.101.98 255.255.255.248
+ no ip route-cache
+!
+interface Vlan405
+ ip address 126.218.101.84 255.255.255.248
+ no ip route-cache
+!
+interface Vlan407
+ ip address 126.218.101.68 255.255.255.248
+ no ip route-cache
+!
+ip default-gateway 126.218.101.87
+no ip http server
+no ip http secure-server
+ip sla enable reaction-alerts
+logging trap debugging
+logging source-interface Vlan401
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.171.244.6
+logging 126.170.38.121
+logging 126.172.24.96
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server community netconanRemoved119 RW 98
+snmp-server trap-source Vlan401
+snmp-server tftp-server-list 99
+snmp-server location <device_location>
+snmp-server contact GLANOPS (650) 432-4040
+snmp-server enable traps entity
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server enable traps config
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.170.164.99 netconanRemoved62 
+snmp-server host 126.175.60.250 netconanRemoved62 
+snmp-server host 126.170.164.99 netconanRemoved3 
+snmp-server file-transfer access-group 99 protocol tftp
+tacacs-server host 126.175.58.45 key 7 09424B1D1A0A1913053E012724322D376C74
+tacacs-server host 126.170.160.247 key 7 09424B1D1A0A1913053E012724322D376773
+tacacs-server timeout 10
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D376371
+banner motd ^CC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37677A
+ transport output none
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647142
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647142
+ transport input ssh
+!
+ntp clock-period 36029064
+ntp server 126.170.165.28 prefer
+ntp server 126.175.61.217
+end
+

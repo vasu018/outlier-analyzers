@@ -1,0 +1,1669 @@
+## Last commit: 2017-03-15 15:36:01 EDT by ken
+version 13.2X51-D30.4;
+groups {
+    global {
+        system {
+            authentication-order [ tacplus password ];
+            tacplus-server {
+                130.245.9.176 {
+                    secret /* SECRET-DATA */; ## SECRET-DATA
+                    source-address 130.245.7.12;
+                }
+            }
+            login {
+                user ReadOnly {
+                    uid 2001;
+                    class read-only;
+                }
+                user Operator {
+                    uid 2002;
+                    class operator;
+                }
+                user SuperUser {
+                    uid 2003;
+                    class super-user;
+                }
+            }
+        }
+    }
+}
+apply-groups global;
+system {
+    host-name 2129;
+    auto-snapshot;
+    domain-name cs.stonybrook.edu;
+    domain-search [ cs.stonybrook.edu cs.sunysb.edu ];
+    time-zone America/New_York;
+    root-authentication {
+        encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+    }
+    name-server {
+        130.245.1.15;
+        130.245.1.48;
+    }
+    login {
+        class RO {
+            permissions [ view view-configuration ];
+        }
+        user junro {
+            uid 2000;
+            class RO;
+            authentication {
+                encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+        web-management {
+            https {
+                pki-local-certificate 2129;
+            }
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    commit synchronize;
+    ntp {
+        server 174.36.71.205;
+        server 130.245.1.15 prefer;
+        server 130.245.1.48 prefer;
+    }
+}
+chassis {
+    redundancy {
+        graceful-switchover;
+    }
+    aggregated-devices {
+        ethernet {
+            device-count 10;
+        }
+    }
+    alarm {
+        management-ethernet {
+            link-down ignore;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/2 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/3 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/4 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/5 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/6 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/7 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/8 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/9 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/10 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/11 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/12 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/13 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/14 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/15 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/16 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/17 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/18 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/19 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/20 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/21 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/22 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/23 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/24 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/25 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/26 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/27 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/28 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/29 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/30 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/31 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/32 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/33 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/34 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/35 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/36 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/37 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/38 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/39 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/40 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/41 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/42 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/43 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/44 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/45 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/46 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/0/47 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/2/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/0 {
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    ge-0/2/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/2/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/2/3 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/3 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-1/0/0 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/1 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/2 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/3 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/4 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/5 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/6 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/7 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/8 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/9 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/10 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/11 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/12 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/13 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/14 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/15 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/16 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/17 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/18 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/19 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/20 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/21 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/22 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/23 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/24 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_113;
+                }
+            }
+        }
+    }
+    ge-1/0/25 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_153;
+                }
+            }
+        }
+    }
+    ge-1/0/26 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/27 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/28 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_19;
+                }
+            }
+        }
+    }
+    ge-1/0/29 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ 7 9 13 19 ];
+                }
+            }
+        }
+    }
+    ge-1/0/30 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/31 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/32 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/33 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/34 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/35 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/36 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/37 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/38 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/39 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/40 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/41 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/42 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/43 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/44 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/45 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/46 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-1/0/47 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    xe-1/2/0 {
+        ether-options {
+            802.3ad ae0;
+        }
+    }
+    ae0 {
+        aggregated-ether-options {
+            minimum-links 1;
+            lacp {
+                active;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members all;
+                }
+            }
+        }
+    }
+    irb {
+        unit 7 {
+            family inet {
+                address 130.245.7.12/24;
+            }
+        }
+    }
+    me0 {
+        unit 0 {
+            family inet {
+                address 192.168.1.1/24;
+            }
+        }
+    }
+}
+snmp {
+    name 2129;
+    location "Computer Science - Datacenter";
+    community "JUn!p3r" {
+        authorization read-only;
+    }
+    trap-group airwave {
+        version all;
+        targets {
+            130.245.9.145;
+        }
+    }
+}
+forwarding-options {
+    storm-control-profiles default {
+        all;
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 130.245.7.1;
+    }
+}
+protocols {
+    lldp {
+        interface all;
+    }
+    lldp-med {
+        interface all;
+    }
+    igmp-snooping {
+        vlan default;
+    }
+    mstp {
+        configuration-name stonybrook;
+        revision-level 1;
+        interface ge-0/0/0 {
+            edge;
+        }
+        interface ge-0/0/1 {
+            edge;
+        }
+        interface ge-0/0/2 {
+            edge;
+        }
+        interface ge-0/0/3 {
+            edge;
+        }
+        interface ge-0/0/4 {
+            edge;
+        }
+        interface ge-0/0/5 {
+            edge;
+        }
+        interface ge-0/0/6 {
+            edge;
+        }
+        interface ge-0/0/7 {
+            edge;
+        }
+        interface ge-0/0/8 {
+            edge;
+        }
+        interface ge-0/0/9 {
+            edge;
+        }
+        interface ge-0/0/10 {
+            edge;
+        }
+        interface ge-0/0/11 {
+            edge;
+        }
+        interface ge-0/0/12 {
+            edge;
+        }
+        interface ge-0/0/13 {
+            edge;
+        }
+        interface ge-0/0/14 {
+            edge;
+        }
+        interface ge-0/0/15 {
+            edge;
+        }
+        interface ge-0/0/16 {
+            edge;
+        }
+        interface ge-0/0/17 {
+            edge;
+        }
+        interface ge-0/0/18 {
+            edge;
+        }
+        interface ge-0/0/19 {
+            edge;
+        }
+        interface ge-0/0/20 {
+            edge;
+        }
+        interface ge-0/0/21 {
+            edge;
+        }
+        interface ge-0/0/22 {
+            edge;
+        }
+        interface ge-0/0/23 {
+            edge;
+        }
+        interface ge-0/0/24 {
+            edge;
+        }
+        interface ge-0/0/25 {
+            edge;
+        }
+        interface ge-0/0/26 {
+            edge;
+        }
+        interface ge-0/0/27 {
+            edge;
+        }
+        interface ge-0/0/28 {
+            edge;
+        }
+        interface ge-0/0/29 {
+            edge;
+        }
+        interface ge-0/0/30 {
+            edge;
+        }
+        interface ge-0/0/31 {
+            edge;
+        }
+        interface ge-0/0/32 {
+            edge;
+        }
+        interface ge-0/0/33 {
+            edge;
+        }
+        interface ge-0/0/34 {
+            edge;
+        }
+        interface ge-0/0/35 {
+            edge;
+        }
+        interface ge-0/0/36 {
+            edge;
+        }
+        interface ge-0/0/37 {
+            edge;
+        }
+        interface ge-0/0/38 {
+            edge;
+        }
+        interface ge-0/0/39 {
+            edge;
+        }
+        interface ge-0/0/40 {
+            edge;
+        }
+        interface ge-0/0/41 {
+            edge;
+        }
+        interface ge-0/0/42 {
+            edge;
+        }
+        interface ge-0/0/43 {
+            edge;
+        }
+        interface ge-0/0/44 {
+            edge;
+        }
+        interface ge-0/0/45 {
+            edge;
+        }
+        interface ge-0/0/46 {
+            edge;
+        }
+        interface ge-0/0/47 {
+            edge;
+        }
+        interface ge-1/0/0 {
+            edge;
+        }
+        interface ge-1/0/1 {
+            edge;
+        }
+        interface ge-1/0/2 {
+            edge;
+        }
+        interface ge-1/0/3 {
+            edge;
+        }
+        interface ge-1/0/4 {
+            edge;
+        }
+        interface ge-1/0/5 {
+            edge;
+        }
+        interface ge-1/0/6 {
+            edge;
+        }
+        interface ge-1/0/7 {
+            edge;
+        }
+        interface ge-1/0/8 {
+            edge;
+        }
+        interface ge-1/0/9 {
+            edge;
+        }
+        interface ge-1/0/10 {
+            edge;
+        }
+        interface ge-1/0/11 {
+            edge;
+        }
+        interface ge-1/0/12 {
+            edge;
+        }
+        interface ge-1/0/13 {
+            edge;
+        }
+        interface ge-1/0/14 {
+            edge;
+        }
+        interface ge-1/0/15 {
+            edge;
+        }
+        interface ge-1/0/16 {
+            edge;
+        }
+        interface ge-1/0/17 {
+            edge;
+        }
+        interface ge-1/0/18 {
+            edge;
+        }
+        interface ge-1/0/19 {
+            edge;
+        }
+        interface ge-1/0/20 {
+            edge;
+        }
+        interface ge-1/0/21 {
+            edge;
+        }
+        interface ge-1/0/22 {
+            edge;
+        }
+        interface ge-1/0/23 {
+            edge;
+        }
+        interface ge-1/0/24 {
+            edge;
+        }
+        interface ge-1/0/25 {
+            edge;
+        }
+        interface ge-1/0/26 {
+            edge;
+        }
+        interface ge-1/0/27 {
+            edge;
+        }
+        interface ge-1/0/28 {
+            edge;
+        }
+        interface ge-1/0/29 {
+            edge;
+        }
+        interface ge-1/0/30 {
+            edge;
+        }
+        interface ge-1/0/31 {
+            edge;
+        }
+        interface ge-1/0/32 {
+            edge;
+        }
+        interface ge-1/0/33 {
+            edge;
+        }
+        interface ge-1/0/34 {
+            edge;
+        }
+        interface ge-1/0/35 {
+            edge;
+        }
+        interface ge-1/0/36 {
+            edge;
+        }
+        interface ge-1/0/37 {
+            edge;
+        }
+        interface ge-1/0/38 {
+            edge;
+        }
+        interface ge-1/0/39 {
+            edge;
+        }
+        interface ge-1/0/40 {
+            edge;
+        }
+        interface ge-1/0/41 {
+            edge;
+        }
+        interface ge-1/0/42 {
+            edge;
+        }
+        interface ge-1/0/43 {
+            edge;
+        }
+        interface ge-1/0/44 {
+            edge;
+        }
+        interface ge-1/0/45 {
+            edge;
+        }
+        interface ge-1/0/46 {
+            edge;
+        }
+        interface ge-1/0/47 {
+            edge;
+        }
+        interface ae0 {
+            mode point-to-point;
+        }
+    }
+}
+virtual-chassis {
+    member 0 {
+        mastership-priority 250;
+    }
+    member 1 {
+        mastership-priority 250;
+    }
+}
+vlans {
+    default {
+        vlan-id 1;
+    }
+    vlan_101 {
+        description "Unix and Linux Servers";
+        vlan-id 101;
+    }
+    vlan_11 {
+        description Printing;
+        vlan-id 11;
+    }
+    vlan_113 {
+        description "SMORES Lab - JWong";
+        vlan-id 113;
+    }
+    vlan_115 {
+        description "Windows Test";
+        vlan-id 115;
+    }
+    vlan_116 {
+        description "Windows DMZ";
+        vlan-id 116;
+    }
+    vlan_117 {
+        description "Direct Access";
+        vlan-id 117;
+    }
+    vlan_12 {
+        description FacDev;
+        vlan-id 12;
+    }
+    vlan_128 {
+        description "128 Net";
+        vlan-id 128;
+    }
+    vlan_13 {
+        description "CVC Unix";
+        vlan-id 13;
+    }
+    vlan_14 {
+        description "Faculty Office Windows";
+        vlan-id 14;
+    }
+    vlan_140 {
+        description MMLab;
+        vlan-id 140;
+    }
+    vlan_15 {
+        description "DAR Lab";
+        vlan-id 15;
+    }
+    vlan_153 {
+        description OSCAR_Lab;
+        vlan-id 153;
+    }
+    vlan_1530 {
+        description OSCAR_Lab_DMZ;
+        vlan-id 1530;
+    }
+    vlan_18 {
+        description "Grad Offices";
+        vlan-id 18;
+    }
+    vlan_19 {
+        description "Room 2129";
+        vlan-id 19;
+    }
+    vlan_2 {
+        description "Grad Offices";
+        vlan-id 2;
+    }
+    vlan_20 {
+        description "Room 2120";
+        vlan-id 20;
+    }
+    vlan_21 {
+        description "Room 2114";
+        vlan-id 21;
+    }
+    vlan_22 {
+        description "Room 2110";
+        vlan-id 22;
+    }
+    vlan_23 {
+        description "Room 2126";
+        vlan-id 23;
+    }
+    vlan_27 {
+        description "Web Servers";
+        vlan-id 27;
+    }
+    vlan_28 {
+        description "Room 1239";
+        vlan-id 28;
+    }
+    vlan_3 {
+        description Secretaries;
+        vlan-id 3;
+    }
+    vlan_30 {
+        description "Course ESX";
+        vlan-id 30;
+    }
+    vlan_4 {
+        description CVC;
+        vlan-id 4;
+    }
+    vlan_6 {
+        description "UNIX Labs";
+        vlan-id 6;
+    }
+    vlan_7 {
+        description Management;
+        vlan-id 7;
+        l3-interface irb.7;
+    }
+    vlan_8 {
+        description "Concurency Lab";
+        vlan-id 8;
+    }
+    vlan_9 {
+        description "Windows Servers";
+        vlan-id 9;
+    }
+    vlan_VOIP {
+        description "Campus VOIP 172.23.249.0/24";
+        vlan-id 2511;
+    }
+}
+poe {
+    interface all;
+}
+{master:0}

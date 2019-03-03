@@ -1,0 +1,270 @@
+st62in82bsce#show running-config
+Building configuration...
+
+Current configuration : 7320 bytes
+!
+! Last configuration change at 06:00:16 GMT Wed Apr 11 2018 by abatol
+! NVRAM config last updated at 05:29:45 GMT Mon May 7 2018 by intell3c6dbden
+!
+version 12.2
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname st62in82bsce
+!
+boot-start-marker
+boot-end-marker
+!
+logging buffered 16384
+enable secret 5 $1$0000$m0GdJTK1cqhh8TV5X90f8/
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+system mtu routing 1700
+vtp domain INTLCE
+vtp mode transparent
+udld enable
+
+ip subnet-zero
+no ip source-route
+no ip domain-lookup
+ip domain-name e9ad96.com
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+!
+!
+!
+!
+crypto pki trustpoint TP-self-signed-341069184
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-341069184
+ revocation-check none
+ rsakeypair TP-self-signed-341069184
+!
+!
+crypto pki certificate chain TP-self-signed-341069184
+ certificate self-signed 01
+  3082024B 308201B4 A0030201 02020101 300D0609 2A864886 F70D0101 04050030 
+  30312E30 2C060355 04031325 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 33343130 36393138 34301E17 0D393330 33303130 30303133 
+  345A170D 32303031 30313030 30303030 5A303031 2E302C06 03550403 1325494F 
+  532D5365 6C662D53 69676E65 642D4365 72746966 69636174 652D3334 31303639 
+  31383430 819F300D 06092A86 4886F70D 01010105 0003818D 00308189 02818100 
+  C104CA27 E7CC749F CBF2A10B D846067D 41014CC2 EA24461F 2C092647 FBC5C715 
+  35AAC9E0 05123846 5DD77BC3 F7B41F2A D49C7AAA 14D2CC70 E446B347 1DD8B08F 
+  18D33F6A FAD72D16 9E574D2D 8C162F9C 96AA3831 B61CEBF0 B0426D69 934B4165 
+  73CB3952 ABCCA8A0 1B08FC7B A63D40FD 3CFAEA87 BAA303E3 510440E3 CF5B3EDD 
+  02030100 01A37530 73300F06 03551D13 0101FF04 05300301 01FF3020 0603551D 
+  11041930 17821573 74363269 6E383262 7363652E 76697361 2E636F6D 301F0603 
+  551D2304 18301680 14EB6FBF 7D72B048 6C2B5430 0FB5CBF4 D64453F1 CF301D06 
+  03551D0E 04160414 EB6FBF7D 72B0486C 2B54300F B5CBF4D6 4453F1CF 300D0609 
+  2A864886 F70D0101 04050003 8181006D 9968B43E A67627A4 99EE0287 6AA6EC8F 
+  9AA89C1C BCABEDC8 359A1739 1E376272 529C7DBF 6458FBF1 452C4CDC 7D7583FA 
+  4230C8DB DEAA0115 5194AE66 4E7FC733 D7DB75B4 BEF71478 01A9D81D 2A0D2E65 
+  DFF4B5D2 73AEF21F 14F22F80 D8EB36D9 EAF35C0F D28B0ED3 27C28A6C 9C5E6F77 
+  611D5911 573299A2 B10D4C1F BD8644
+  quit
+!
+!
+!
+errdisable recovery cause udld
+errdisable recovery cause bpduguard
+errdisable recovery cause pagp-flap
+errdisable recovery cause dtp-flap
+errdisable recovery cause link-flap
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-3c6dbd
+!
+vlan internal allocation policy ascending
+!
+vlan 21
+ name INI_ATT_CORP
+ mtu 1700
+!
+vlan 28
+ name INI_ATT_INI
+ mtu 1700
+!
+ip ssh time-out 60
+ip ssh version 2
+!
+!
+interface Loopback0
+ no ip address
+!
+interface FastEthernet0
+ no ip address
+ shutdown
+!
+interface GigabitEthernet0/1
+ description connects to INI VRF to RT62BS82 g0/1
+ switchport access vlan 28
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast
+!
+interface GigabitEthernet0/2
+ description connects to CORP VRF to RT62BS13 g1/0
+ switchport access vlan 21
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast
+!
+interface GigabitEthernet0/3
+ description AT&T Pub MPLS Cir 3c6dbd:2C01002533
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 21,28
+ switchport mode trunk
+ load-interval 30
+ speed nonegotiate
+!
+interface GigabitEthernet0/4
+ shutdown
+!
+interface GigabitEthernet0/5
+ shutdown
+!
+interface GigabitEthernet0/6
+ shutdown
+!
+interface GigabitEthernet0/7
+ shutdown
+!
+interface GigabitEthernet0/8
+ shutdown
+!
+interface GigabitEthernet0/9
+ shutdown
+!
+interface GigabitEthernet0/10
+ shutdown
+!
+interface GigabitEthernet0/11
+ shutdown
+!
+interface GigabitEthernet0/12
+ shutdown
+!
+interface GigabitEthernet0/13
+ shutdown
+!
+interface GigabitEthernet0/14
+ shutdown
+!
+interface GigabitEthernet0/15
+ shutdown
+!
+interface GigabitEthernet0/16
+ description Mgmt connection to RT55BS11 2/11
+ no switchport
+ ip address 126.201.47.54 255.255.255.252
+ no ip redirects
+ no ip proxy-arp
+!
+interface TenGigabitEthernet0/1
+ shutdown
+!
+interface TenGigabitEthernet0/2
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+ip default-gateway 126.201.47.52
+ip classless
+no ip http server
+ip http secure-server
+!
+logging source-interface Loopback0
+logging 126.170.164.99
+logging 126.175.60.250
+access-list 98 permit 126.170.164.59 0.0.15.255
+access-list 98 permit 126.175.60.181 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.170.164.59 0.0.15.255
+access-list 99 permit 126.175.60.181 0.0.15.255
+access-list 99 deny any log
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server trap link ietf
+snmp-server tftp-server-list 99
+snmp-server location OCB
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps entity
+snmp-server enable traps vtp
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server enable traps config
+snmp-server enable traps bridge newroot topologychange
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+tacacs-server host 126.170.160.247 timeout 5
+tacacs-server host 126.175.58.45 timeout 5
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D37677147
+!
+control-plane
+!
+banner motd ^CCCCC
+
+
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37677A
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647642
+ logging synchronous
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647642
+ transport input ssh
+!
+ntp clock-period 36028459
+ntp server 126.170.165.28 prefer
+ntp server 126.175.61.217
+end
+

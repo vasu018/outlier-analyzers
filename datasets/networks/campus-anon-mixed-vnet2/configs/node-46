@@ -1,0 +1,250 @@
+ts55dxnt01#show running-config
+Building configuration...
+
+Current configuration : 6853 bytes
+!
+! Last configuration change at 18:44:45 GMT Mon Apr 9 2018 by kv3c6dbdap
+! NVRAM config last updated at 08:20:30 GMT Mon May 7 2018 by intell3c6dbden
+!
+version 12.4
+no service pad
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname ts55dxnt01
+!
+boot-start-marker
+boot-end-marker
+!
+logging buffered 32000 debugging
+no logging console
+no logging monitor
+enable secret 5 $1$0000$aIeboAlENxY5grgDxXAKJ1
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+aaa session-id common
+clock timezone GMT 0
+no network-clock-participate slot 1 
+no network-clock-participate wic 0 
+no ip source-route
+ip cef
+!
+!
+!
+!
+no ip bootp server
+no ip domain lookup
+ip domain name e9ad96.com
+!
+!
+!
+!
+!
+ip ssh time-out 60
+ip ssh version 2
+!
+!
+interface Loopback0
+ ip address 126.170.171.233 255.255.255.240
+!
+interface Tunnel1
+ no ip address
+!
+interface FastEthernet0/0
+ description future connection Going to st55dxOM01ms Fa X/XX
+ no ip address
+ load-interval 30
+ shutdown
+ speed auto
+ full-duplex
+!
+interface Serial0/0
+ ip address 126.170.171.240 255.255.255.240
+ no ip redirects
+ no ip unreachables
+ encapsulation frame-relay IETF
+ load-interval 30
+ shutdown
+ serial restart-delay 1
+ frame-relay map ip 126.170.171.243 117
+ frame-relay map ip 126.170.171.242 116
+ frame-relay map ip 126.170.171.246 120
+ frame-relay map ip 126.170.171.247 121
+!
+interface FastEthernet0/1
+ description Going to st55dxOM02ms Fa 4/29
+ ip address 126.170.162.79 255.255.255.0
+ no ip redirects
+ no ip mroute-cache
+ load-interval 30
+ speed 100
+ full-duplex
+!
+interface Serial0/1
+ no ip address
+ shutdown
+!
+router ospf 2
+ log-adjacency-changes
+!
+router ospf 500
+ log-adjacency-changes
+!
+ip forward-protocol nd
+ip route 0.0.0.0 0.0.0.0 126.170.162.93
+ip route 126.96.115.125 255.255.255.0 Serial0/0
+!
+no ip http server
+no ip http secure-server
+!
+ip access-list standard FROM_OCE
+ permit 1.243.3.11
+ permit 1.243.3.7
+ip access-list standard static2ospf
+ permit 126.137.165.207 0.0.3.255
+!
+ip access-list extended OCC-cybs-Mochasoft-Extended
+ permit tcp host 126.156.184.92 any eq telnet
+ permit tcp host 126.156.184.77 any eq telnet
+ permit tcp host 126.156.184.79 any eq telnet
+ permit tcp host 126.156.184.78 any eq telnet
+ permit tcp host 126.156.184.92 any eq 3389
+ permit tcp host 126.156.184.77 any eq 3389
+ permit tcp host 126.156.184.79 any eq 3389
+ permit tcp host 126.156.184.78 any eq 3389
+ip access-list extended OCC-cybs-SMB-Extended
+ deny tcp host 126.156.184.92 any eq telnet
+ deny tcp host 126.156.184.77 any eq telnet
+ deny tcp host 126.156.184.79 any eq telnet
+ deny tcp host 126.156.184.78 any eq telnet
+ deny tcp host 126.156.184.92 any eq 3389
+ deny tcp host 126.156.184.77 any eq 3389
+ deny tcp host 126.156.184.79 any eq 3389
+ deny tcp host 126.156.184.78 any eq 3389
+ permit ip 126.156.189.35 0.0.1.255 any
+ permit ip 126.156.191.49 0.0.1.255 any
+ permit ip 126.156.184.81 0.0.1.255 any
+ permit ip 126.156.54.198 0.0.1.255 any
+ permit ip 126.156.53.57 0.0.1.255 any
+ permit ip 126.156.49.193 0.0.1.255 any
+!
+logging trap debugging
+logging source-interface Loopback0
+logging 126.170.38.121
+logging 126.172.24.96
+logging 126.171.244.6
+access-list 40 permit 126.170.165.28
+access-list 40 permit 126.175.61.217
+access-list 98 permit 126.101.140.44
+access-list 98 permit 126.183.150.235
+access-list 98 permit 126.170.164.127 117.42.218.181
+access-list 98 permit 126.171.246.12 117.42.218.181
+access-list 98 permit 126.175.60.232 117.42.218.181
+access-list 98 deny any log
+access-list 99 permit 126.101.140.36
+access-list 99 permit 126.101.140.44
+access-list 99 permit 126.101.140.51
+access-list 99 permit 126.101.140.48
+access-list 99 permit 126.101.140.139
+access-list 99 permit 126.183.150.235
+access-list 99 permit 126.170.164.59 0.0.7.255
+access-list 99 permit 126.171.246.80 0.0.7.255
+access-list 99 permit 126.175.60.181 0.0.7.255
+access-list 99 permit 126.170.164.59 0.0.15.255
+access-list 99 permit 126.175.60.181 0.0.15.255
+access-list 99 deny any log
+access-list 112 deny tcp 102.8.22.240 0.0.0.7 any
+access-list 112 deny tcp host 102.8.23.92 any
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved119 RW 98
+snmp-server community netconanRemoved4 RW 98
+snmp-server ifindex persist
+snmp-server trap link ietf
+snmp-server trap-source Loopback0
+snmp-server location <South Data Center>
+snmp-server contact GLANOPS 6730-4625   
+snmp-server chassis-id XXXXXXX
+snmp-server enable traps tty
+snmp-server enable traps envmon
+snmp-server enable traps isdn call-information
+snmp-server enable traps isdn layer2
+snmp-server enable traps isdn chan-not-avail
+snmp-server enable traps isdn ietf
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server enable traps frame-relay
+snmp-server enable traps frame-relay subif
+snmp-server enable traps hsrp
+snmp-server enable traps ipmulticast
+snmp-server enable traps msdp
+snmp-server enable traps rsvp
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+tacacs-server host 126.170.160.247 key 7 09424B1D1A0A1913053E012724322D37647540
+tacacs-server host 126.175.58.45 key 7 09424B1D1A0A1913053E012724322D37647547
+tacacs-server timeout 10
+tacacs-server directed-request
+!
+control-plane
+!
+banner motd ^CC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D3764714B
+line 33 64
+ exec-timeout 5 0
+ no exec
+ transport input ssh
+line aux 0
+ password 7 09424B1D1A0A1913053E012724322D37647546
+ no exec
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ privilege level 15
+ password 7 09424B1D1A0A1913053E012724322D37647545
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647544
+ transport preferred none
+ transport input ssh
+!
+scheduler allocate 10000 5000
+ntp clock-period 17208565
+ntp access-group peer 40
+ntp server 126.170.165.28 prefer
+ntp server 126.175.61.217
+!
+end
+

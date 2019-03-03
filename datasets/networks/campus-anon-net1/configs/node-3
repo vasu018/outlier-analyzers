@@ -1,0 +1,1166 @@
+## Last commit: 2018-07-18 10:20:49 EDT by dcaj
+version 13.3R5.9;
+groups {
+    re0 {
+        system {
+            host-name coreb-re0.stonybrook.edu;
+        }
+        interfaces {
+            fxp0 {
+                unit 0 {
+                    family inet;
+                }
+            }
+        }
+    }
+    re1 {
+        system {
+            host-name coreb-re1.stonybrook.edu;
+        }
+        interfaces {
+            fxp0 {
+                unit 0 {
+                    family inet;
+                }
+            }
+        }
+    }
+    global {
+        system {
+            authentication-order [ tacplus password ];
+            tacplus-server {
+                130.245.9.176 {
+                    secret /* SECRET-DATA */; ## SECRET-DATA
+                    source-address 130.245.7.3;
+                }
+            }
+            login {
+                user ReadOnly {
+                    uid 2001;
+                    class read-only;
+                }
+                user Operator {
+                    uid 2002;
+                    class operator;
+                }
+                user SuperUser {
+                    uid 2003;
+                    class super-user;
+                }
+            }
+            commit synchronize;
+        }
+    }
+}
+apply-groups [ re0 re1 global ];
+system {
+    host-name coreb;
+    time-zone America/New_York;
+    root-authentication {
+        encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+    }
+    name-server {
+        130.245.1.15;
+        130.245.1.48;
+    }
+    login {
+        class RO {
+            permissions [ view view-configuration ];
+        }
+        user junro {
+            uid 2000;
+            class RO;
+            authentication {
+                encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login allow;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    ntp {
+        server 130.245.1.15 prefer;
+        server 130.245.1.48 prefer;
+        server 174.36.71.205;
+    }
+}
+chassis {
+    redundancy {
+        graceful-switchover;
+    }
+    aggregated-devices {
+        ethernet {
+            device-count 32;
+        }
+    }
+    alarm {
+        management-ethernet {
+            link-down ignore;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        description "fw01-node1.cs.stonybrook.edu: GE-0/0 (Mgmt) - Temp";
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-0/1/4 {
+        description "Link to perimeter.stonybrook.edu: ge-1/0/47";
+        ether-options {
+            802.3ad ae19;
+        }
+    }
+    ge-0/3/7 {
+        unit 0 {
+            family ethernet-switching {
+                interface-mode access;
+                vlan {
+                    members vlan_7;
+                }
+            }
+        }
+    }
+    ge-0/3/8 {
+        description "corea: ge-0/3/8";
+        ether-options {
+            802.3ad ae30;
+        }
+    }
+    ge-0/3/9 {
+        description "corea: ge-0/3/9";
+        ether-options {
+            802.3ad ae30;
+        }
+    }
+    xe-2/0/0 {
+        ether-options {
+            802.3ad ae10;
+        }
+    }
+    xe-2/0/1 {
+        ether-options {
+            802.3ad ae11;
+        }
+    }
+    xe-2/0/2 {
+        ether-options {
+            802.3ad ae12;
+        }
+    }
+    xe-2/0/3 {
+        ether-options {
+            802.3ad ae13;
+        }
+    }
+    xe-2/0/4 {
+        ether-options {
+            802.3ad ae20;
+        }
+    }
+    xe-2/1/0 {
+        ether-options {
+            802.3ad ae14;
+        }
+    }
+    xe-2/1/1 {
+        ether-options {
+            802.3ad ae15;
+        }
+    }
+    xe-2/1/3 {
+        ether-options {
+            802.3ad ae17;
+        }
+    }
+    xe-2/2/1 {
+        description "PA2: Eth1/5";
+        flexible-vlan-tagging;
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ vlan_7 vlan_12 vlan_101 vlan_2 vlan_3 vlan_4 vlan_6 vlan_8 vlan_9 vlan_13 vlan_14 vlan_15 vlan_27 vlan_117 vlan_116 vlan_115 vlan_5 vlan_68 vlan_72 vlan_11 vlan_10 vlan_30 vlan_19 vlan_20 vlan_21 vlan_22 vlan_23 vlan_28 vlan_24 vlan_50 vlan_51 vlan_52 vlan_18 vlan_17 vlan_53 vlan_29 vlan_140 vlan_152 vlan_135 vlan_671 vlan_672 vlan_673 vlan_674 vlan_675 vlan_676 vlan_677 vlan_678 vlan_679 vlan_3710 vlan_3711 vlan_3712 vlan_3713 vlan_3714 vlan_3715 vlan_3716 ];
+                }
+            }
+        }
+    }
+    xe-2/2/7 {
+        description "ae18 - awc1: ge0/3";
+        ether-options {
+            802.3ad ae18;
+        }
+    }
+    xe-2/3/6 {
+        description "corea: xe-2/3/6";
+        ether-options {
+            802.3ad ae31;
+        }
+    }
+    xe-2/3/7 {
+        description "corea: xe-2/3/7";
+        ether-options {
+            802.3ad ae31;
+        }
+    }
+    ae10 {
+        description "LAG to 1fl: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 10;
+            }
+            mc-ae {
+                mc-ae-id 10;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae11 {
+        description "LAG to 2fl: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 11;
+            }
+            mc-ae {
+                mc-ae-id 11;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae12 {
+        description "LAG to 3fl: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 12;
+            }
+            mc-ae {
+                mc-ae-id 12;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae13 {
+        description "LAG to intra-cabinet: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 13;
+            }
+            mc-ae {
+                mc-ae-id 13;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae14 {
+        description "LAG to 2126: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 14;
+            }
+            mc-ae {
+                mc-ae-id 14;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae15 {
+        description "LAG to 2129: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 15;
+            }
+            mc-ae {
+                mc-ae-id 15;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae17 {
+        description "LAG to 2209: ae0";
+        flexible-vlan-tagging;
+        multi-chassis-protection 1.1.1.1 {
+            interface ae31;
+        }
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 17;
+            }
+            mc-ae {
+                mc-ae-id 17;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ 2-4094 vlan_7 ];
+                }
+            }
+        }
+    }
+    ae18 {
+        description "LAG to awc1: pc0";
+        flexible-vlan-tagging;
+        multi-chassis-protection 1.1.1.1 {
+            interface ae31;
+        }
+        aggregated-ether-options {
+            link-speed 10g;
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 18;
+            }
+            mc-ae {
+                mc-ae-id 18;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members all;
+                }
+            }
+        }
+    }
+    ae19 {
+        description "LAG to perimeter: ae3";
+        flexible-vlan-tagging;
+        multi-chassis-protection 1.1.1.1 {
+            interface ae31;
+        }
+        aggregated-ether-options {
+            link-speed 1g;
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 19;
+            }
+            mc-ae {
+                mc-ae-id 19;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ae20 {
+        description "LAG to ex2300: ae0";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+                system-id 00:00:01:00:00:01;
+                admin-key 20;
+            }
+            mc-ae {
+                mc-ae-id 20;
+                redundancy-group 32;
+                chassis-id 1;
+                mode active-active;
+                status-control standby;
+                events {
+                    iccp-peer-down {
+                        prefer-status-control-active;
+                    }
+                }
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members 2-4094;
+                }
+            }
+        }
+    }
+    ae30 {
+        description "ICCP link to core-a: ae30";
+        aggregated-ether-options {
+            minimum-links 1;
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family inet {
+                address 1.1.1.2/30;
+            }
+        }
+    }
+    ae31 {
+        description "ICL link to core-a: ae31";
+        flexible-vlan-tagging;
+        aggregated-ether-options {
+            lacp {
+                active;
+                periodic fast;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members all;
+                }
+            }
+        }
+    }
+    fxp0 {
+        unit 0 {
+            family inet {
+                address 192.168.1.2/24;
+            }
+        }
+    }
+    irb {
+        arp-l2-validate;
+        inactive: unit 5 {
+            family inet {
+                address 130.245.5.131/29 {
+                    arp 130.245.5.130 l2-interface ae31.0 mac 84:b5:9c:62:f7:f0;
+                    vrrp-group 5 {
+                        virtual-address 130.245.5.129;
+                        priority 100;
+                        advertise-interval 1;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        unit 7 {
+            family inet {
+                filter {
+                    input allow-internal-management;
+                }
+                address 130.245.7.3/24 {
+                    arp 130.245.7.2 l2-interface ae31.0 mac 84:b5:9c:62:f7:f0;
+                }
+            }
+        }
+        inactive: unit 68 {
+            family inet {
+                address 130.245.68.3/22 {
+                    arp 130.245.68.2 l2-interface ae31.0 mac 84:b5:9c:62:f7:f0;
+                    vrrp-group 68 {
+                        virtual-address 130.245.68.1;
+                        priority 100;
+                        advertise-interval 1;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        inactive: unit 72 {
+            family inet {
+                address 130.245.72.3/22 {
+                    arp 130.245.72.2 l2-interface ae31.0 mac 84:b5:9c:62:f7:f0;
+                    vrrp-group 72 {
+                        virtual-address 130.245.72.1;
+                        priority 100;
+                        advertise-interval 1;
+                        accept-data;
+                    }
+                }
+            }
+        }
+        inactive: unit 128 {
+            family inet {
+                address 130.245.128.3/24 {
+                    arp 130.245.128.2 l2-interface ae31.0 mac 84:b5:9c:62:f7:f0;
+                    vrrp-group 128 {
+                        virtual-address 130.245.128.1;
+                        priority 100;
+                        advertise-interval 1;
+                        accept-data;
+                    }
+                }
+            }
+        }
+    }
+}
+multi-chassis {
+    multi-chassis-protection 1.1.1.1 {
+        interface ae31;
+    }
+}
+snmp {
+    name coreb;
+    location "Computer Science - Datacenter";
+    community "JUn!p3r" {
+        authorization read-only;
+    }
+    trap-group airwave {
+        version all;
+        targets {
+            130.245.9.145;
+        }
+    }
+}
+forwarding-options {
+    dhcp-relay {
+        server-group {
+            sb-dhcp {
+                130.245.9.237;
+                130.245.9.236;
+            }
+        }
+        group g0 {
+            active-server-group sb-dhcp;
+        }
+    }
+}
+routing-options {
+    static {
+        route 0.0.0.0/0 next-hop 130.245.7.1;
+        route 130.245.0.0/16 next-hop 130.245.5.132;
+    }
+}
+protocols {
+    iccp {
+        local-ip-addr 1.1.1.2;
+        peer 1.1.1.1 {
+            session-establishment-hold-time 50;
+            redundancy-group-id-list 32;
+            liveness-detection {
+                minimum-receive-interval 60;
+                transmit-interval {
+                    minimum-interval 60;
+                }
+            }
+        }
+    }
+    lldp {
+        interface all;
+    }
+    layer2-control {
+        nonstop-bridging;
+    }
+    mstp {
+        configuration-name stonybrook;
+        revision-level 1;
+        system-identifier 00:00:01:00:00:01;
+        bridge-priority 24k;
+        interface xe-2/2/1 {
+            edge;
+        }
+        interface ae0 {
+            edge;
+        }
+        interface ae1 {
+            edge;
+        }
+        interface ae2 {
+            edge;
+        }
+        interface ae10 {
+            mode point-to-point;
+        }
+        interface ae11 {
+            mode point-to-point;
+        }
+        interface ae12 {
+            mode point-to-point;
+        }
+        interface ae13 {
+            mode point-to-point;
+        }
+        interface ae14 {
+            mode point-to-point;
+        }
+        interface ae15 {
+            mode point-to-point;
+        }
+        interface ae16 {
+            mode point-to-point;
+        }
+        interface ae17 {
+            mode point-to-point;
+        }
+        interface ae20 {
+            mode point-to-point;
+        }
+        msti 1 {
+            bridge-priority 24k;
+            vlan 2-4094;
+        }
+    }
+}
+firewall {
+    family inet {
+        filter allow-internal-management {
+            term p1 {
+                from {
+                    source-address {
+                        130.245.0.0/16 except;
+                    }
+                }
+                then {
+                    log;
+                    discard;
+                }
+            }
+            term p2 {
+                then accept;
+            }
+        }
+    }
+}
+switch-options {
+    service-id 1;
+}
+vlans {
+    vlan_10 {
+        description "System Staff";
+        vlan-id 10;
+    }
+    vlan_101 {
+        description "UNIX & Linux Servers";
+        vlan-id 101;
+    }
+    vlan_1011 {
+        description "IV - ALLMC - 101.0/24 net";
+        vlan-id 1011;
+    }
+    vlan_11 {
+        description printing;
+        vlan-id 11;
+    }
+    vlan_113 {
+        description "SMORES Lab - JWong";
+        vlan-id 113;
+    }
+    vlan_115 {
+        description "Windows Test";
+        vlan-id 115;
+    }
+    vlan_116 {
+        description "Windows DMZ";
+        vlan-id 116;
+    }
+    vlan_117 {
+        description "Direct Access";
+        vlan-id 117;
+    }
+    vlan_12 {
+        description "FACDEV Public Devices";
+        vlan-id 12;
+    }
+    vlan_126 {
+        description FSL;
+        vlan-id 126;
+    }
+    vlan_127 {
+        description OSLab;
+        vlan-id 127;
+    }
+    vlan_128 {
+        vlan-id 128;
+    }
+    vlan_13 {
+        description AV;
+        vlan-id 13;
+    }
+    vlan_130 {
+        description "BMI Lab";
+        vlan-id 130;
+    }
+    vlan_131 {
+        description "SET Lab";
+        vlan-id 131;
+    }
+    vlan_132 {
+        description "Schwartz Lab";
+        vlan-id 132;
+    }
+    vlan_135 {
+        description "Nikiforakis PragSec Lab";
+        vlan-id 135;
+    }
+    vlan_1371 {
+        description SecLab1;
+        vlan-id 1371;
+    }
+    vlan_1372 {
+        description SecLab2;
+        vlan-id 1372;
+    }
+    vlan_14 {
+        description "Faculty Office Windows";
+        vlan-id 14;
+    }
+    vlan_140 {
+        description MMLab;
+        vlan-id 140;
+    }
+    vlan_1431 {
+        description LLu_Lab_1;
+        vlan-id 1431;
+    }
+    vlan_1432 {
+        description LLu_Lab_2;
+        vlan-id 1432;
+    }
+    vlan_144 {
+        description WINGS_Lab;
+        vlan-id 144;
+    }
+    vlan_145 {
+        vlan-id 145;
+    }
+    vlan_149 {
+        description TrustedHW_Lab;
+        vlan-id 149;
+    }
+    vlan_15 {
+        description "DAR Lab - A. Liu";
+        vlan-id 15;
+    }
+    vlan_150 {
+        description SPLAT_Lab;
+        vlan-id 150;
+    }
+    vlan_152 {
+        vlan-id 152;
+    }
+    vlan_153 {
+        description OSCAR_Lab;
+        vlan-id 153;
+    }
+    vlan_1530 {
+        description OSCAR_Lab_DMZ;
+        vlan-id 1530;
+    }
+    vlan_158 {
+        description COMPAS_Lab;
+        vlan-id 158;
+    }
+    vlan_161 {
+        description Skiena_Lab;
+        vlan-id 161;
+    }
+    vlan_162 {
+        description Skiena_Cluster;
+        vlan-id 162;
+    }
+    vlan_163 {
+        description NBalasub_Lab;
+        vlan-id 163;
+    }
+    vlan_164 {
+        description Gao_Lab;
+        vlan-id 164;
+    }
+    vlan_165 {
+        description SystemStaff_Lab;
+        vlan-id 165;
+    }
+    vlan_166 {
+        description SystemStaff_vsys;
+        vlan-id 166;
+    }
+    vlan_168 {
+        description Ferdman_cluster;
+        vlan-id 168;
+    }
+    vlan_17 {
+        description "MS Workspace";
+        vlan-id 17;
+    }
+    vlan_18 {
+        description "PhD Offices";
+        vlan-id 18;
+    }
+    vlan_19 {
+        description "Rm 2129";
+        vlan-id 19;
+    }
+    vlan_2 {
+        description "GRAD Offices - Rooms 1206 & 1207";
+        vlan-id 2;
+    }
+    vlan_20 {
+        description "Rm 2120";
+        vlan-id 20;
+    }
+    vlan_21 {
+        description "Rm 2114";
+        vlan-id 21;
+    }
+    vlan_22 {
+        description "Rm 2110";
+        vlan-id 22;
+    }
+    vlan_23 {
+        description "Rm 2126";
+        vlan-id 23;
+    }
+    vlan_24 {
+        vlan-id 24;
+    }
+    vlan_26 {
+        description "DAR Lab";
+        vlan-id 26;
+    }
+    vlan_27 {
+        description "Web Servers";
+        vlan-id 27;
+    }
+    vlan_28 {
+        description "Rm 1239";
+        vlan-id 28;
+    }
+    vlan_29 {
+        description JWong_Macs;
+        vlan-id 29;
+    }
+    vlan_3 {
+        description Secretaries;
+        vlan-id 3;
+    }
+    vlan_30 {
+        description "Course ESX";
+        vlan-id 30;
+    }
+    vlan_301 {
+        description "Lutron Network";
+        vlan-id 301;
+    }
+    vlan_31 {
+        description "SAN 2";
+        vlan-id 31;
+    }
+    vlan_32 {
+        description "Nikiforakis Lab";
+        vlan-id 32;
+    }
+    vlan_33 {
+        description Patro_Lab;
+        vlan-id 33;
+    }
+    vlan_34 {
+        description "Leman - Data Lab";
+        vlan-id 34;
+    }
+    vlan_36 {
+        description CR_Lab;
+        vlan-id 36;
+    }
+    vlan_37 {
+        description Smolka_Lab;
+        vlan-id 37;
+    }
+    vlan_3710 {
+        description "Production web servers";
+        vlan-id 3710;
+    }
+    vlan_3711 {
+        vlan-id 3711;
+    }
+    vlan_3712 {
+        vlan-id 3712;
+    }
+    vlan_3713 {
+        vlan-id 3713;
+    }
+    vlan_3714 {
+        vlan-id 3714;
+    }
+    vlan_3715 {
+        vlan-id 3715;
+    }
+    vlan_3716 {
+        vlan-id 3716;
+    }
+    vlan_38 {
+        description "Stoller Lab";
+        vlan-id 38;
+    }
+    vlan_4 {
+        description CVC;
+        vlan-id 4;
+    }
+    vlan_42 {
+        description "Polychronakis Lab";
+        vlan-id 42;
+    }
+    vlan_499 {
+        vlan-id 499;
+    }
+    vlan_5 {
+        description "Transit to Cisco 6500";
+        vlan-id 5;
+    }
+    vlan_50 {
+        description "Room 115";
+        vlan-id 50;
+    }
+    vlan_51 {
+        description "Room 120";
+        vlan-id 51;
+    }
+    vlan_52 {
+        description "Room 108";
+        vlan-id 52;
+    }
+    vlan_53 {
+        description "Room 106";
+        vlan-id 53;
+    }
+    vlan_6 {
+        description "UNIX Lab - Rooms 1203";
+        vlan-id 6;
+    }
+    vlan_671 {
+        description "DMZ 1 - Esmaili";
+        vlan-id 671;
+    }
+    vlan_672 {
+        description "DMZ 2";
+        vlan-id 672;
+    }
+    vlan_673 {
+        description "DMZ 3";
+        vlan-id 673;
+    }
+    vlan_674 {
+        description "DMZ 4";
+        vlan-id 674;
+    }
+    vlan_675 {
+        description "DMZ 5";
+        vlan-id 675;
+    }
+    vlan_676 {
+        description "DMZ 6";
+        vlan-id 676;
+    }
+    vlan_677 {
+        description "DMZ 7";
+        vlan-id 677;
+    }
+    vlan_678 {
+        description "DMZ 8";
+        vlan-id 678;
+    }
+    vlan_679 {
+        description "Database servers";
+        vlan-id 679;
+    }
+    vlan_68 {
+        description CS_SECURE;
+        vlan-id 68;
+    }
+    vlan_7 {
+        description Management;
+        vlan-id 7;
+        l3-interface irb.7;
+        mcae-mac-synchronize;
+    }
+    vlan_72 {
+        description CS_GUEST;
+        vlan-id 72;
+    }
+    vlan_8 {
+        description "Concurrency Lab - Smolka";
+        vlan-id 8;
+    }
+    vlan_9 {
+        description "Windows Servers";
+        vlan-id 9;
+    }
+    vlan_VOIP {
+        description "Campus VOIP 172.23.249.0/24";
+        vlan-id 2511;
+    }
+}
+{master}

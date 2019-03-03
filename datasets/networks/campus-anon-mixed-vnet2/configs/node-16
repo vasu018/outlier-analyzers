@@ -1,0 +1,293 @@
+lb73in27p4as/Admin# show running-config
+Generating configuration....
+
+
+
+logging enable
+logging fastpath
+logging timestamp
+logging trap 6
+logging history 6
+logging buffered 6
+logging monitor 6
+logging host 126.170.38.121 udp/514 
+logging host 126.172.24.96 udp/514 
+
+peer hostname lb73in26p4as
+
+hostname lb73in27p4as 
+boot system image:c6ace-t1k9-mz.A4_1_1.bin
+tacacs-server key 7 "netconanRemoved18"
+tacacs-server timeout 15
+tacacs-server deadtime 15
+tacacs-server host 126.175.58.45 key 7 "netconanRemoved18"
+tacacs-server host 126.170.160.247 key 7 "netconanRemoved18"
+aaa group server tacacs+ INI-TACACS
+  server 126.175.58.45
+  server 126.170.160.247
+  deadtime 15
+
+clock timezone standard GMT
+
+crypto chaingroup MVS
+  cert root.pem
+  cert vica4.pem
+
+crypto authgroup OCE
+  cert root.pem
+aaa authentication login default group INI-TACACS local 
+aaa accounting default group INI-TACACS local 
+
+crypto csr-params MVS4-26
+  country US
+  state CA
+  organization-e285e1 e9ad96 Inc
+  organization-unit Network Engineering
+  common-e285e1 mv73mvs4.intl.e9ad96.net
+crypto csr-params MVSD-26
+  country US
+  state CA
+  organization-e285e1 e9ad96 Inc
+  organization-unit Network Engineering
+  common-e285e1 mvsd.intl.e9ad96.net
+crypto csr-params VCMSMVS-26
+  country US
+  state CA
+  organization-e285e1 e9ad96 Inc
+  organization-unit Network Engineering
+  common-e285e1 mv55mvs7.intl.e9ad96.net
+crypto csr-params MVS5
+  country US
+  state VA
+  locality Ashburn
+  organization-e285e1 e9ad96 Inc
+  organization-unit Network Engineering
+  common-e285e1 mvs5.intl.e9ad96.net
+crypto csr-params MVS8
+  country US
+  state VA
+  locality Ashburn
+  organization-e285e1 e9ad96 Inc
+  organization-unit Network Engineering
+  common-e285e1 mvs8.intl.e9ad96.net
+
+access-list ACL1 line 10 extended permit ip any any 
+access-list ACL1 line 20 extended permit icmp any any 
+access-list snmp line 2 extended permit udp any eq snmp any 
+access-list snmp line 4 extended permit udp any any eq snmp 
+
+
+ip domain-name intl.e9ad96.com
+
+rserver host MVS
+  description MVS
+  ip address 126.217.188.60
+  inservice
+
+serverfarm host MVS4
+  description MVS4
+  transparent
+  failaction purge
+  predictor leastconns
+  rserver MVS 50111
+    inservice
+serverfarm host MVS5
+  description MVS5
+  transparent
+  failaction purge
+  predictor leastconns
+  rserver MVS 50111
+    inservice
+serverfarm host MVS8
+  description MVS8
+  transparent
+  failaction purge
+  predictor leastconns
+  rserver MVS 50111
+    inservice
+serverfarm host MVSD
+  description MVSD
+  transparent
+  failaction purge
+  predictor leastconns
+  rserver MVS 50111
+    inservice
+serverfarm host VCMSMVS
+  description VCMSMVS
+  transparent
+  failaction purge
+  predictor leastconns
+  rserver MVS 50121
+    inservice
+
+parameter-map type http MVS
+  no persistence-rebalance
+parameter-map type connection TCPIP_PARAM_MAP
+  nagle
+  set tcp buffer-share 128000
+  set timeout inactivity 60
+
+ssl-proxy service MVS4
+  key netconanRemoved78
+  cert mvs4.pem
+  chaingroup MVS
+  authgroup OCE
+ssl-proxy service MVS5
+  key netconanRemoved79
+  cert mvs5.pem
+  chaingroup MVS
+  authgroup OCE
+ssl-proxy service MVS8
+  key netconanRemoved80
+  cert mvs8.pem
+  chaingroup MVS
+  authgroup OCE
+ssl-proxy service MVSD
+  key netconanRemoved81
+  cert mvsd.pem
+  chaingroup MVS
+  authgroup OCE
+ssl-proxy service VCMSMVS
+  key netconanRemoved82
+  cert vcmsmvs.pem
+  chaingroup MVS
+  authgroup OCE
+
+class-map type management match-any ACCESS-CLASS
+  description ACE access class
+  3 match protocol ssh any
+  4 match protocol icmp any
+class-map type http loadbalance match-all MVS4
+  2 match source-address 196.1.253.64 255.255.255.255
+class-map type http loadbalance match-all MVS5
+  2 match source-address 196.1.253.124 255.255.255.255
+class-map type http loadbalance match-all MVS8
+  2 match source-address 196.1.253.111 255.255.255.255
+class-map type http loadbalance match-all MVSD
+  2 match source-address 196.1.253.113 255.255.255.255
+class-map type management match-any SNMP-CLASS
+  description ACE SNMP monitoring class
+  10 match protocol snmp source-address 126.173.34.41 255.252.0.0
+  20 match protocol snmp source-address 126.168.136.164 255.255.0.0
+  30 match protocol snmp source-address 126.170.176.15 255.255.0.0
+class-map match-any TCP_CLASS
+  2 match destination-address 0.0.0.0 0.0.0.0
+  3 match port tcp eq 51101
+  4 match port tcp eq 50112
+  5 match port tcp eq 51117
+  6 match port tcp eq 50122
+class-map type management match-any TSR-MANAGEMENT
+  2 match protocol icmp any
+  3 match protocol snmp any
+  4 match protocol ssh source-address 126.105.145.135 255.0.0.0
+class-map match-all VCMSMVS
+  2 match virtual-address 0.0.0.0 0.0.0.0 tcp eq 50122
+class-map match-all VIP
+  2 match virtual-address 0.0.0.0 0.0.0.0 tcp eq 50112
+
+policy-map type management first-match MANAGEMENT-POLICY
+  class ACCESS-CLASS
+    permit
+  class SNMP-CLASS
+    permit
+policy-map type management first-match TSR-MANAGEMENT
+  class TSR-MANAGEMENT
+    permit
+
+policy-map type loadbalance http first-match MVS4_POLICY
+  class MVS4
+    serverfarm MVS4
+    ssl-proxy client MVS4
+  class MVSD
+    serverfarm MVSD
+    ssl-proxy client MVSD
+  class MVS5
+    serverfarm MVS5
+    ssl-proxy client MVS5
+  class MVS8
+    serverfarm MVS8
+    ssl-proxy client MVS8
+  class class-default
+    drop
+policy-map type loadbalance first-match VCMSMVS_POLICY
+  class class-default
+    serverfarm VCMSMVS
+    ssl-proxy client VCMSMVS
+
+policy-map multi-match MVS4
+  class VIP
+    loadbalance vip inservice
+    loadbalance policy MVS4_POLICY
+    loadbalance vip icmp-reply
+    appl-parameter http advanced-options MVS
+policy-map multi-match TCPIP_POLICY
+  class TCP_CLASS
+    connection advanced-options TCPIP_PARAM_MAP
+policy-map multi-match VCMSMVS
+  class VCMSMVS
+    loadbalance vip inservice
+    loadbalance policy VCMSMVS_POLICY
+    loadbalance vip icmp-reply
+    appl-parameter http advanced-options MVS
+
+interface vlan 460
+  description ADMIN vlan interface
+  ip address 126.217.188.58 255.255.255.248
+  alias 126.217.188.57 255.255.255.248
+  peer ip address 126.217.188.56 255.255.255.248
+  access-group input ACL1
+  access-group output ACL1
+  service-policy input TCPIP_POLICY
+  service-policy input MVS4
+  service-policy input VCMSMVS
+  service-policy input TSR-MANAGEMENT
+  no shutdown
+
+ft interface vlan 461
+  ip address 126.217.188.54 255.255.255.248
+  peer ip address 126.217.188.48 255.255.255.248
+  no shutdown
+
+ft peer 1
+  heartbeat interval 300
+  heartbeat count 10
+  ft-interface vlan 461
+ft group 1
+  peer 1
+  no preempt
+  priority 90
+  peer priority 110
+  associate-context Admin
+  inservice
+
+domain intl.e9ad96.net
+
+ip route 0.0.0.0 0.0.0.0 126.217.188.60
+
+snmp-server contact "GLANOPS 6730-4625"
+snmp-server location "OCE INI POD4"
+snmp-server community netconanRemoved57 group Network-Monitor
+snmp-server community netconanRemoved3 group Network-Monitor
+
+snmp-server host 126.170.38.121 traps version 1 netconanRemoved57 
+
+snmp-server host 126.172.24.96 traps version 1 netconanRemoved57 
+
+snmp-server enable traps snmp coldstart
+snmp-server enable traps license 
+snmp-server enable traps slb vserver
+snmp-server enable traps slb real
+snmp-server enable traps syslog 
+snmp-server enable traps snmp authentication
+snmp-server enable traps snmp linkup
+snmp-server enable traps snmp linkdown
+snmp-server trap link ietf
+  
+username admin password 5 $1$00000000$SmZQTvfJOjvf6qdyWT88V1 role Admin domain default-domain 
+username www password 5 $1$00000000$Rs2/3wtc3KvmhnV2DuRGK0 role Admin domain default-domain 
+
+ssh key rsa 1024 force
+
+banner motd # "CC^|******************************* WARNING **********************************^|* *^|* If you are not authorized to access this system, disconnect now. *^|* *^|* All attempts to access this system and/or its resources are recorded. *^|* Unauthorized attempts may subject you to a fine and/or imprisonment in *^|* accordance with Title 18, USC, Section 1030. For questions regarding *^|* this system please contact Information Security Hotline (650)432-4329. *^|* *^|****************************************************************************^|" ^| #
+
+

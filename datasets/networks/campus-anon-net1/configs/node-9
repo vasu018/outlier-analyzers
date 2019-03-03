@@ -1,0 +1,1407 @@
+## Last commit: 2018-06-15 11:46:52 EDT by dcaj
+version 13.2X51-D30.4;
+groups {
+    global {
+        system {
+            authentication-order [ tacplus password ];
+            tacplus-server {
+                130.245.9.176 {
+                    secret /* SECRET-DATA */; ## SECRET-DATA
+                    source-address 130.245.5.1;
+                }
+            }
+            login {
+                user ReadOnly {
+                    uid 2001;
+                    class read-only;
+                }
+                user Operator {
+                    uid 2002;
+                    class operator;
+                }
+                user SuperUser {
+                    uid 2003;
+                    class super-user;
+                }
+            }
+        }
+    }
+}
+apply-groups global;
+system {
+    host-name perimeter;
+    auto-snapshot;
+    domain-name cs.stonybrook.edu;
+    domain-search [ cs.stonybrook.edu cs.sunysb.edu ];
+    time-zone America/New_York;
+    root-authentication {
+        encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+    }
+    name-server {
+        130.245.1.15;
+        130.245.1.48;
+    }
+    login {
+        class RO {
+            permissions [ view view-configuration ];
+        }
+        user junro {
+            uid 2000;
+            class RO;
+            authentication {
+                encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+            }
+        }
+    }
+    services {
+        ssh {
+            root-login deny;
+            protocol-version v2;
+        }
+    }
+    syslog {
+        user * {
+            any emergency;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+        file interactive-commands {
+            interactive-commands any;
+        }
+    }
+    processes {
+        dhcp-service {
+            traceoptions {
+                file dhcp_logfile size 10m;
+                level all;
+                flag all;
+            }
+        }
+    }
+    ntp {
+        server 130.245.1.15 prefer;
+        server 130.245.1.48 prefer;
+    }
+}
+chassis {
+    redundancy {
+        graceful-switchover;
+    }
+    aggregated-devices {
+        ethernet {
+            device-count 10;
+        }
+    }
+    alarm {
+        management-ethernet {
+            link-down ignore;
+        }
+    }
+}
+interfaces {
+    ge-0/0/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/3 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/4 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/5 {
+        description 1352;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/6 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/7 {
+        description 2149;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/8 {
+        description 2150;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/9 {
+        description 2037;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/10 {
+        description 2081;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/11 {
+        description 2120;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/12 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/13 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_502;
+                }
+            }
+        }
+    }
+    ge-0/0/14 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/15 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/16 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/17 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/18 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/19 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/20 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/21 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/22 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/23 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/24 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/25 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/26 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/27 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/28 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/29 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/30 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/31 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/32 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/33 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/34 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/35 {
+        description 3066;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/36 {
+        description B-CAB9-108;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/37 {
+        description B-CAB8-79;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/38 {
+        description 3036;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/39 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/40 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/41 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/42 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/43 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/44 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/45 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/46 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-0/0/47 {
+        description "ae3 - to core-a ge-0/1/4";
+        ether-options {
+            802.3ad ae3;
+        }
+    }
+    ge-0/2/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    xe-0/2/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/2/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/1 {
+        ether-options {
+            802.3ad ae5;
+        }
+    }
+    ge-0/2/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-0/2/3 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members default;
+                }
+                storm-control default;
+            }
+        }
+    }
+    xe-0/2/3 {
+        description PA1-1/6;
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ default vlan_501 ];
+                }
+                storm-control default;
+            }
+        }
+    }
+    ge-1/0/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/1 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/2 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/3 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/4 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/5 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/6 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/7 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/8 {
+        description B-CAB3-53;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/9 {
+        description C-CAB1-01;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/10 {
+        description B-CAB7-76;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/11 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/12 {
+        description 2074;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/13 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_502;
+                }
+            }
+        }
+    }
+    ge-1/0/14 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/15 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/16 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/17 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/18 {
+        description C-CAB1-05;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/19 {
+        description A-CAB2-08;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/20 {
+        description B-CAB7-77;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/21 {
+        description A-CAB2-10;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/22 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/23 {
+        description A-CAB2-12;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/24 {
+        description A-CAB6-31;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/25 {
+        description A-CAB6-36;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/26 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/27 {
+        description A-CAB5-30;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/28 {
+        description C-CAB2-12;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/29 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/30 {
+        description C-CAB6-31;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/31 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/32 {
+        description C-CAB3-18;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/33 {
+        description C-CAB3-13;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/34 {
+        description C-CAB7-37;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/35 {
+        description C-CAB4-19;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/36 {
+        description B-CAB9-85;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/37 {
+        description B-CAB5-61;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/38 {
+        description B-CAB2-47;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/39 {
+        description B-CAB2-47;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/40 {
+        description B-CAB5-65;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/41 {
+        description A-CAB3-13;
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/42 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/43 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/44 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_501;
+                }
+            }
+        }
+    }
+    ge-1/0/45 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/46 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ge-1/0/47 {
+        description "ae3 - to core-b ge-0/1/4";
+        ether-options {
+            802.3ad ae3;
+        }
+    }
+    ge-1/2/0 {
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    xe-1/2/1 {
+        ether-options {
+            802.3ad ae5;
+        }
+    }
+    xe-1/2/3 {
+        description PA2-1/6;
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members vlan_501;
+                }
+            }
+        }
+    }
+    ae3 {
+        description "LAG to Core (AE19) for vlan_128";
+        aggregated-ether-options {
+            minimum-links 1;
+            lacp {
+                active;
+                periodic slow;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members vlan_128;
+                }
+            }
+        }
+    }
+    ae5 {
+        description "LAG to SBU Campus";
+        aggregated-ether-options {
+            minimum-links 1;
+            lacp {
+                active;
+                periodic slow;
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                vlan {
+                    members vlan_499;
+                }
+            }
+        }
+    }
+    irb {
+        unit 128 {
+            family inet {
+                address 130.245.128.1/24;
+            }
+        }
+        unit 499 {
+            family inet {
+                address 130.245.5.254/30;
+            }
+        }
+        unit 501 {
+            family inet {
+                address 130.245.5.1/25;
+            }
+        }
+        unit 502 {
+            family inet {
+                address 130.245.5.138/29;
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                filter {
+                    input sshFilter;
+                }
+                address 127.0.0.1/32;
+            }
+        }
+    }
+    me0 {
+        unit 0 {
+            family inet {
+                address 192.168.1.1/24;
+            }
+        }
+    }
+    vme {
+        unit 0 {
+            family inet {
+                dhcp {
+                    vendor-id Juniper-ex4300-48p;
+                }
+            }
+        }
+    }
+}
+snmp {
+    name perimeter;
+    location "Computer Science - Datacenter";
+    community "JUn!p3r" {
+        authorization read-only;
+    }
+}
+forwarding-options {
+    storm-control-profiles default {
+        all;
+    }
+}
+routing-options {
+    static {
+        route 130.245.0.0/16 next-hop 130.245.5.4;
+        route 0.0.0.0/0 next-hop 130.245.5.253;
+        route 10.245.7.0/24 next-hop 130.245.5.4;
+        route 10.245.68.0/22 next-hop 130.245.5.4;
+        route 10.245.72.0/22 next-hop 130.245.5.4;
+        route 130.245.26.0/24 next-hop 130.245.128.99;
+        route 130.245.31.0/24 next-hop 130.245.128.31;
+        route 130.245.32.0/24 next-hop 130.245.128.32;
+        route 130.245.33.0/24 next-hop 130.245.128.33;
+        route 130.245.34.0/24 next-hop 130.245.128.34;
+        route 130.245.35.0/24 next-hop 130.245.128.35;
+        route 130.245.36.0/24 next-hop 130.245.128.36;
+        route 130.245.37.0/24 next-hop 130.245.128.37;
+        route 130.245.38.0/24 next-hop 130.245.128.38;
+        route 130.245.41.0/24 next-hop 130.245.128.41;
+        route 130.245.42.0/24 next-hop 130.245.128.42;
+        route 130.245.124.0/24 next-hop 130.245.128.124;
+        route 130.245.126.0/24 next-hop 130.245.128.6;
+        route 130.245.127.0/24 next-hop 130.245.128.6;
+        route 130.245.129.0/24 next-hop 130.245.128.128;
+        route 130.245.133.0/24 next-hop 130.245.128.5;
+        route 130.245.134.0/24 next-hop 130.245.128.12;
+        route 130.245.137.0/24 next-hop 130.245.128.2;
+        route 130.245.138.0/24 next-hop 130.245.128.2;
+        route 130.245.139.0/24 next-hop 130.245.128.2;
+        route 130.245.141.0/24 next-hop 130.245.128.14;
+        route 130.245.143.0/24 next-hop 130.245.128.24;
+        route 130.245.146.0/24 next-hop 130.245.128.11;
+        route 130.245.147.0/24 next-hop 130.245.128.128;
+        route 130.245.148.0/24 next-hop 130.245.128.148;
+        route 130.245.149.0/24 next-hop 130.245.128.16;
+        route 130.245.150.0/24 next-hop 130.245.128.18;
+        route 130.245.151.0/24 next-hop 130.245.128.19;
+        route 130.245.153.0/24 next-hop 130.245.128.29;
+        route 130.245.154.0/24 next-hop 130.245.128.182;
+        route 130.245.155.0/24 next-hop 130.245.128.155;
+        route 130.245.156.0/24 next-hop 130.245.128.156;
+        route 130.245.157.0/24 next-hop 130.245.128.157;
+        route 130.245.158.0/24 next-hop 130.245.128.158;
+        route 130.245.159.0/24 next-hop 130.245.128.159;
+        route 130.245.168.0/23 next-hop 130.245.128.168;
+        route 130.245.176.0/20 next-hop 130.245.5.253;
+        route 130.245.192.0/18 next-hop 130.245.5.253;
+        route 130.245.101.0/24 next-hop 130.245.128.101;
+        route 130.245.165.0/24 next-hop 130.245.128.165;
+        route 130.245.164.0/24 next-hop 130.245.128.164;
+        route 130.245.161.0/24 next-hop 130.245.128.161;
+        route 130.245.162.0/24 next-hop 130.245.128.161;
+        route 130.245.163.0/24 next-hop 130.245.128.163;
+        route 130.245.113.0/24 next-hop 130.245.128.113;
+        route 130.245.130.0/24 next-hop 130.245.128.130;
+        route 130.245.131.0/24 next-hop 130.245.128.131;
+        route 130.245.167.0/24 next-hop 130.245.128.167;
+        route 130.245.132.0/24 next-hop 130.245.128.132;
+        route 130.245.5.144/28 next-hop 130.245.5.253;
+        route 130.245.5.160/29 next-hop 130.245.5.253;
+        route 130.245.144.0/24 next-hop 130.245.128.144;
+        route 130.245.145.0/24 next-hop 130.245.128.145;
+        route 130.245.140.0/24 next-hop 130.245.5.4;
+        route 130.245.174.0/24 next-hop 130.245.5.6;
+        route 130.245.175.0/24 next-hop 130.245.5.6;
+        route 130.245.171.0/24 next-hop 130.245.128.168;
+        route 130.245.170.0/24 next-hop 130.245.128.168;
+        route 130.245.135.0/24 next-hop 130.245.128.168;
+        route 130.245.136.0/24 next-hop 130.245.128.168;
+    }
+}
+protocols {
+    lldp {
+        interface all;
+    }
+    lldp-med {
+        interface all;
+    }
+    igmp-snooping {
+        vlan default;
+    }
+    rstp {
+        interface ge-0/0/4;
+        interface ge-0/0/5;
+        interface ge-0/0/6;
+        interface ge-0/0/7;
+        interface ge-0/0/8;
+        interface ge-0/0/9;
+        interface ge-0/0/10;
+        interface ge-0/0/11;
+        interface ge-0/0/12;
+        interface ge-0/0/13;
+        interface ge-0/0/14;
+        interface ge-0/0/15;
+        interface ge-0/0/16;
+        interface ge-0/0/17;
+        interface ge-0/0/18;
+        interface ge-0/0/19;
+        interface ge-0/0/20;
+        interface ge-0/0/21;
+        interface ge-0/0/22;
+        interface ge-0/0/23;
+        interface ge-0/0/24;
+        interface ge-0/0/25;
+        interface ge-0/0/26;
+        interface ge-0/0/27;
+        interface ge-0/0/28;
+        interface ge-0/0/29;
+        interface ge-0/0/30;
+        interface ge-0/0/31;
+        interface ge-0/0/32;
+        interface ge-0/0/33;
+        interface ge-0/0/34;
+        interface ge-0/0/35;
+        interface ge-0/0/36;
+        interface ge-0/0/37;
+        interface ge-0/0/38;
+        interface ge-0/0/39;
+        interface ge-0/0/40;
+        interface ge-0/0/41;
+        interface ge-0/0/42;
+        interface ge-0/0/43;
+        interface ge-0/0/44;
+        interface ge-0/0/45;
+        interface ge-0/0/46;
+        interface xe-0/2/0;
+        interface ge-0/2/1;
+        interface ge-0/2/2;
+        interface xe-0/2/2;
+        interface ge-0/2/3;
+        interface xe-0/2/3;
+        interface ae0;
+        interface ae5;
+    }
+}
+firewall {
+    family inet {
+        filter sshFilter {
+            term allow_ssh {
+                from {
+                    source-address {
+                        130.245.10.104/32;
+                        130.245.10.105/32;
+                        130.245.10.106/32;
+                        130.245.10.250/32;
+                        130.245.10.251/32;
+                        130.245.10.252/32;
+                        130.245.10.253/32;
+                        130.245.10.254/32;
+                        130.245.10.120/32;
+                        130.245.7.150/32;
+                    }
+                    protocol tcp;
+                    destination-port ssh;
+                }
+                then accept;
+            }
+            term discard_unknown_ssh {
+                from {
+                    source-address {
+                        0.0.0.0/0;
+                    }
+                    destination-port ssh;
+                }
+                then {
+                    discard;
+                }
+            }
+            term allow {
+                then accept;
+            }
+        }
+    }
+}
+virtual-chassis {
+    no-split-detection;
+    member 0 {
+        mastership-priority 250;
+    }
+    member 1 {
+        mastership-priority 250;
+    }
+}
+vlans {
+    default {
+        vlan-id 1;
+        l3-interface irb.0;
+    }
+    vlan_128 {
+        description 128-Nets;
+        vlan-id 128;
+        l3-interface irb.128;
+    }
+    vlan_165 {
+        description SystemStaff_Lab;
+        vlan-id 165;
+    }
+    vlan_499 {
+        description "External VLAN to SBU Campus";
+        vlan-id 499;
+        l3-interface irb.499;
+    }
+    vlan_501 {
+        description "Transit VLAN to SRX Firewall";
+        vlan-id 501;
+        l3-interface irb.501;
+    }
+    vlan_502 {
+        description GP-Gateway;
+        vlan-id 502;
+        l3-interface irb.502;
+    }
+}
+poe {
+    interface all;
+}
+{master:0}

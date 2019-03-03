@@ -1,0 +1,611 @@
+rt73in09m5ce#show running-config
+Building configuration...
+
+Current configuration : 17864 bytes
+!
+! Last configuration change at 05:43:11 GMT Wed Apr 11 2018 by abatol
+! NVRAM config last updated at 22:23:42 GMT Sun May 13 2018 by intell3c6dbden
+!
+version 15.5
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+service internal
+service counters max age 10
+no platform punt-keepalive disable-kernel-core
+!
+hostname rt73in09m5ce
+!
+boot-start-marker
+boot system flash bootflash:asr1000rp2-adventerprisek9.03.16.04b.S.155-3.S4b-ext.bin
+boot-end-marker
+!
+aqm-register-fnf
+!
+vrf definition Mgmt-intf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0 0
+no ip source-route
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+
+
+no ip bootp server
+ip name-server 126.170.165.28 126.175.61.217
+
+no ip domain lookup
+ip domain name intl.e9ad96.net
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+subscriber templating
+!
+multilink bundle-e285e1 authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-3c6dbd
+diagnostic bootup level complete
+!
+!
+redundancy
+ mode sso
+!
+!
+!
+!
+!
+cdp run
+!
+!
+class-map match-all tier2
+ match access-group 112
+class-map match-all tier3
+ match access-group 113
+class-map match-all tier1
+ match access-group 111
+class-map match-all MPLS_Tier2_out
+ match ip dscp af21 
+class-map match-all MPLS_Tier3_out
+ match ip dscp af11 
+class-map match-any MPLS_Tier1_out
+ match ip dscp af31 
+ match ip dscp cs6 
+!
+policy-map QOS_INI_Pri_MPLS
+ class MPLS_Tier1_out
+  bandwidth percent 26 
+ class MPLS_Tier2_out
+  bandwidth percent 14 
+ class MPLS_Tier3_out
+  bandwidth percent 50 
+ class class-default
+  bandwidth percent 10 
+policy-map Private_MPLS_Shaping
+ class class-default
+  shape average 2500000000   
+   service-policy QOS_INI_Pri_MPLS
+policy-map DSCP_SETTING
+ class tier1
+  set dscp af31
+ class tier2
+  set dscp af21
+ class tier3
+  set dscp af11
+ class class-default
+  set dscp default
+!
+!
+! 
+!
+!
+!
+!
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 2
+ lifetime 14400
+crypto isakmp key netconanRemoved1 address 126.215.254.60   
+crypto isakmp key netconanRemoved1 address 126.247.59.200    
+crypto isakmp key netconanRemoved1 address 126.233.150.229    
+!
+!
+crypto ipsec transform-set IPSEC esp-aes 256 
+ mode transport
+!
+crypto ipsec profile MPLS
+ set security-association lifetime kilobytes 536870912
+ set transform-set IPSEC 
+!
+!
+!
+!
+!
+!
+! 
+! 
+! 
+! 
+! 
+! 
+! 
+! 
+!
+!
+interface Loopback0
+ ip address 126.217.153.99 255.255.255.255
+ no ip redirects
+ no ip unreachables
+!
+interface Tunnel62
+ description ipsec tunnel from OCE to OCB via private mpls
+ ip address 126.215.233.218 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ ip mtu 1700
+ load-interval 30
+ tunnel source TenGigabitEthernet0/2/0
+ tunnel destination 126.233.150.229
+ tunnel protection ipsec profile MPLS
+ service-policy output Private_MPLS_Shaping
+!
+interface Tunnel75
+ description ipsec tunnel from OCE to OCC via private mpls
+ ip address 126.215.233.179 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ ip mtu 1700
+ load-interval 30
+ cdp enable
+ tunnel source TenGigabitEthernet0/2/0
+ tunnel destination 126.215.254.60
+ tunnel protection ipsec profile MPLS
+ service-policy output Private_MPLS_Shaping
+!
+interface Tunnel93
+ description ipsec tunnel from OCE to OCS via private mpls
+ ip address 126.215.233.223 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ ip mtu 1700
+ load-interval 30
+ tunnel source TenGigabitEthernet0/2/0
+ tunnel destination 126.247.59.200
+ tunnel protection ipsec profile MPLS
+ service-policy output Private_MPLS_Shaping
+!
+interface TenGigabitEthernet0/0/0
+ description to rt73in01m5cr te7/1
+ ip address 126.217.154.185 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+ cdp enable
+ service-policy input DSCP_SETTING
+!
+interface TenGigabitEthernet0/1/0
+ description link to rt73in08m4ce te0/1/0
+ ip address 126.217.149.224 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+ cdp enable
+ service-policy input DSCP_SETTING
+!
+interface TenGigabitEthernet0/2/0
+ description to rt73bb05m5pe TenGigE0/2/0/1 
+ mtu 1700
+ ip address 126.215.238.112 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+ cdp enable
+!
+interface TenGigabitEthernet0/3/0
+ description to rt73in00m4crds te7/2
+ ip address 126.217.155.44 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+ cdp enable
+ service-policy input DSCP_SETTING
+!
+interface GigabitEthernet0
+ vrf forwarding Mgmt-intf
+ no ip address
+ shutdown
+ negotiation auto
+!
+router ospf 64574
+ router-id 126.217.153.99
+ timers throttle spf 1000 5000 5000
+ redistribute connected subnets
+ redistribute bgp 64574 subnets
+ network 126.217.153.107 0.0.255.255 area 0
+!
+router bgp 64574
+ bgp router-id 126.217.153.99
+ bgp log-neighbor-changes
+ bgp maxas-limit 254
+ timers bgp 3 9
+ neighbor 126.215.233.176 remote-as 65102
+ neighbor 126.215.233.176 description RT55HR72
+ neighbor 126.215.233.176 ebgp-multihop 255
+ neighbor 126.215.233.217 remote-as 64605
+ neighbor 126.215.233.217 description RT62IN09BS3c6dbdC
+ neighbor 126.215.233.217 ebgp-multihop 255
+ neighbor 126.215.233.220 remote-as 64693
+ neighbor 126.215.233.220 description RT93IN02K23c6dbdC
+ neighbor 126.215.233.220 ebgp-multihop 255
+ neighbor 126.217.155.47 remote-as 64574
+ neighbor 126.217.155.47 description RT73IN00M4CR
+ neighbor 126.217.154.186 remote-as 64574
+ neighbor 126.217.154.186 description RT73IN01M5CR
+ neighbor 126.217.149.226 remote-as 64574
+ neighbor 126.217.149.226 description RT73IN08M4CE
+ !
+ address-family ipv4
+  bgp scan-time 5
+  network 126.217.153.99 mask 255.255.255.255
+  aggregate-address 126.217.153.107 255.255.0.0 summary-only
+  neighbor 126.215.233.176 activate
+  neighbor 126.215.233.176 send-community
+  neighbor 126.215.233.176 advertisement-interval 10
+  neighbor 126.215.233.176 route-map to-OCC out
+  neighbor 126.215.233.217 activate
+  neighbor 126.215.233.217 send-community
+  neighbor 126.215.233.217 advertisement-interval 10
+  neighbor 126.215.233.217 route-map to-OCB out
+  neighbor 126.215.233.220 activate
+  neighbor 126.215.233.220 send-community
+  neighbor 126.215.233.220 advertisement-interval 10
+  neighbor 126.215.233.220 route-map to-OCS out
+  neighbor 126.217.155.47 activate
+  neighbor 126.217.155.47 send-community
+  neighbor 126.217.155.47 advertisement-interval 10
+  neighbor 126.217.154.186 activate
+  neighbor 126.217.154.186 send-community
+  neighbor 126.217.154.186 advertisement-interval 10
+  neighbor 126.217.149.226 activate
+  neighbor 126.217.149.226 send-community
+  neighbor 126.217.149.226 advertisement-interval 10
+  maximum-paths 2
+  maximum-paths ibgp 2
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip as-path access-list 1 permit ^$
+no ip http server
+no ip http secure-server
+ip tftp source-interface GigabitEthernet0
+ip route 126.215.254.61 255.255.255.252 126.215.238.114
+ip route 126.247.59.202 255.255.255.252 126.215.238.114
+ip route 126.233.150.231 255.255.255.252 126.215.238.114
+ip tacacs source-interface Loopback0
+ip ssh time-out 60
+ip ssh version 2
+!
+!
+ip prefix-list OCE-INI-networks seq 10010 permit 126.217.153.107/16
+ip prefix-list OCE-INI-networks seq 10020 permit 196.1.253.83/24 ge 32
+ip prefix-list OCE-INI-networks seq 10030 permit 126.110.125.41/20
+ip prefix-list OCE-INI-networks seq 10040 permit 126.110.224.198/20
+ip prefix-list OCE-INI-networks seq 10050 permit 126.110.254.117/20
+ip prefix-list OCE-INI-networks seq 10060 permit 126.110.218.58/20
+!
+ip prefix-list OCE-networks seq 10010 permit 126.217.153.107/16
+ip prefix-list OCE-networks seq 10020 permit 193.126.41.203/24 ge 32
+ip prefix-list OCE-networks seq 10030 permit 126.212.108.103/19
+ip prefix-list OCE-networks seq 10050 permit 126.212.54.236/21
+ip prefix-list OCE-networks seq 10060 permit 126.192.154.59/16
+ip prefix-list OCE-networks seq 100100 permit 126.182.178.225/16
+ip prefix-list OCE-networks seq 100110 permit 126.53.204.228/16
+ip prefix-list OCE-networks seq 100120 permit 126.173.34.41/16
+ip prefix-list OCE-networks seq 100130 permit 126.174.15.249/16
+ip prefix-list OCE-networks seq 100140 permit 126.175.41.0/16
+ip prefix-list OCE-networks seq 100150 permit 126.163.61.230/16
+ip prefix-list OCE-networks seq 100160 permit 126.162.149.104/16
+ip prefix-list OCE-networks seq 100170 permit 193.93.108.168/24
+ip prefix-list OCE-networks seq 100180 permit 126.230.162.63/21
+ip prefix-list OCE-networks seq 100190 permit 196.1.253.139/32
+ip prefix-list OCE-networks seq 100200 permit 196.1.253.136/32
+ip prefix-list OCE-networks seq 100210 permit 196.1.252.165/32
+ip prefix-list OCE-networks seq 100220 permit 126.212.209.18/29
+ip prefix-list OCE-networks seq 100230 permit 126.122.216.224/28
+ip prefix-list OCE-networks seq 100240 permit 196.1.253.137/32
+ip prefix-list OCE-networks seq 100250 permit 196.1.253.143/32
+ip prefix-list OCE-networks seq 100260 permit 126.236.126.115/16 ge 32
+ip prefix-list OCE-networks seq 100270 permit 126.172.200.241/16
+ip prefix-list OCE-networks seq 100280 permit 196.1.253.142/32
+ip prefix-list OCE-networks seq 100290 permit 126.122.237.145/24
+ip prefix-list OCE-networks seq 100300 permit 126.122.236.136/24
+ip prefix-list OCE-networks seq 100310 permit 126.158.102.207/16
+ip prefix-list OCE-networks seq 100320 permit 126.210.169.194/16
+ip prefix-list OCE-networks seq 100330 permit 196.1.251.236/24 le 32
+ip prefix-list OCE-networks seq 100350 permit 126.150.12.150/16
+ip prefix-list OCE-networks seq 100360 permit 126.110.224.198/20
+!
+ip prefix-list third-party description third party network 
+ip prefix-list third-party seq 10010 permit 126.108.151.90/24
+ip prefix-list third-party seq 10020 permit 126.108.141.99/27
+ip prefix-list third-party seq 10030 permit 126.229.92.201/24
+ip prefix-list third-party seq 10040 permit 126.108.140.194/27
+ip prefix-list third-party seq 10050 permit 183.111.55.40/32
+ip prefix-list third-party seq 10060 permit 126.108.143.244/27
+logging source-interface Loopback0
+logging host 126.171.244.6
+logging host 126.170.38.121
+logging host 126.172.24.96
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 111 permit tcp any eq 51100 any
+access-list 111 permit tcp any any eq 51100
+access-list 111 permit udp any eq 12002 any
+access-list 111 permit udp any any eq 12002
+access-list 111 permit tcp any eq 51110 any
+access-list 111 permit tcp any any eq 51110
+access-list 111 permit tcp any eq 51106 any
+access-list 111 permit tcp any any eq 51106
+access-list 111 permit tcp any eq 51104 any
+access-list 111 permit tcp any any eq 51104
+access-list 111 permit tcp any eq 9443 any
+access-list 111 permit tcp any any eq 9443
+access-list 111 permit tcp any eq 51107 any
+access-list 111 permit tcp any any eq 51107
+access-list 111 permit tcp any range 51180 51181 any
+access-list 111 permit tcp any any range 51180 51181
+access-list 112 permit tcp any eq 51900 any
+access-list 112 permit tcp any any eq 51900
+access-list 112 permit tcp any eq 50100 any
+access-list 112 permit tcp any any eq 50100
+access-list 112 permit tcp any range 9347 9350 any
+access-list 112 permit tcp any any range 9347 9350
+access-list 112 permit tcp any eq 22 any
+access-list 112 permit tcp any any eq 22
+access-list 112 permit tcp any eq 50103 any
+access-list 112 permit tcp any any eq 50103
+access-list 112 permit tcp any eq 50105 any
+access-list 112 permit tcp any any eq 50105
+access-list 112 permit tcp any range 50107 50120 any
+access-list 112 permit tcp any any range 50107 50120
+access-list 112 permit tcp any range 52108 52109 any
+access-list 112 permit tcp any any range 52108 52109
+access-list 112 permit tcp any eq 446 any
+access-list 112 permit tcp any any eq 446
+access-list 112 permit tcp any eq 5020 any
+access-list 112 permit tcp any any eq 5020
+access-list 112 permit tcp any eq 3012 any
+access-list 112 permit tcp any any eq 3012
+access-list 112 permit tcp any eq 3031 any
+access-list 112 permit tcp any any eq 3031
+access-list 113 permit tcp any eq ftp any
+access-list 113 permit tcp any any eq ftp
+access-list 113 permit udp any eq 12004 any
+access-list 113 permit udp any any eq 12004
+access-list 113 permit tcp any eq ftp-data any
+access-list 113 permit tcp any any eq ftp-data
+access-list 113 permit tcp any eq 670 any
+access-list 113 permit tcp any any eq 670
+access-list 113 permit tcp any range 40001 40500 any
+access-list 113 permit tcp any any range 40001 40500
+access-list 113 permit tcp any any range 21617 22120
+access-list 113 permit tcp any range 21617 22120 any
+access-list 113 permit tcp any eq 50106 any
+access-list 113 permit tcp any any eq 50106
+access-list 113 permit udp any eq 12000 any
+access-list 113 permit udp any any eq 12000
+access-list 113 permit tcp any eq 1464 any
+access-list 113 permit tcp any any eq 1464
+access-list 113 permit tcp any eq 1484 any
+access-list 113 permit tcp any any eq 1484
+access-list 113 permit tcp any eq 1494 any
+access-list 113 permit tcp any any eq 1494
+access-list 113 permit tcp any eq 1664 any
+access-list 113 permit tcp any any eq 1664
+access-list 113 permit tcp any eq 1764 any
+access-list 113 permit tcp any any eq 1764
+access-list 113 permit tcp any eq 1864 any
+access-list 113 permit tcp any any eq 1864
+access-list 113 permit tcp any eq 2064 any
+access-list 113 permit tcp any any eq 2064
+access-list 113 permit tcp any range 28000 29999 any
+access-list 113 permit tcp any any range 28000 29999
+access-list 113 permit tcp any range 6740 6745 any
+access-list 113 permit tcp any any range 6740 6745
+access-list 113 permit tcp any eq 11060 any
+access-list 113 permit tcp any any eq 11060
+access-list 113 permit tcp any eq 22022 any
+access-list 113 permit tcp any any eq 22022
+access-list 113 permit tcp any range 30000 30800 any
+access-list 113 permit tcp any any range 30000 30800
+access-list 113 permit tcp any range 34000 34800 any
+access-list 113 permit tcp any any range 34000 34800
+access-list 113 permit tcp any range 37000 37999 any
+access-list 113 permit tcp any any range 37000 37999
+access-list 113 permit tcp any range 1363 1371 any
+access-list 113 permit tcp any any range 1363 1371
+access-list 113 permit tcp any eq 1414 any
+access-list 113 permit tcp any any eq 1414
+access-list 113 permit tcp any eq 51112 any
+access-list 113 permit tcp any any eq 51112
+access-list 113 permit ip 126.217.183.221 0.0.0.255 any
+access-list 113 permit tcp any eq 21021 any
+access-list 113 permit tcp any any eq 21021
+access-list 113 permit tcp any range 9500 9599 any
+access-list 113 permit tcp any any range 9500 9599
+access-list 113 permit tcp any eq 21020 any
+access-list 113 permit tcp any any eq 21020
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+!
+route-map to-OCS permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-OCS deny 20
+!
+route-map to-OCB permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-OCB deny 20
+!
+route-map to-OCC permit 10
+ match ip address prefix-list OCE-networks
+!
+route-map to-OCC permit 20
+ match as-path 1
+!
+route-map to-OCC permit 30
+ match ip address prefix-list third-party
+!
+route-map to-OCC deny 200
+!
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server trap link ietf
+snmp-server tftp-server-list 99
+snmp-server location OCE Pod 5
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+!
+tacacs-server host 126.170.160.247
+tacacs-server host 126.175.58.45
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D37647347
+!
+!
+!
+control-plane
+!
+ !
+ !
+ !
+ !
+!
+!
+!
+!
+banner motd ^CCCCC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647545
+ transport preferred none
+ transport output none
+ stopbits 1
+line aux 0
+ no exec
+ stopbits 1
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647144
+ transport preferred none
+ transport input ssh
+!
+ntp server 126.175.61.217 prefer
+ntp server 126.170.165.28
+!
+end
+

@@ -1,0 +1,1099 @@
+st73in28p5as#show running-config
+Building configuration...
+
+Current configuration : 32556 bytes
+!
+! Last configuration change at 02:50:17 GMT Sun Apr 22 2018 by lteo
+! NVRAM config last updated at 06:39:33 GMT Mon May 7 2018 by intell3c6dbden
+!
+upgrade fpd auto
+version 12.2
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+service counters max age 5
+!
+hostname st73in28p5as
+!
+boot-start-marker
+boot system disk0:s72033-advipservicesk9_wan-mz.122-33.SXI6.bin
+boot-end-marker
+!
+security passwords min-length 1
+logging buffered 32000
+enable secret 5 $1$0000$XFkGdhsWTDx2Hx4kRezWB0
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+svclc multiple-vlan-interfaces
+no ip source-route
+!
+!
+!
+no ip bootp server
+ip ssh time-out 60
+ip ssh version 2
+no ip domain-lookup
+ip domain-name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+vtp domain OCX_INI_Server_Farm_Switch
+vtp mode transparent
+no mls acl tcam share-global
+mls netflow interface
+mls rate-limit unicast ip icmp unreachable acl-drop 0 
+mls cef error action freeze
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode rap3c6dbd-pvst
+diagnostic bootup level complete
+port-channel per-module load-balance
+access-list 11 permit 193.126.41.203 0.0.0.255
+access-list 11 permit 196.1.253.83 0.0.0.255
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 deny any log
+access-list 105 remark VACL Capture
+access-list 105 permit ip any any
+access-list 110 permit tcp host 193.126.66.139 eq 51102 any
+access-list 110 permit tcp host 196.1.253.136 eq 51102 any
+access-list 110 permit tcp host 196.1.253.136 eq 51107 any
+access-list 120 permit tcp host 193.126.41.220 any eq 50112
+access-list 120 permit tcp host 193.126.41.222 any eq 50112
+access-list 120 permit tcp host 196.1.253.67 any eq 50112
+access-list 120 permit tcp host 196.1.253.114 any eq 50112
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+access-list 125 permit ip 183.108.7.7 0.15.255.255 any
+access-list 130 permit tcp any eq 50111 host 193.126.41.220
+access-list 130 permit tcp any eq 50111 host 193.126.41.222
+access-list 130 permit tcp any host 193.126.66.139 eq 51101
+access-list 130 permit tcp any host 196.1.253.136 eq 51101
+access-list 130 permit tcp any eq 50111 host 196.1.253.67
+access-list 130 permit tcp any eq 50111 host 196.1.253.114
+access-list 130 permit tcp any host 196.1.253.136 eq 51117
+!
+redundancy
+ main-cpu
+  auto-sync running-config
+ mode sso
+!
+ip access-list extended BRP
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.243
+ permit tcp host 126.217.172.233 eq 23023 any
+ permit tcp host 126.217.172.228 eq 23023 any
+ permit tcp host 126.217.172.243 eq 23023 any
+ permit tcp host 126.217.172.248 eq 23023 any
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.120 range 12000 12004 host 126.217.186.121
+ permit udp host 126.217.186.121 range 12000 12004 host 126.217.186.120
+ permit tcp host 126.217.186.7 eq 23023 any
+ permit tcp host 126.217.186.13 eq 23023 any
+ permit tcp host 126.217.186.17 eq 23023 any
+ permit tcp host 126.217.186.29 eq 23023 any
+ip access-list extended BRP2
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.243
+ permit tcp any host 126.217.172.244
+ permit tcp host 126.217.172.244 any
+ permit udp any host 126.217.172.244
+ permit udp host 126.217.172.244 any
+ permit tcp host 126.217.172.233 eq 23023 any
+ permit tcp host 126.217.172.228 eq 23023 any
+ permit tcp host 126.217.172.243 eq 23023 any
+ permit tcp host 126.217.172.248 eq 23023 any
+ permit tcp any host 126.217.172.243 eq 23023
+ permit tcp any eq 23023 host 126.217.172.243
+ permit tcp any host 126.217.172.248 eq 23023
+ permit tcp any eq 23023 host 126.217.172.248
+ permit tcp any host 126.217.172.233 eq 23023
+ permit tcp any eq 23023 host 126.217.172.233
+ permit tcp any host 126.217.172.228 eq 23023
+ permit tcp any eq 23023 host 126.217.172.228
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.233 range 11060 11100
+ permit tcp host 126.217.172.233 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.243 range 11060 11100
+ permit tcp host 126.217.172.243 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.17
+ permit tcp any host 126.217.186.23
+ permit tcp host 126.217.186.23 any
+ permit udp any host 126.217.186.23
+ permit udp host 126.217.186.23 any
+ permit tcp host 126.217.186.7 eq 23023 any
+ permit tcp host 126.217.186.13 eq 23023 any
+ permit tcp host 126.217.186.17 eq 23023 any
+ permit tcp host 126.217.186.29 eq 23023 any
+ permit tcp any host 126.217.186.17 eq 23023
+ permit tcp any eq 23023 host 126.217.186.17
+ permit tcp any host 126.217.186.29 eq 23023
+ permit tcp any eq 23023 host 126.217.186.29
+ permit tcp any host 126.217.186.7 eq 23023
+ permit tcp any eq 23023 host 126.217.186.7
+ permit tcp any host 126.217.186.13 eq 23023
+ permit tcp any eq 23023 host 126.217.186.13
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.7 range 11060 11100
+ permit tcp host 126.217.186.7 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.17 range 11060 11100
+ permit tcp host 126.217.186.17 range 11060 11100 host 196.1.253.64 range 11060 11100
+ip access-list extended BRP2_out
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.233 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.243
+ permit udp host 126.217.172.228 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.243 range 12000 12004 host 126.217.172.248
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.233
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.228
+ permit udp host 126.217.172.248 range 12000 12004 host 126.217.172.243
+ permit tcp any host 126.217.172.244
+ permit tcp host 126.217.172.244 any
+ permit udp any host 126.217.172.244
+ permit udp host 126.217.172.244 any
+ permit tcp host 126.217.172.233 eq 23023 any
+ permit tcp host 126.217.172.228 eq 23023 any
+ permit tcp host 126.217.172.243 eq 23023 any
+ permit tcp host 126.217.172.248 eq 23023 any
+ permit tcp any host 126.217.172.243 eq 23023
+ permit tcp any eq 23023 host 126.217.172.243
+ permit tcp any host 126.217.172.248 eq 23023
+ permit tcp any eq 23023 host 126.217.172.248
+ permit tcp any host 126.217.172.233 eq 23023
+ permit tcp any eq 23023 host 126.217.172.233
+ permit tcp any host 126.217.172.228 eq 23023
+ permit tcp any eq 23023 host 126.217.172.228
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.233 range 11060 11100
+ permit tcp host 126.217.172.233 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.243 range 11060 11100
+ permit tcp host 126.217.172.243 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.7 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.17
+ permit udp host 126.217.186.13 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.17 range 12000 12004 host 126.217.186.29
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.7
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.13
+ permit udp host 126.217.186.29 range 12000 12004 host 126.217.186.17
+ permit tcp any host 126.217.186.23
+ permit tcp host 126.217.186.23 any
+ permit udp any host 126.217.186.23
+ permit udp host 126.217.186.23 any
+ permit tcp host 126.217.186.7 eq 23023 any
+ permit tcp host 126.217.186.13 eq 23023 any
+ permit tcp host 126.217.186.17 eq 23023 any
+ permit tcp host 126.217.186.29 eq 23023 any
+ permit tcp any host 126.217.186.17 eq 23023
+ permit tcp any eq 23023 host 126.217.186.17
+ permit tcp any host 126.217.186.29 eq 23023
+ permit tcp any eq 23023 host 126.217.186.29
+ permit tcp any host 126.217.186.7 eq 23023
+ permit tcp any eq 23023 host 126.217.186.7
+ permit tcp any host 126.217.186.13 eq 23023
+ permit tcp any eq 23023 host 126.217.186.13
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.7 range 11060 11100
+ permit tcp host 126.217.186.7 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.17 range 11060 11100
+ permit tcp host 126.217.186.17 range 11060 11100 host 196.1.253.64 range 11060 11100
+ip access-list extended BRPD
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit tcp host 126.217.172.140 eq 23023 any
+ permit tcp any host 126.217.172.140 eq 23023
+ permit tcp host 126.217.172.139 eq 23023 any
+ permit tcp any host 126.217.172.139 eq 23023
+ permit tcp host 126.217.172.137 eq 23023 any
+ permit tcp any host 126.217.172.137 eq 23023
+ permit tcp host 126.217.172.143 eq 23023 any
+ permit tcp any host 126.217.172.143 eq 23023
+ permit tcp host 126.217.172.140 eq telnet any
+ permit tcp any host 126.217.172.140 eq telnet
+ permit tcp host 126.217.172.139 eq telnet any
+ permit tcp any host 126.217.172.139 eq telnet
+ permit tcp host 126.217.172.137 eq telnet any
+ permit tcp any host 126.217.172.137 eq telnet
+ permit tcp host 126.217.172.143 eq telnet any
+ permit tcp any host 126.217.172.143 eq telnet
+ permit udp host 126.217.172.136 any
+ permit udp any host 126.217.172.136
+ permit tcp host 126.217.172.136 any
+ permit tcp any host 126.217.172.136
+ permit ip 126.217.172.138 0.0.0.7 126.217.172.138 0.0.0.7
+ permit tcp any eq 23023 host 126.217.172.139
+ permit tcp any eq 23023 host 126.217.172.137
+ permit tcp any eq 23023 host 126.217.172.140
+ permit tcp any eq 23023 host 126.217.172.143
+ permit tcp host 126.217.172.139 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 126.217.172.137 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.139 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.137 range 11060 11100
+ permit tcp host 126.217.186.121 eq 23023 any
+ permit tcp any host 126.217.186.121 eq 23023
+ permit tcp host 126.217.186.127 eq 23023 any
+ permit tcp any host 126.217.186.127 eq 23023
+ permit tcp host 126.217.186.124 eq 23023 any
+ permit tcp any host 126.217.186.124 eq 23023
+ permit tcp host 126.217.186.122 eq 23023 any
+ permit tcp any host 126.217.186.122 eq 23023
+ permit tcp host 126.217.186.121 eq telnet any
+ permit tcp any host 126.217.186.121 eq telnet
+ permit tcp host 126.217.186.127 eq telnet any
+ permit tcp any host 126.217.186.127 eq telnet
+ permit tcp host 126.217.186.124 eq telnet any
+ permit tcp any host 126.217.186.124 eq telnet
+ permit tcp host 126.217.186.122 eq telnet any
+ permit tcp any host 126.217.186.122 eq telnet
+ permit udp host 126.217.186.125 any
+ permit udp any host 126.217.186.125
+ permit tcp host 126.217.186.125 any
+ permit tcp any host 126.217.186.125
+ permit tcp any eq 23023 host 126.217.186.127
+ permit tcp any eq 23023 host 126.217.186.124
+ permit tcp any eq 23023 host 126.217.186.121
+ permit tcp any eq 23023 host 126.217.186.122
+ permit tcp host 126.217.186.127 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 126.217.186.124 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.127 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.124 range 11060 11100
+ip access-list extended BRPD_out
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit tcp host 126.217.172.140 eq 23023 any
+ permit tcp any host 126.217.172.140 eq 23023
+ permit tcp host 126.217.172.139 eq 23023 any
+ permit tcp any host 126.217.172.139 eq 23023
+ permit tcp host 126.217.172.137 eq 23023 any
+ permit tcp any host 126.217.172.137 eq 23023
+ permit tcp host 126.217.172.143 eq 23023 any
+ permit tcp any host 126.217.172.143 eq 23023
+ permit tcp host 126.217.172.140 eq telnet any
+ permit tcp any host 126.217.172.140 eq telnet
+ permit tcp host 126.217.172.139 eq telnet any
+ permit tcp any host 126.217.172.139 eq telnet
+ permit tcp host 126.217.172.137 eq telnet any
+ permit tcp any host 126.217.172.137 eq telnet
+ permit tcp host 126.217.172.143 eq telnet any
+ permit tcp any host 126.217.172.143 eq telnet
+ permit udp host 126.217.172.136 any
+ permit udp any host 126.217.172.136
+ permit tcp host 126.217.172.136 any
+ permit tcp any host 126.217.172.136
+ permit ip 126.217.172.138 0.0.0.7 126.217.172.138 0.0.0.7
+ permit tcp any eq 23023 host 126.217.172.139
+ permit tcp any eq 23023 host 126.217.172.137
+ permit tcp any eq 23023 host 126.217.172.140
+ permit tcp any eq 23023 host 126.217.172.143
+ permit tcp host 126.217.172.139 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 126.217.172.137 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.139 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.172.137 range 11060 11100
+ permit tcp host 126.217.186.121 eq 23023 any
+ permit tcp any host 126.217.186.121 eq 23023
+ permit tcp host 126.217.186.127 eq 23023 any
+ permit tcp any host 126.217.186.127 eq 23023
+ permit tcp host 126.217.186.124 eq 23023 any
+ permit tcp any host 126.217.186.124 eq 23023
+ permit tcp host 126.217.186.122 eq 23023 any
+ permit tcp any host 126.217.186.122 eq 23023
+ permit tcp host 126.217.186.121 eq telnet any
+ permit tcp any host 126.217.186.121 eq telnet
+ permit tcp host 126.217.186.127 eq telnet any
+ permit tcp any host 126.217.186.127 eq telnet
+ permit tcp host 126.217.186.124 eq telnet any
+ permit tcp any host 126.217.186.124 eq telnet
+ permit tcp host 126.217.186.122 eq telnet any
+ permit tcp any host 126.217.186.122 eq telnet
+ permit udp host 126.217.186.125 any
+ permit udp any host 126.217.186.125
+ permit tcp host 126.217.186.125 any
+ permit tcp any host 126.217.186.125
+ permit tcp any eq 23023 host 126.217.186.127
+ permit tcp any eq 23023 host 126.217.186.124
+ permit tcp any eq 23023 host 126.217.186.121
+ permit tcp any eq 23023 host 126.217.186.122
+ permit tcp host 126.217.186.127 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 126.217.186.124 range 11060 11100 host 196.1.253.64 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.127 range 11060 11100
+ permit tcp host 196.1.253.64 range 11060 11100 host 126.217.186.124 range 11060 11100
+ip access-list extended MVS
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit icmp any any
+ permit tcp any 126.217.153.107 0.0.0.255 eq telnet
+ permit tcp 126.217.153.107 0.0.0.255 eq telnet any
+ permit tcp any eq bgp any
+ip access-list extended TPF
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit icmp any any
+ permit tcp any 126.217.153.107 0.0.0.255 eq telnet
+ permit tcp 126.217.153.107 0.0.0.255 eq telnet any
+ip access-list extended Tandem
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit icmp any any
+ permit tcp any 126.217.153.107 0.0.0.255 eq telnet
+ permit tcp 126.217.153.107 0.0.0.255 eq telnet any
+ permit udp host 126.217.183.91 eq domain any
+ permit tcp host 126.217.183.91 eq domain any
+ permit tcp host 126.217.183.91 any eq domain
+ permit ip host 126.217.183.91 any
+ permit ip 126.217.183.20 0.0.0.3 any
+ permit ip host 126.217.183.19 any
+ permit udp any any eq 1985
+ip access-list extended Vital
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit icmp any any
+ permit tcp any 126.217.153.107 0.0.0.255 eq telnet
+ permit tcp 126.217.153.107 0.0.0.255 eq telnet any
+!
+vlan internal allocation policy ascending
+vlan access-log ratelimit 2000
+!
+vlan 62
+ name Vtape_Vlan
+!
+vlan 331
+ name To_ST73IN26P4AS_IntraArea_6
+!
+vlan 333
+ name To_ST73IN29P5AS_IntraArea_6
+!
+vlan 462
+ name VLAN_for_ACE
+!
+vlan 463
+ name FT_VLAN_for_ACE
+!
+vlan 724
+ name F5_HA
+!
+! 
+!
+!
+!
+interface Loopback0
+ description st73in28p5as
+ ip address 126.217.153.124 255.255.255.255
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Port-channel1
+ switchport
+ switchport access vlan 333
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 333,462,463,724
+ switchport mode trunk
+!
+interface Port-channel2
+ switchport
+ switchport access vlan 331
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 331
+ switchport mode trunk
+!
+interface Port-channel3
+ description F5 HA port-channel 
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 462,724
+ switchport mode trunk
+!
+interface GigabitEthernet1/1
+ description to LB73IN07M5  
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 462,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 3 mode active
+!
+interface GigabitEthernet1/2
+ description to LB73IN07M5  
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 462,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 3 mode active
+!
+interface GigabitEthernet1/3
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/4
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/5
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/6
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/7
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/9
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/10
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/11
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/12
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/13
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/14
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/21
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/24
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet2/1
+ description To RT73IN00M4CR 7/4
+ ip address 126.217.155.252 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet2/2
+ description To ST73IN29P5AS 2/2
+ switchport
+ switchport access vlan 333
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 333,462,463,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet2/3
+ description To ST73IN26P4AS 2/3
+ switchport
+ switchport access vlan 331
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 331
+ switchport mode trunk
+ load-interval 30
+ channel-group 2 mode desirable non-silent
+!
+interface TenGigabitEthernet2/4
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet2/5
+ description BRP to MVSP, MPN2 & CP03 OSA1
+ ip address 126.217.187.193 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376177
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet2/6
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet2/7
+ description To MVS9 & M4N2 OSA 1
+ ip address 126.217.187.216 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_MVS
+ ip ospf message-digest-key 1 md5 7 37565916712100135462603219638437682623540
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet2/8
+ description BRP for OCB/OCS
+ ip address 126.217.187.177 255.255.255.240
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf message-digest-key 1 md5 7 37565916712100135462603219638437682624307
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet3/1
+ description To RT73IN01M5CR 7/4
+ ip address 126.217.154.84 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet3/2
+ description To ST73IN29P5AS 3/2
+ switchport
+ switchport access vlan 333
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 333,462,463,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet3/3
+ description To ST73IN26P4AS 3/3
+ switchport
+ switchport access vlan 331
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 331
+ switchport mode trunk
+ load-interval 30
+ channel-group 2 mode desirable non-silent
+!
+interface TenGigabitEthernet3/4
+ description BRP to MVDA, MDN2 & CD03 OSA1
+ ip address 126.217.187.225 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_MVS
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376174
+ ip ospf priority 2
+ load-interval 30
+!
+interface GigabitEthernet5/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/1
+ description OCEMVS4ACS01LMU02-01
+ switchport
+ switchport access vlan 62
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet8/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/3
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/4
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/5
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/6
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/7
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/8
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/9
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/10
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/11
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/12
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/13
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/14
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/21
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/24
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/25
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/26
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/27
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/28
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/29
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/30
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/31
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/32
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/33
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/34
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/35
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/36
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/37
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/38
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/39
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/40
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/41
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/42
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/43
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/44
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/45
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/46
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/47
+ no ip address
+ shutdown
+!
+interface GigabitEthernet8/48
+ no ip address
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan62
+ description Vtape VLAN
+ ip address 126.217.184.49 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan331
+ description To ST73IN26P4AS IntraArea 6
+ ip address 126.217.189.226 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf cost 10
+!
+interface Vlan333
+ description To ST73IN29P5AS IntraArea 6
+ ip address 126.217.189.245 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan462
+ description VLAN for ACE
+ ip address 126.217.190.197 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ standby 62 ip 126.217.190.199
+ standby 62 timers 1 4
+ standby 62 priority 110
+!
+interface Vlan463
+ description FT VLAN for ACE
+ ip address 126.217.190.205 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+router ospf 64574
+ router-id 126.217.153.124
+ log-adjacency-changes
+ area 6 authentication message-digest
+ area 6 stub no-summary
+ timers throttle spf 1000 5000 5000
+ network 126.217.153.124 0.0.0.0 area 0
+ network 126.217.155.254 0.0.0.7 area 0
+ network 126.217.154.87 0.0.0.7 area 0
+ network 126.217.189.236 0.0.7.255 area 6
+!
+router bgp 64574
+ no synchronization
+ bgp router-id 126.217.153.124
+ bgp log-neighbor-changes
+ bgp maxas-limit 254
+ bgp scan-time 5
+ timers bgp 3 9
+ redistribute ospf 64574 route-map MVS_Floating_Address
+ neighbor 126.217.155.255 remote-as 64574
+ neighbor 126.217.155.255 description RT73IN00M4CR
+ neighbor 126.217.155.255 send-community
+ neighbor 126.217.154.86 remote-as 64574
+ neighbor 126.217.154.86 description RT73IN01M5CR
+ neighbor 126.217.154.86 send-community
+ no auto-summary
+!
+ip classless
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+logging trap debugging
+logging source-interface Loopback0
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.170.38.121
+logging 126.172.24.96
+!
+route-map FROM_MVS permit 10
+ match ip address 120
+ set ip next-hop 126.217.190.195
+!
+route-map MVS_Floating_Address permit 10
+ match ip address 11
+ match route-type internal
+!
+route-map FROM_EDGE permit 10
+ match ip address 130
+ set ip next-hop 126.217.190.195
+!
+snmp-server community netconanRemoved57 RW 98
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server ifindex persist
+snmp-server trap link ietf
+snmp-server trap-source Loopback0
+snmp-server tftp-server-list 99
+snmp-server location OCX
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+tacacs-server host 126.175.58.45
+tacacs-server host 126.170.160.247
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D37637B
+!
+!
+control-plane
+!
+!
+dial-peer cor custom
+!
+!
+!
+banner motd ^CCC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376276
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376277
+ logging synchronous
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376071
+ logging synchronous
+ transport preferred none
+ transport input ssh
+!
+ntp clock-period 17180030
+ntp update-calendar
+ntp server 126.170.165.28
+ntp server 126.175.61.217 prefer
+mac-address-table aging-time 480
+!
+end
+

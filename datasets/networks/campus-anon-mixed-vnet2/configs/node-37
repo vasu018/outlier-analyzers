@@ -1,0 +1,582 @@
+ST73IN66P5AS#show running-config
+Building configuration...
+
+Current configuration : 12681 bytes
+!
+! Last configuration change at 05:43:09 GMT Thu May 3 2018 by viong
+! NVRAM config last updated at 06:41:35 GMT Mon May 7 2018 by intell3c6dbden
+!
+version 12.2
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+service compress-config
+!
+hostname ST73IN66P5AS
+!
+boot-start-marker
+boot system flash bootflash:cat4500e-ipbasek9-mz.122-54.SG.bin
+boot-end-marker
+!
+logging buffered 16384
+no logging console
+no logging monitor
+enable secret 5 $1$0000$Wk5x406gIMH6/gcFL4JZO0
+!
+!
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+udld enable
+
+ip subnet-zero
+no ip source-route
+ip domain-name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+!
+!
+ip vrf mgmtVrf
+!
+vtp domain INI
+vtp mode transparent
+!
+!
+!
+errdisable recovery cause udld
+errdisable recovery cause bpduguard
+errdisable recovery cause pagp-flap
+errdisable recovery cause dtp-flap
+errdisable recovery cause link-flap
+power redundancy-mode redundant
+!
+!
+!
+!
+spanning-tree mode rap3c6dbd-pvst
+spanning-tree portfast bpduguard default
+spanning-tree extend system-3c6dbd
+!
+vlan internal allocation policy ascending
+!
+vlan 27
+ name VLAN-for-CMLS-App4-10.216.27.0
+!
+vlan 927
+ name DB_VLAN_NonRouted
+lldp run
+!
+ip ssh version 2
+!
+!
+interface Loopback0
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+!
+interface FastEthernet1
+ ip vrf forwarding mgmtVrf
+ no ip address
+ speed 100
+ full-duplex
+!
+interface GigabitEthernet1/1
+ description DECOMMd INC6637952
+ shutdown
+!
+interface GigabitEthernet1/2
+ description sl73anahdp18-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/3
+ description sl73anahdp17-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/4
+ description sl73anahdp16-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/5
+ description DECOMMd INC6637964
+ shutdown
+!
+interface GigabitEthernet1/6
+ description sl73anahdp14-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/7
+ description DECOMMd INC6637979
+ shutdown
+!
+interface GigabitEthernet1/8
+ description DECOMMd INC6637978
+ shutdown
+!
+interface GigabitEthernet1/9
+ description DECOMMd INC6637974
+ shutdown
+!
+interface GigabitEthernet1/10
+ description sl73anahdp10-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/11
+ description sl73anahdp09-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/12
+ description sl73anahdp08-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/13
+ description DECOMMd INC6637972
+ shutdown
+!
+interface GigabitEthernet1/14
+ description sl73opehdp03-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/15
+ description sl73anahdp06-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/16
+ description DECOMMd INC6637980
+ shutdown
+!
+interface GigabitEthernet1/17
+ description sl73anahdp04-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/18
+ description sl73opehdp13-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/19
+ description sl73opehdp12-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/20
+ description sl73opehdp11-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/21
+ description sl73opehdp10-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/22
+ description sl73opehdp09-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/23
+ description sl73opehdp08-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/24
+ description sl73opehdp07-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/25
+ description sl73opehdp06-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/26
+ description sl73opehdp05-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/27
+ description sl73opehdp04-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/28
+ description sl73opehdp02-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/29
+ description sl73opehdp01-E1
+ switchport access vlan 27
+ switchport mode access
+ logging event link-status
+ speed 1000
+ duplex full
+ spanning-tree portfast
+!
+interface GigabitEthernet1/30
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/31
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/32
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/33
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/34
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/35
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/36
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/37
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/38
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/39
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/40
+ logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/41
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/42
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/43
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/44
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/45
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/46
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/47
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface GigabitEthernet1/48
+ no logging event link-status
+ shutdown
+ speed 1000
+ duplex full
+!
+interface TenGigabitEthernet1/49
+ description BE7305BN033EN01VC2P1 IPR 5608
+ switchport access vlan 27
+ switchport trunk allowed vlan 27
+ switchport mode trunk
+ logging event link-status
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface TenGigabitEthernet1/50
+ no logging event link-status
+ shutdown
+!
+interface TenGigabitEthernet1/51
+ no logging event link-status
+ shutdown
+!
+interface TenGigabitEthernet1/52
+ description to st73in46p5as 1/5
+ switchport access vlan 27
+ switchport trunk allowed vlan 27,927
+ switchport mode trunk
+ logging event link-status
+!
+interface Vlan1
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ no logging event link-status
+ shutdown
+!
+interface Vlan27
+ ip address 126.217.143.147 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ logging event link-status
+!
+ip route 0.0.0.0 0.0.0.0 126.217.143.45
+no ip http server
+no ip http secure-server
+!
+!
+logging trap debugging
+logging source-interface Vlan27
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.171.244.6
+logging 126.170.38.121
+logging 126.172.24.96
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+access-list 125 permit ip 183.108.7.7 0.15.255.255 any
+!
+snmp-server user ninespace47 ninespace47 v1 access 98
+snmp-server user ninespace47 ninespace47 v2c access 98
+snmp-server user trap4nv trap4nv v1 
+snmp-server user trap4nv trap4nv v2c 
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server trap link ietf
+snmp-server trap-source Vlan27
+snmp-server tftp-server-list 99
+snmp-server location OCX
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps entity
+snmp-server enable traps vtp
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server enable traps config
+snmp-server enable traps bridge newroot topologychange
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+tacacs-server host 126.175.58.45 key 7 09424B1D1A0A1913053E012724322D376773
+tacacs-server host 126.170.160.247 key 7 09424B1D1A0A1913053E012724322D376675
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D376775
+banner motd ^CCC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D3764764A
+ logging synchronous
+ transport preferred none
+ stopbits 1
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647743
+ logging synchronous
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647743
+ logging synchronous
+ transport preferred none
+ transport input ssh
+!
+ntp clock-period 17180280
+ntp update-calendar
+ntp server 126.170.165.28
+ntp server 126.175.61.217 prefer
+end
+

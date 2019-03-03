@@ -1,0 +1,1099 @@
+RT73IN71M5AS#show running-config
+Building configuration...
+
+Current configuration : 35023 bytes
+!
+! Last configuration change at 06:08:58 GMT Thu May 10 2018 by lteo
+! NVRAM config last updated at 22:24:46 GMT Sun May 13 2018 by intell3c6dbden
+!
+upgrade fpd auto
+version 12.2
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+service counters max age 10
+!
+hostname RT73IN71M5AS
+!
+boot-start-marker
+boot system flash sup-bootdisk:
+boot-end-marker
+!
+logging buffered 16384
+enable secret 5 $1$0000$eIU3rlra0b2RAhMLQ2Ucv.
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+ip subnet-zero
+no ip source-route
+!
+!
+no ip bootp server
+ip ssh time-out 60
+no ip domain-lookup
+ip domain-name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+!
+!
+mls ip multicast flow-stat-timer 9
+mls flow ip interface-full
+no mls flow ipv6
+no mls acl tcam share-global
+mls cef error action reset
+!
+!
+!
+spanning-tree mode rap3c6dbd-pvst
+spanning-tree extend system-3c6dbd
+diagnostic cns publish cisco.cns.device.diag_results
+diagnostic cns subscribe cisco.cns.device.diag_commands
+!
+!
+redundancy
+ mode sso
+ main-cpu
+  auto-sync running-config
+!
+!
+vlan access-map 3c6dbd73mn251m5dc716 10
+ match ip address 105
+ action forward capture
+!
+vlan filter 3c6dbd73mn251m5dc716 vlan-list 1,70-71
+vlan internal allocation policy ascending
+vlan access-log ratelimit 2000
+!
+! 
+!
+!
+!
+!
+interface Loopback0
+ ip address 126.212.108.3 255.255.255.255
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Port-channel1
+ description To DPS Dist RT73US02M4DS 1/6 and 2/6
+ ip address 126.212.110.118 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface Port-channel2
+ description To DPS Dist RT73US01M5DS 1/6 and 2/6
+ ip address 126.212.110.127 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface Port-channel3
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 70,170
+!
+interface GigabitEthernet1/1
+ description To RT73IN70M4AS 1/1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 70,170
+ channel-group 3 mode desirable
+!
+interface GigabitEthernet1/2
+ description To FW73IN01P4CPS eth4
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet1/3
+ description To FX73IN70M5CPP eth3-07 
+ switchport
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet1/4
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/5
+ description to rt73ve11m5ar 1/0 
+ ip address 126.212.110.18 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+!
+interface GigabitEthernet1/6
+ description to RT73LA05M5TN 0/1/1
+ ip address 126.212.110.61 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/7
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ description to rt73cm02m4tp gi1/8
+ ip address 126.122.216.180 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+!
+interface GigabitEthernet1/9
+ description available
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+!
+interface GigabitEthernet1/10
+ description To RT73US02M4DS 1/6
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface GigabitEthernet1/11
+ no ip address
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface GigabitEthernet1/12
+ description to RT73CE01M5TN G0/0/1
+ ip address 126.212.110.136 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/13
+ description to RT73CE02M4TN G0/0/1
+ ip address 126.212.110.154 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/14
+ description to RT73LA12M4TN 0/1/1
+ ip address 126.212.110.173 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/15
+ description to RT73LA13M5TN 0/1/1
+ ip address 126.212.110.161 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/16
+ description to RT73LA14M4TN 0/1/1
+ ip address 126.212.110.186 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/18
+ description to PIAD420 gig0/2 
+ ip address 126.217.154.193 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+!
+interface GigabitEthernet1/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/21
+ description rt73ca01m5tn gig0/0/0
+ ip address 126.212.110.181 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet1/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/24
+ description -nomon 3c6dbd73mn251m5dc716 VACL Port 5
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport capture
+ speed nonegotiate
+!
+interface GigabitEthernet2/1
+ description To RT73IN70M4AS 2/1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 70,170
+ channel-group 3 mode desirable
+!
+interface GigabitEthernet2/2
+ description To FW73IN01P5CPP eth3
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ spanning-tree portfast
+!
+interface GigabitEthernet2/3
+ description To FX73IN70M4CPS eth3-07 
+ switchport
+ switchport mode access
+ shutdown
+ spanning-tree portfast
+!
+interface GigabitEthernet2/4
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/5
+ description RT73VE10M4AR 2/0
+ ip address 126.212.110.29 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+!
+interface GigabitEthernet2/6
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+!
+interface GigabitEthernet2/7
+ description available
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+!
+interface GigabitEthernet2/8
+ description to rt73cm01m5tp gi2/8
+ ip address 126.122.216.188 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/9
+ description available
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ shutdown
+!
+interface GigabitEthernet2/10
+ description To RT73US01M5DS 1/6
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ channel-group 2 mode desirable non-silent
+!
+interface GigabitEthernet2/11
+ no ip address
+ channel-group 2 mode desirable non-silent
+!
+interface GigabitEthernet2/12
+ description To ra73cm01m5sas Gi 0/9
+ switchport
+ switchport access vlan 170
+ switchport mode access
+!
+interface GigabitEthernet2/13
+ description to RT73AP01M5TN Gi0/1/0
+ ip address 126.212.110.95 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/14
+ description to RT73AP02M4TN Gi0/1/0
+ ip address 126.212.110.84 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/15
+ description to RT73AP03M5TN Gi0/1/0                                    
+ ip address 126.212.110.64 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/16
+ description to RT73AP04M4TN Gi0/1/0                                    
+ ip address 126.212.110.79 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/18
+ description Connected to BT73ABEURNITR01 - G0/0/4
+ ip address 126.212.110.128 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+!
+interface GigabitEthernet2/19
+ description Connected to BT73ABEURNITR02 - G0/0/4
+ ip address 126.212.110.236 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ load-interval 30
+!
+interface GigabitEthernet2/20
+ description to Orange PIAD1135 g0/0/1
+ ip address 126.212.110.252 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/21
+ description to Orange PIAD1136 g0/0/1
+ ip address 126.212.110.248 255.255.255.252
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface GigabitEthernet2/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/24
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/2
+ no ip address
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan70
+ description Link for Regional FW-layer 2 test
+ ip address 126.212.105.48 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ standby 70 ip 126.212.105.50
+ standby 70 priority 110
+!
+interface Vlan170
+ description link to ra73cm01m5sas Gig 0/9 
+ ip address 126.212.209.16 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ standby 170 ip 126.212.209.19
+ standby 170 preempt
+!
+router ospf 64674
+ router-id 126.212.108.3
+ log-adjacency-changes
+ timers throttle spf 1000 5000 5000
+ redistribute bgp 64674 subnets
+ passive-interface default
+ no passive-interface Vlan70
+ network 126.212.108.103 0.0.255.255 area 0
+!
+router bgp 64674
+ no synchronization
+ bgp router-id 126.212.108.3
+ bgp log-neighbor-changes
+ bgp maxas-limit 254
+ bgp scan-time 5
+ network 126.212.108.3 mask 255.255.255.255
+ network 126.212.209.18 mask 255.255.255.248
+ aggregate-address 126.212.108.103 255.255.224.0 summary-only
+ aggregate-address 126.243.230.171 255.255.255.0 summary-only
+ timers bgp 3 9
+ neighbor Euro-RNI-to-OCE-INI peer-group
+ neighbor Euro-RNI-to-OCE-INI remote-as 64552
+ neighbor Euro-RNI-to-OCE-INI description *** Euro RNI eBGP peer group, peers are BT managed ***
+ neighbor Euro-RNI-to-OCE-INI next-hop-self
+ neighbor Euro-RNI-to-OCE-INI send-community both
+ neighbor Euro-RNI-to-OCE-INI advertisement-interval 10
+ neighbor Euro-RNI-to-OCE-INI soft-reconfiguration inbound
+ neighbor Euro-RNI-to-OCE-INI route-map RM-EURO-RNI-TO-OCE-INI in
+ neighbor Euro-RNI-to-OCE-INI route-map RM-OCE-INI-TO-EURO-RNI out
+ neighbor 126.122.216.191 remote-as 64713
+ neighbor 126.122.216.191 description rt73cm01m5tp
+ neighbor 126.122.216.191 next-hop-self
+ neighbor 126.122.216.191 send-community both
+ neighbor 126.122.216.191 advertisement-interval 10
+ neighbor 126.122.216.191 route-map to-third-party out
+ neighbor 126.122.216.182 remote-as 64713
+ neighbor 126.122.216.182 description rt73cm02m4tp
+ neighbor 126.122.216.182 next-hop-self
+ neighbor 126.122.216.182 send-community both
+ neighbor 126.122.216.182 advertisement-interval 10
+ neighbor 126.122.216.182 route-map to-third-party out
+ neighbor 126.212.108.2 remote-as 64674
+ neighbor 126.212.108.2 description RT73IN71M5AS
+ neighbor 126.212.108.2 update-source Loopback0
+ neighbor 126.212.108.2 send-community
+ neighbor 126.212.108.2 advertisement-interval 10
+ neighbor 126.212.110.31 remote-as 64642
+ neighbor 126.212.110.31 description rt73ve10m4ar 
+ neighbor 126.212.110.31 ebgp-multihop 255
+ neighbor 126.212.110.31 send-community both
+ neighbor 126.212.110.31 advertisement-interval 10
+ neighbor 126.212.110.31 route-map to-VE out
+ neighbor 126.212.110.17 remote-as 64642
+ neighbor 126.212.110.17 description rt73ve11m5ar 
+ neighbor 126.212.110.17 ebgp-multihop 255
+ neighbor 126.212.110.17 send-community both
+ neighbor 126.212.110.17 advertisement-interval 10
+ neighbor 126.212.110.17 route-map to-VE out
+ neighbor 126.212.110.62 remote-as 64734
+ neighbor 126.212.110.62 description rt73la05m5tn
+ neighbor 126.212.110.62 ebgp-multihop 255
+ neighbor 126.212.110.62 send-community both
+ neighbor 126.212.110.62 advertisement-interval 10
+ neighbor 126.212.110.62 route-map to-OCLA out
+ neighbor 126.212.110.116 remote-as 64714
+ neighbor 126.212.110.116 description RT73US02M4DS
+ neighbor 126.212.110.116 send-community
+ neighbor 126.212.110.116 advertisement-interval 10
+ neighbor 126.212.110.116 route-map INI-to-DPS_2 out
+ neighbor 126.212.110.124 remote-as 64714
+ neighbor 126.212.110.124 description RT73US01M5DS
+ neighbor 126.212.110.124 send-community
+ neighbor 126.212.110.124 advertisement-interval 10
+ neighbor 126.212.110.124 route-map INI-to-DPS_2 out
+ neighbor 126.212.110.92 remote-as 64739
+ neighbor 126.212.110.92 description rt73ap01m5tn
+ neighbor 126.212.110.92 ebgp-multihop 255
+ neighbor 126.212.110.92 send-community both
+ neighbor 126.212.110.92 advertisement-interval 10
+ neighbor 126.212.110.92 route-map To-AP out
+ neighbor 126.212.110.87 remote-as 64740
+ neighbor 126.212.110.87 description RT73AP02M4TN
+ neighbor 126.212.110.87 ebgp-multihop 255
+ neighbor 126.212.110.87 send-community both
+ neighbor 126.212.110.87 advertisement-interval 10
+ neighbor 126.212.110.87 route-map To-AP out
+ neighbor 126.212.110.66 remote-as 64741
+ neighbor 126.212.110.66 description RT73AP03M5TN
+ neighbor 126.212.110.66 ebgp-multihop 255
+ neighbor 126.212.110.66 send-community both
+ neighbor 126.212.110.66 advertisement-interval 10
+ neighbor 126.212.110.66 route-map To-AP out
+ neighbor 126.212.110.77 remote-as 64742
+ neighbor 126.212.110.77 description RT73AP04M4TN
+ neighbor 126.212.110.77 ebgp-multihop 255
+ neighbor 126.212.110.77 send-community both
+ neighbor 126.212.110.77 advertisement-interval 10
+ neighbor 126.212.110.77 route-map To-AP out
+ neighbor 126.212.110.130 peer-group Euro-RNI-to-OCE-INI
+ neighbor 126.212.110.130 description *** BT73ABEURNITR01 G0/0/4 - BT Managed Tunnel router ***
+ neighbor 126.212.110.130 password 7 09424B1D1A0A1913053E012724322D37677741
+ neighbor 126.212.110.130 ttl-security hops 2
+ neighbor 126.212.110.130 weight 200
+ neighbor 126.212.110.139 remote-as 64716
+ neighbor 126.212.110.139 description RT73CE01M5TN 
+ neighbor 126.212.110.139 ebgp-multihop 255
+ neighbor 126.212.110.139 send-community both
+ neighbor 126.212.110.139 advertisement-interval 10
+ neighbor 126.212.110.139 route-map to-ORANGE-CEMEA out
+ neighbor 126.212.110.153 remote-as 64717
+ neighbor 126.212.110.153 description RT73CE02M4TN 
+ neighbor 126.212.110.153 ebgp-multihop 255
+ neighbor 126.212.110.153 send-community both
+ neighbor 126.212.110.153 advertisement-interval 10
+ neighbor 126.212.110.153 route-map to-ORANGE-CEMEA out
+ neighbor 126.212.110.174 remote-as 64635
+ neighbor 126.212.110.174 description rt73la12m4tn
+ neighbor 126.212.110.174 ebgp-multihop 255
+ neighbor 126.212.110.174 send-community both
+ neighbor 126.212.110.174 advertisement-interval 10
+ neighbor 126.212.110.174 route-map to-OCLA out
+ neighbor 126.212.110.163 remote-as 64636
+ neighbor 126.212.110.163 description rt73la13m5th
+ neighbor 126.212.110.163 ebgp-multihop 255
+ neighbor 126.212.110.163 send-community both
+ neighbor 126.212.110.163 advertisement-interval 10
+ neighbor 126.212.110.163 route-map to-OCLA out
+ neighbor 126.212.110.185 remote-as 64637
+ neighbor 126.212.110.185 description rt73la14m4tn
+ neighbor 126.212.110.185 ebgp-multihop 255
+ neighbor 126.212.110.185 send-community both
+ neighbor 126.212.110.185 advertisement-interval 10
+ neighbor 126.212.110.185 route-map to-OCLA out
+ neighbor 126.212.110.182 remote-as 64638
+ neighbor 126.212.110.182 description rt73ca01m5tn
+ neighbor 126.212.110.182 ebgp-multihop 255
+ neighbor 126.212.110.182 send-community both
+ neighbor 126.212.110.182 advertisement-interval 10
+ neighbor 126.212.110.182 route-map to-CAN out
+ neighbor 126.212.110.239 peer-group Euro-RNI-to-OCE-INI
+ neighbor 126.212.110.239 description *** BT73ABEURNITR02 G0/0/4 - BT Managed Tunnel router ***
+ neighbor 126.212.110.239 password 7 09424B1D1A0A1913053E012724322D37677740
+ neighbor 126.212.110.239 ttl-security hops 2
+ neighbor 126.212.110.239 weight 100
+ neighbor 126.212.110.255 remote-as 65019
+ neighbor 126.212.110.255 description Orange PIAD1135 to CEMEA
+ neighbor 126.212.110.255 password 7 09424B1D1A0A1913053E012724322D37677747
+ neighbor 126.212.110.255 next-hop-self
+ neighbor 126.212.110.255 send-community both
+ neighbor 126.212.110.255 advertisement-interval 10
+ neighbor 126.212.110.255 route-map OrangeRD-to-INI in
+ neighbor 126.212.110.255 route-map INI-to-Orange out
+ neighbor 126.212.110.251 remote-as 65020
+ neighbor 126.212.110.251 description Orange PIAD1136 to CEMEA
+ neighbor 126.212.110.251 password 7 09424B1D1A0A1913053E012724322D37677746
+ neighbor 126.212.110.251 next-hop-self
+ neighbor 126.212.110.251 send-community both
+ neighbor 126.212.110.251 advertisement-interval 10
+ neighbor 126.212.110.251 route-map OrangeRD-to-INI in
+ neighbor 126.212.110.251 route-map INI-to-Orange out
+ neighbor 126.212.209.21 remote-as 64645
+ neighbor 126.212.209.21 description ra73cm01m4sap
+ neighbor 126.212.209.21 ebgp-multihop 2
+ neighbor 126.212.209.21 send-community both
+ neighbor 126.212.209.21 advertisement-interval 10
+ neighbor 126.212.209.23 remote-as 64645
+ neighbor 126.212.209.23 description ra73cm02m4sap
+ neighbor 126.212.209.23 ebgp-multihop 2
+ neighbor 126.212.209.23 send-community both
+ neighbor 126.212.209.23 advertisement-interval 10
+ neighbor 126.217.154.195 remote-as 65006
+ neighbor 126.217.154.195 description PIAD420 Orange to CEMEA 
+ neighbor 126.217.154.195 send-community both
+ neighbor 126.217.154.195 advertisement-interval 10
+ neighbor 126.217.154.195 route-map Orange-to-INI in
+ neighbor 126.217.154.195 route-map INI-to-Orange out
+ neighbor 126.217.145.222 remote-as 64574
+ neighbor 126.217.145.222 description RT73IN05M5DS
+ neighbor 126.217.145.222 ebgp-multihop 2
+ neighbor 126.217.145.222 send-community
+ neighbor 126.217.145.222 advertisement-interval 10
+ neighbor 126.217.145.222 route-map DS2AS in
+ neighbor 126.217.145.218 remote-as 64574
+ neighbor 126.217.145.218 description eBGP-to-RT73IN04M4Ds
+ neighbor 126.217.145.218 ebgp-multihop 2
+ neighbor 126.217.145.218 send-community
+ neighbor 126.217.145.218 advertisement-interval 10
+ neighbor 126.217.145.218 route-map DS2AS in
+ no auto-summary
+!
+ip classless
+ip route 126.217.145.221 255.255.255.0 126.212.105.49
+!
+ip bgp-community new-format
+ip community-list standard Orange1 permit 64674:100
+ip community-list standard Orange2 permit 64674:200
+ip community-list standard Orange3 permit 64674:300
+ip community-list standard Orange4 permit 64674:400
+ip as-path access-list 1 permit ^64574$
+ip as-path access-list 2 permit _64555$
+ip as-path access-list 21 permit _64574$
+!
+no ip http server
+no ip http secure-server
+ip tacacs source-interface Loopback0
+!
+!
+ip prefix-list AP4EA-Resources seq 10 permit 126.242.84.208/16
+!
+ip prefix-list EA_Inet_Networks description EA_over_Internet_Hosts 
+ip prefix-list EA_Inet_Networks seq 10 permit 126.236.126.115/16 ge 32
+!
+ip prefix-list INI-CAN-networks description INI-CAN-subnets 
+ip prefix-list INI-CAN-networks seq 10 permit 126.239.123.160/16
+!
+ip prefix-list INI-DPS-networks seq 10 permit 126.217.153.107/16
+ip prefix-list INI-DPS-networks seq 20 permit 193.126.41.154/27 ge 32
+ip prefix-list INI-DPS-networks seq 30 permit 196.1.253.64/32
+ip prefix-list INI-DPS-networks seq 35 permit 196.1.253.65/32
+ip prefix-list INI-DPS-networks seq 40 permit 196.1.253.67/32
+!
+ip prefix-list INI-DPS-networks_2 seq 10 permit 126.217.153.107/16
+ip prefix-list INI-DPS-networks_2 seq 20 permit 196.1.253.83/25 ge 32
+!
+ip prefix-list INI-to-Orange description advertised-to-Orange 
+ip prefix-list INI-to-Orange seq 20 permit 126.53.204.228/16
+ip prefix-list INI-to-Orange seq 30 permit 126.182.178.225/16
+ip prefix-list INI-to-Orange seq 50 permit 126.173.34.41/16
+ip prefix-list INI-to-Orange seq 60 permit 126.174.15.249/16
+ip prefix-list INI-to-Orange seq 70 permit 126.175.41.0/16
+ip prefix-list INI-to-Orange seq 80 permit 126.163.61.230/16
+ip prefix-list INI-to-Orange seq 90 permit 126.162.149.104/16
+ip prefix-list INI-to-Orange seq 110 permit 126.217.153.107/16
+ip prefix-list INI-to-Orange seq 120 permit 126.252.6.91/16
+ip prefix-list INI-to-Orange seq 130 permit 126.253.156.248/16
+ip prefix-list INI-to-Orange seq 140 permit 193.126.41.220/30 ge 31
+ip prefix-list INI-to-Orange seq 150 permit 193.126.66.139/32
+ip prefix-list INI-to-Orange seq 160 permit 193.126.67.37/32
+ip prefix-list INI-to-Orange seq 170 permit 196.1.253.139/32
+ip prefix-list INI-to-Orange seq 180 permit 196.1.253.136/32
+ip prefix-list INI-to-Orange seq 190 permit 126.172.200.241/16
+!
+ip prefix-list MVS-networks seq 10 permit 196.1.253.83/25 ge 32
+ip prefix-list MVS-networks seq 20 permit 193.126.41.203/26 ge 32
+!
+ip prefix-list OCAP-INI-networks description OCAP-subnets
+ip prefix-list OCAP-INI-networks seq 10010 permit 126.254.152.192/16
+ip prefix-list OCAP-INI-networks seq 10020 permit 193.126.121.169/32
+!
+ip prefix-list OCC-Corp-networks description OCC-subnets
+ip prefix-list OCC-Corp-networks seq 10010 permit 126.20.40.59/16
+ip prefix-list OCC-Corp-networks seq 10020 permit 126.89.189.109/16
+ip prefix-list OCC-Corp-networks seq 10030 permit 126.170.176.15/16
+ip prefix-list OCC-Corp-networks seq 10040 permit 126.23.111.214/16
+ip prefix-list OCC-Corp-networks seq 10050 permit 126.205.30.161/16
+ip prefix-list OCC-Corp-networks seq 10060 permit 126.105.145.135/16
+ip prefix-list OCC-Corp-networks seq 10070 permit 126.183.218.121/16
+ip prefix-list OCC-Corp-networks seq 10080 permit 126.45.46.197/16
+ip prefix-list OCC-Corp-networks seq 10090 permit 126.46.74.111/16
+!
+ip prefix-list OCC-INI-networks description OCC-subnets
+ip prefix-list OCC-INI-networks seq 10010 permit 193.126.50.253/32
+ip prefix-list OCC-INI-networks seq 10020 permit 193.126.30.249/32
+ip prefix-list OCC-INI-networks seq 10030 permit 126.218.99.135/16
+!
+ip prefix-list OCC-blocked-networks description OCC-subnets
+ip prefix-list OCC-blocked-networks seq 10010 permit 193.126.50.253/32
+ip prefix-list OCC-blocked-networks seq 10020 permit 193.126.30.249/32
+ip prefix-list OCC-blocked-networks seq 10030 permit 126.222.209.107/16
+ip prefix-list OCC-blocked-networks seq 10040 permit 126.222.209.107/16 ge 24
+ip prefix-list OCC-blocked-networks seq 10050 permit 126.223.76.136/16 le 24
+ip prefix-list OCC-blocked-networks seq 10060 permit 126.20.40.59/16
+ip prefix-list OCC-blocked-networks seq 10070 permit 126.89.189.109/16
+ip prefix-list OCC-blocked-networks seq 10090 permit 126.218.99.135/16
+ip prefix-list OCC-blocked-networks seq 10100 permit 126.170.176.15/16
+ip prefix-list OCC-blocked-networks seq 10200 permit 193.126.121.169/32
+ip prefix-list OCC-blocked-networks seq 10300 permit 126.254.152.192/16
+ip prefix-list OCC-blocked-networks seq 10310 permit 126.227.62.175/16
+ip prefix-list OCC-blocked-networks seq 10320 permit 126.231.145.79/16
+!
+ip prefix-list OCE-Corp-networks description OCE-Corp-subnets
+ip prefix-list OCE-Corp-networks seq 10010 permit 126.105.201.213/24
+ip prefix-list OCE-Corp-networks seq 10020 permit 126.21.105.85/16 le 24
+ip prefix-list OCE-Corp-networks seq 10030 permit 126.21.105.85/16
+ip prefix-list OCE-Corp-networks seq 10040 permit 126.39.134.128/17
+ip prefix-list OCE-Corp-networks seq 10050 permit 126.188.63.205/16
+ip prefix-list OCE-Corp-networks seq 10060 permit 126.181.19.223/16
+ip prefix-list OCE-Corp-networks seq 10070 permit 126.171.230.136/16
+ip prefix-list OCE-Corp-networks seq 10080 permit 184.140.14.94/24
+ip prefix-list OCE-Corp-networks seq 10090 permit 184.140.52.162/24
+ip prefix-list OCE-Corp-networks seq 10100 permit 184.140.53.36/24
+ip prefix-list OCE-Corp-networks seq 10110 permit 184.140.59.218/24
+ip prefix-list OCE-Corp-networks seq 10120 permit 184.140.62.223/24
+ip prefix-list OCE-Corp-networks seq 10130 permit 184.140.40.32/24
+ip prefix-list OCE-Corp-networks seq 10140 permit 184.140.41.209/24
+ip prefix-list OCE-Corp-networks seq 10150 permit 184.140.43.91/24
+ip prefix-list OCE-Corp-networks seq 10160 permit 193.126.31.178/24
+ip prefix-list OCE-Corp-networks seq 10170 permit 193.126.16.224/24
+ip prefix-list OCE-Corp-networks seq 10180 permit 193.126.18.77/24
+ip prefix-list OCE-Corp-networks seq 10190 permit 193.126.40.112/24
+ip prefix-list OCE-Corp-networks seq 10200 permit 193.93.70.127/24
+ip prefix-list OCE-Corp-networks seq 10210 permit 193.93.73.205/24
+ip prefix-list OCE-Corp-networks seq 10220 permit 193.93.72.18/24
+ip prefix-list OCE-Corp-networks seq 10230 permit 193.93.75.127/24
+ip prefix-list OCE-Corp-networks seq 10240 permit 184.140.189.246/24
+ip prefix-list OCE-Corp-networks seq 10250 permit 184.140.188.122/24
+ip prefix-list OCE-Corp-networks seq 10260 permit 193.126.43.66/24
+ip prefix-list OCE-Corp-networks seq 10270 permit 126.24.58.87/19
+ip prefix-list OCE-Corp-networks seq 10280 permit 126.182.178.225/16
+ip prefix-list OCE-Corp-networks seq 10290 permit 126.75.11.42/18
+ip prefix-list OCE-Corp-networks seq 10300 permit 126.25.218.83/16
+!
+ip prefix-list OCE-INI-TP-networks description OCE-INI-TP-subnets
+ip prefix-list OCE-INI-TP-networks seq 10010 permit 126.122.236.136/24
+!
+ip prefix-list OCE-INI-networks description OCE-INI-subnets
+ip prefix-list OCE-INI-networks seq 10010 permit 126.213.38.85/16
+ip prefix-list OCE-INI-networks seq 10020 permit 126.213.38.85/16 ge 24
+ip prefix-list OCE-INI-networks seq 10030 permit 193.126.66.139/32
+ip prefix-list OCE-INI-networks seq 10040 permit 193.126.67.37/32
+ip prefix-list OCE-INI-networks seq 10050 permit 196.1.253.139/32
+ip prefix-list OCE-INI-networks seq 10060 permit 196.1.253.136/32
+ip prefix-list OCE-INI-networks seq 10070 permit 126.123.167.129/24
+!
+ip prefix-list OCX-INI seq 10110 permit 126.173.34.41/16
+ip prefix-list OCX-INI seq 10130 permit 126.174.15.249/16
+ip prefix-list OCX-INI seq 10140 permit 126.175.41.0/16
+ip prefix-list OCX-INI seq 10150 permit 126.163.61.230/16
+ip prefix-list OCX-INI seq 10160 permit 126.162.149.104/16
+ip prefix-list OCX-INI seq 10170 permit 126.182.178.225/16
+ip prefix-list OCX-INI seq 10180 permit 126.53.204.228/16
+ip prefix-list OCX-INI seq 10190 permit 126.217.153.107/16
+ip prefix-list OCX-INI seq 10200 permit 193.126.41.203/27 ge 32
+ip prefix-list OCX-INI seq 10210 permit 126.172.200.241/16
+!
+ip prefix-list Orange2INI description advertised-from-Orange
+ip prefix-list Orange2INI seq 10 permit 126.248.69.248/16
+!
+ip prefix-list OrangeRD2INI description advertised-from-OrangeRD
+ip prefix-list OrangeRD2INI seq 10 permit 126.248.69.248/16 le 32
+!
+ip prefix-list PL-EURO-RNI-OCE-INI-IN description advertisements from Euro RNI into OCE INI 
+ip prefix-list PL-EURO-RNI-OCE-INI-IN seq 10 permit 126.221.151.200/16
+ip prefix-list PL-EURO-RNI-OCE-INI-IN seq 20 permit 126.220.144.111/16
+!
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT description MVS systems advertisements from OCE INI to Euro RNI
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT seq 10 permit 196.1.253.64/32
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT seq 20 permit 196.1.253.67/32
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT seq 30 permit 196.1.253.113/32
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT seq 40 permit 196.1.253.21/32
+ip prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT seq 50 permit 196.1.253.124/32
+!
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT description VIP B/F + EA VMSN advertisements from OCE INI to Euro RNI
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT seq 10 permit 196.1.253.139/32
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT seq 20 permit 196.1.253.136/32
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT seq 30 permit 126.172.200.241/16
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT seq 40 permit 126.174.15.249/16
+ip prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT seq 50 permit 126.175.41.0/16
+logging trap debugging
+logging source-interface Loopback0
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.171.244.6
+logging 126.170.38.121
+logging 126.172.24.96
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 105 remark VACL Capture
+access-list 105 permit ip any any
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+access-list 125 permit ip 183.108.7.7 0.15.255.255 any
+!
+route-map To-AP permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map To-AP permit 20
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map To-AP permit 30
+ match ip address prefix-list OCX-INI
+!
+route-map To-AP permit 40
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map To-AP permit 50
+ match ip address prefix-list AP4EA-Resources
+!
+route-map INI-to-DPS permit 10
+ match ip address prefix-list INI-DPS-networks
+ match as-path 1
+!
+route-map to-third-party permit 10
+ match ip address prefix-list OCC-Corp-networks
+!
+route-map to-third-party permit 20
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-third-party permit 30
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-third-party permit 40
+ match ip address prefix-list OCX-INI-networks
+!
+route-map to-third-party permit 50
+ match ip address prefix-list OCC-INI-networks
+!
+route-map to-third-party permit 60
+ match ip address prefix-list INI-CAN-networks
+!
+route-map to-VE permit 10
+ match ip address prefix-list OCC-INI-networks
+ set as-path prepend 64674 64674 64674 64674
+!
+route-map to-VE permit 20
+ match ip address prefix-list OCC-Corp-networks
+ set as-path prepend 64674 64674 64674 64674
+!
+route-map to-VE permit 30
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-VE permit 40
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-VE permit 50
+ match ip address prefix-list OCAP-INI-networks
+!
+route-map to-VE permit 60
+ match ip address prefix-list OCX-INI
+!
+route-map to-VE permit 70
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map to-VE permit 100
+ set as-path prepend 64674 64674 64674 64674
+!
+route-map to-OCLA permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-OCLA permit 20
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-OCLA permit 30
+ match ip address prefix-list OCX-INI
+!
+route-map to-OCLA permit 40
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map DS2AS deny 10
+ match ip address prefix-list EA_Inet_Networks
+!
+route-map DS2AS permit 20
+!
+route-map to-ORANGE-CEMEA permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-ORANGE-CEMEA permit 20
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-ORANGE-CEMEA permit 30
+ match ip address prefix-list OCX-INI
+!
+route-map to-ORANGE-CEMEA permit 40
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map INI-to-Orange permit 10
+ match ip address prefix-list INI-to-Orange
+!
+route-map INI-to-Orange permit 20
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map Orange-to-INI permit 10
+ match ip address prefix-list Orange2INI
+!
+route-map OrangeRD-to-INI permit 10
+ match community Orange1
+ set local-preference 120
+!
+route-map OrangeRD-to-INI permit 20
+ match community Orange2
+ set local-preference 110
+!
+route-map OrangeRD-to-INI permit 30
+ match community Orange3
+ set local-preference 100
+!
+route-map OrangeRD-to-INI permit 40
+ match community Orange4
+ set local-preference 90
+!
+route-map OrangeRD-to-INI permit 50
+ match ip address prefix-list OrangeRD2INI
+ set local-preference 60
+!
+route-map RM-EURO-RNI-TO-OCE-INI permit 10
+ match ip address prefix-list PL-EURO-RNI-OCE-INI-IN
+!
+route-map RM-OCE-INI-TO-EURO-RNI permit 10
+ match ip address prefix-list PL-VIP-OCE-INI-EURO-RNI-OUT
+!
+route-map RM-OCE-INI-TO-EURO-RNI permit 20
+ match ip address prefix-list PL-MVS-OCE-INI-EURO-RNI-OUT
+ match as-path 21
+!
+route-map to-CEMEA permit 10
+ match ip address prefix-list OCC-INI-networks
+ set as-path prepend 64674 64674 64674 64674
+!
+route-map to-CEMEA permit 20
+ match ip address prefix-list OCC-Corp-networks
+ set as-path prepend 64674 64674 64674 64674
+!
+route-map to-CEMEA permit 30
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-CEMEA permit 40
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-CEMEA permit 50
+ match ip address prefix-list OCAP-INI-networks
+!
+route-map to-CEMEA permit 60
+ match ip address prefix-list OCX-INI
+!
+route-map to-CEMEA permit 70
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map to-CAN permit 10
+ match ip address prefix-list OCE-INI-networks
+!
+route-map to-CAN permit 20
+ match ip address prefix-list OCE-Corp-networks
+!
+route-map to-CAN permit 30
+ match ip address prefix-list OCX-INI
+!
+route-map to-CAN permit 40
+ match ip address prefix-list MVS-networks
+ match as-path 21
+!
+route-map to-CAN permit 50
+ match ip address prefix-list OCE-INI-TP-networks
+!
+route-map INI-to-DPS_2 deny 10
+ match as-path 2
+!
+route-map INI-to-DPS_2 permit 20
+ match ip address prefix-list INI-DPS-networks_2
+!
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server trap link ietf
+snmp-server trap-source Loopback0
+snmp-server tftp-server-list 99
+snmp-server location OCX
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+!
+tacacs-server host 126.175.58.45 key 7 09424B1D1A0A1913053E012724322D376C73
+tacacs-server host 126.170.160.247 key 7 09424B1D1A0A1913053E012724322D3763
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D376675
+!
+control-plane
+!
+banner motd ^CC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37677745
+ transport preferred none
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37677744
+ logging synchronous
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D3767774B
+ logging synchronous
+ transport preferred none
+ transport input ssh
+!
+exception crashinfo buffersize 80
+ntp clock-period 17180053
+ntp update-calendar
+ntp server 126.170.165.28
+ntp server 126.175.61.217 prefer
+!
+end
+

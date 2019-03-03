@@ -1,0 +1,1343 @@
+st55in64hras# show running-config
+
+!Command: show running-config
+!Time: Mon May 14 04:53:21 2018
+
+version 5.1(3)N1(1a)
+hostname st55in64hras
+
+no feature telnet
+no feature http-server
+feature tacacs+
+cfs eth distribute
+feature udld
+feature interface-vlan
+feature lacp
+feature vpc
+feature lldp
+feature fex
+
+username admin password 5 $1$00000000$x90WWsIXa/NV307C9SWM41 role network-admin
+no password netconanRemoved17
+
+banner motd #C******************************* WARNING **************************
+*********                                                                       
+ ** If you are not authorized to access this system, disconnect now. **   
+                                                                     ** All atte
+mpts to access this system and/or its resources are recorded. ** Unauthorized a
+ttempts may subject you to a fine and/or imprisonment in ** accordance with Titl
+e 18, USC, Section 1030. For questions regarding ** this system please contact
+ Information Security Hotline (650)432-4329. **                                 
+                                       *****************************************
+**********************************
+
+
+
+#
+
+ip domain-lookup
+ip host st55in64hras 0.0.0.0
+tacacs-server key 7 "netconanRemoved18"
+tacacs-server timeout 15
+tacacs-server host 126.175.58.45 
+tacacs-server host 126.170.160.247 
+aaa group server tacacs+ tacacs01 
+    server 126.175.58.45 
+    server 126.170.160.247 
+ip access-list 125
+  10 permit ip 126.105.145.135/8 any
+ip access-list 98
+  10 permit ip 126.173.34.41/14 any
+  20 permit ip 126.168.136.164/16 any
+  30 permit ip 126.170.176.15/16 any
+  40 permit ip 126.171.230.136/16 any
+  50 deny ip any any
+ip access-list 99
+  10 permit ip 126.173.34.41/14 any
+  20 permit ip 126.168.136.164/16 any
+  30 permit ip 126.170.176.15/16 any
+  40 permit ip 126.171.230.136/16 any
+  50 permit ip 126.182.152.234/32 any
+  60 permit ip 126.182.155.209/32 any
+  70 permit ip 126.183.172.226/32 any
+  80 permit ip 126.183.173.231/32 any
+  90 deny ip any any
+class-map type qos class-fcoe
+class-map type queuing class-fcoe
+  match qos-group 1
+class-map type queuing class-all-flood
+  match qos-group 2
+class-map type queuing class-ip-multicast
+  match qos-group 2
+class-map type network-qos class-fcoe
+  match qos-group 1
+class-map type network-qos class-all-flood
+  match qos-group 2
+class-map type network-qos class-ip-multicast
+  match qos-group 2
+fex 100
+  no hardware N2248T queue-limit
+  pinning max-links 1
+  description "FEX0100"
+fex 102
+  pinning max-links 1
+  description "FEX0102"
+fex 104
+  pinning max-links 1
+  description "FEX0104"
+fex 106
+  pinning max-links 1
+  description "FEX0106"
+fex 108
+  pinning max-links 1
+  description "FEX0108"
+snmp-server contact GLANOPS 6730-4625
+snmp-server location OCC-S
+snmp-server user admin network-admin auth md5 netconanRemoved171 priv netconanRemoved171 localizedkey
+snmp-server host 126.170.164.99 traps version 1 netconanRemoved5 
+snmp-server host 126.175.60.250 traps version 1 netconanRemoved5 
+snmp-server host 126.170.38.121 traps version 1 netconanRemoved5 
+snmp-server host 126.170.38.121 use-vrf default
+snmp-server host 126.172.24.96 traps version 1 netconanRemoved5 
+snmp-server host 126.172.24.96 use-vrf default
+snmp-server enable traps bridge newroot
+snmp-server enable traps bridge topologychange
+snmp-server community netconanRemoved4 group network-operator
+snmp-server community netconanRemoved3 group network-operator
+snmp-server community netconanRemoved4 use-acl 98
+snmp-server community netconanRemoved3 use-acl 99
+ntp server 126.170.165.28 prefer
+ntp server 126.175.61.217
+aaa authentication login default group tacacs01 
+aaa authorization config-commands default group tacacs01 local 
+aaa authorization commands default group tacacs01 local 
+aaa accounting default group tacacs01 
+
+vrf context management
+vlan 1
+vlan 14
+  name CMLS_EDW_Vlan
+vlan 88
+  name dedicated-CMLS
+vlan 812
+  name MDE_Private_VLAN
+vlan 900
+  name DB2_Private_VLAN
+vlan 901
+  name DB_Private_VLAN
+spanning-tree port type edge bpduguard default
+vpc domain 20
+  role priority 110
+  peer-keepalive destination 126.104.66.9 source 126.104.66.11
+  auto-recovery
+  ip arp synchronize
+
+
+interface Vlan1
+
+interface Vlan14
+  no shutdown
+  ip address 126.218.108.27/24
+
+interface port-channel1
+  description vPC peer link to st55in65hras
+  switchport mode trunk
+  spanning-tree port type network
+  logging event port link-status
+  logging event port trunk-status
+  vpc peer-link
+
+interface port-channel12
+  description to rt55in10hrds p1/7
+  switchport mode trunk
+  spanning-tree port type normal
+  logging event port link-status
+  logging event port trunk-status
+  vpc 12
+
+interface port-channel13
+  description to rt75in11hrds p1/7
+  switchport mode trunk
+  spanning-tree port type normal
+  logging event port link-status
+  logging event port trunk-status
+  vpc 13
+
+interface port-channel100
+  switchport mode fex-fabric
+  fex associate 100
+
+interface port-channel102
+  switchport mode fex-fabric
+  fex associate 102
+
+interface port-channel104
+  switchport mode fex-fabric
+  fex associate 104
+
+interface port-channel106
+  switchport mode fex-fabric
+  fex associate 106
+
+interface port-channel108
+  switchport mode fex-fabric
+  fex associate 108
+
+interface Ethernet1/1
+  description VPC Peer
+  switchport mode trunk
+  channel-group 1 mode active
+
+interface Ethernet1/2
+  description VPC Peer
+  switchport mode trunk
+  channel-group 1 mode active
+
+interface Ethernet1/3
+  description to rt75in11hrds p1/7
+  switchport mode trunk
+  spanning-tree port type normal
+  channel-group 13 mode active
+
+interface Ethernet1/4
+  description to rt55in10hrds p1/7
+  switchport mode trunk
+  spanning-tree port type normal
+  channel-group 12 mode active
+
+interface Ethernet1/5
+  description st55in64hras-100 f-ext1
+  switchport mode fex-fabric
+  fex associate 100
+  channel-group 100
+
+interface Ethernet1/6
+  description st55in64hras-102 f-ext1
+  switchport mode fex-fabric
+  fex associate 102
+  channel-group 102
+
+interface Ethernet1/7
+  description st55in64hras-104 f-ext1
+  switchport mode fex-fabric
+  fex associate 104
+  channel-group 104
+
+interface Ethernet1/8
+  description st55in64hras-106 f-ext1
+  switchport mode fex-fabric
+  fex associate 106
+  channel-group 106
+
+interface Ethernet1/9
+  description st55in64hras-108 f-ext1
+  switchport mode fex-fabric
+  fex associate 108
+  channel-group 108
+
+interface Ethernet1/10
+
+interface Ethernet1/11
+
+interface Ethernet1/12
+
+interface Ethernet1/13
+
+interface Ethernet1/14
+
+interface Ethernet1/15
+
+interface Ethernet1/16
+
+interface Ethernet1/17
+
+interface Ethernet1/18
+
+interface Ethernet1/19
+
+interface Ethernet1/20
+
+interface Ethernet1/21
+
+interface Ethernet1/22
+
+interface Ethernet1/23
+
+interface Ethernet1/24
+
+interface Ethernet1/25
+
+interface Ethernet1/26
+
+interface Ethernet1/27
+
+interface Ethernet1/28
+
+interface Ethernet1/29
+
+interface Ethernet1/30
+
+interface Ethernet1/31
+
+interface Ethernet1/32
+
+interface Ethernet1/33
+
+interface Ethernet1/34
+
+interface Ethernet1/35
+
+interface Ethernet1/36
+
+interface Ethernet1/37
+
+interface Ethernet1/38
+
+interface Ethernet1/39
+
+interface Ethernet1/40
+
+interface Ethernet1/41
+
+interface Ethernet1/42
+
+interface Ethernet1/43
+
+interface Ethernet1/44
+
+interface Ethernet1/45
+
+interface Ethernet1/46
+
+interface Ethernet1/47
+
+interface Ethernet1/48
+
+interface Ethernet2/1
+
+interface Ethernet2/2
+
+interface Ethernet2/3
+
+interface Ethernet2/4
+
+interface Ethernet2/5
+
+interface Ethernet2/6
+
+interface Ethernet2/7
+
+interface Ethernet2/8
+
+interface Ethernet2/9
+
+interface Ethernet2/10
+
+interface Ethernet2/11
+
+interface Ethernet2/12
+
+interface Ethernet2/13
+
+interface Ethernet2/14
+
+interface Ethernet2/15
+
+interface Ethernet2/16
+
+interface Ethernet3/1
+
+interface Ethernet3/2
+
+interface Ethernet3/3
+
+interface Ethernet3/4
+
+interface Ethernet3/5
+
+interface Ethernet3/6
+
+interface Ethernet3/7
+
+interface Ethernet3/8
+
+interface Ethernet3/9
+
+interface Ethernet3/10
+
+interface Ethernet3/11
+
+interface Ethernet3/12
+
+interface Ethernet3/13
+
+interface Ethernet3/14
+
+interface Ethernet3/15
+
+interface Ethernet3/16
+
+interface Ethernet4/1
+
+interface Ethernet4/2
+
+interface Ethernet4/3
+
+interface Ethernet4/4
+
+interface Ethernet4/5
+
+interface Ethernet4/6
+
+interface Ethernet4/7
+
+interface Ethernet4/8
+
+interface Ethernet4/9
+
+interface Ethernet4/10
+
+interface Ethernet4/11
+
+interface Ethernet4/12
+
+interface Ethernet4/13
+
+interface Ethernet4/14
+
+interface Ethernet4/15
+
+interface Ethernet4/16
+
+interface mgmt0
+  no snmp trap link-status
+  ip address 126.104.66.11/30
+
+interface Ethernet100/1/1
+  description sa55vbisdb01b DB2 Network 
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/2
+  description sa55vbisdb02b DB2 Network 
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/3
+  description sa55vbisdb03b DB2 Network 
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/4
+  shutdown
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/5
+  description sa55qmtapp02 14.27 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+  speed 1000
+
+interface Ethernet100/1/6
+  shutdown
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/7
+  shutdown
+
+interface Ethernet100/1/8
+  description sa55vbisdb02 126.218.108.214 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/9
+  description sa55vbisdb03
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/10
+  description sa55dfa01
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/11
+  description sa55vctr01a 126.218.108.235 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/12
+  description sa55vctr01
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/13
+  description sa55cmlsp13
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/14
+  description sa55cmlsp14 126.218.108.140 WO202873 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+  flowcontrol send off
+
+interface Ethernet100/1/15
+  description sa55vbisdb03b
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/16
+  description sa55cmlsp10
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/17
+  description sa55cmlsp11 126.218.108.134 IPR 3101 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/18
+  description ss55vmsnmed01 vlan218 126.218.108.199 IPR 3123
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/19
+  description sa55dtrsp01
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/20
+  description SA55GMBDBP01 126.218.108.130 IPR 4546 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/21
+  description sa55cmlsp12 126.218.108.128 IPR 5713
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/22
+  description sa55cirdb01-primary 126.218.108.237 WO266635 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/23
+  description sa55vinapp01-primary 126.218.108.159 WO261641 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/24
+  description na55damclp16 126.218.108.145 WO398464 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/25
+  description na55damclp18 126.218.108.150 WO398464  
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/26
+  description sa55dtrsp01
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet100/1/27
+  description FI552I137P02 VIOA NIC1 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/28
+  description FI552I137P02 VIOA NIC2 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/29
+  description FI552J137P02 VIOA NIC1 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/30
+  description FI552J137P02 VIOA NIC2 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/31
+  description FI552K137P01 VIOA NIC1 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/32
+  description FI552K137P01 VIOA NIC2 WO480672
+  switchport mode trunk
+  switchport trunk allowed vlan 14,812,900-901
+  speed 1000
+
+interface Ethernet100/1/33
+
+interface Ethernet100/1/34
+
+interface Ethernet100/1/35
+
+interface Ethernet100/1/36
+
+interface Ethernet100/1/37
+
+interface Ethernet100/1/38
+
+interface Ethernet100/1/39
+
+interface Ethernet100/1/40
+
+interface Ethernet100/1/41
+
+interface Ethernet100/1/42
+
+interface Ethernet100/1/43
+
+interface Ethernet100/1/44
+
+interface Ethernet100/1/45
+
+interface Ethernet100/1/46
+
+interface Ethernet100/1/47
+
+interface Ethernet100/1/48
+
+interface Ethernet102/1/1
+  description sa55odsp01 
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/2
+  description sa55odsp02  
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/3
+  description sa55odsp02  
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/4
+  description sa55odsp02
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/5
+  description sa55odsp03
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/6
+  description sa55odsp03  
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/7
+  description sa55odsp03
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/8
+  description sa55odsp04   
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/9
+  description sa55odsp04 126.218.108.220
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/10
+  description sa55odsp04 
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/11
+  description sa55odsp05
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/12
+  description sa55odsp05 126.218.108.218
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/13
+  description sa55odsp05
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/14
+  description sa55odsp06
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/15
+  description sa55odsp06 126.218.108.217
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/16
+  description sa55odsp06 
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/17
+  description sa55odsp07  
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/18
+  description sa55odsp07 126.218.108.206
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/19
+  description sa55odsp07     
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/20
+  description sa55odsp08     
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/21
+  description sa55odsp08 126.218.108.204
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/22
+  description sa55odsp08      
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/23
+  description sa55odsp09     
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/24
+  description sa55odsp09 126.218.108.203
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/25
+  description sa55odsp09      
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/26
+  description sa55odsp10     
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/27
+  description sa55odsp10 126.218.108.200
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/28
+  description sa55odsp10      
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/29
+  description sa55odsnim01 126.218.108.198      
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/30
+  description sa55odsp01
+  switchport access vlan 901
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/31
+  description sa55odsp01
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/32
+  description sm550cmlshsmp01 126.218.108.172 WO349681 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/33
+  description SU55ISIPRD02n2 ipr 3155691 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet102/1/34
+  description sa55cmlsp31 126.218.108.239 CARD1 SLOT0 WO1197331
+  switchport access vlan 14
+  speed 1000
+  duplex full
+
+interface Ethernet102/1/35
+  description sa55cmlsp32 126.218.108.210 CARD1 SLOT0 WO1197331
+  switchport access vlan 14
+  speed 1000
+  duplex full
+
+interface Ethernet102/1/36
+
+interface Ethernet102/1/37
+
+interface Ethernet102/1/38
+
+interface Ethernet102/1/39
+
+interface Ethernet102/1/40
+
+interface Ethernet102/1/41
+
+interface Ethernet102/1/42
+
+interface Ethernet102/1/43
+
+interface Ethernet102/1/44
+
+interface Ethernet102/1/45
+
+interface Ethernet102/1/46
+
+interface Ethernet102/1/47
+
+interface Ethernet102/1/48
+
+interface Ethernet104/1/1
+  description fi552i95p01 VIOB 116da8 NIC2 WO221212
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+
+interface Ethernet104/1/2
+  description fi552k95p03 VIOA 116da8 NIC2 WO221212
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+
+interface Ethernet104/1/3
+  description sa55cmlsp15 
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+
+interface Ethernet104/1/4
+  description sm550cmlshsmp01 126.218.108.172 WO349681 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet104/1/5
+  description sm550vmcsshsmp01 126.218.108.163 WO349681 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet104/1/6
+  description fi552i95p03 VIOA 116da8 NIC2 WO318414
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  speed 1000
+  duplex full
+
+interface Ethernet104/1/7
+  description fi552i95p03 VIOB 116da8 NIC2 WO318414
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  speed 1000
+  duplex full
+
+interface Ethernet104/1/8
+  description FI552M95P03 VIOA 116da81 WO332891
+  switchport mode trunk
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  speed 1000
+  duplex full
+
+interface Ethernet104/1/9
+  description fi552m95p03
+  switchport mode trunk
+  switchport access vlan 14
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  speed 1000
+  duplex full
+
+interface Ethernet104/1/10
+  description fi552i95p01
+  switchport mode trunk
+  switchport trunk allowed vlan 14,900-901
+  spanning-tree port type edge trunk
+  spanning-tree guard root
+  speed 1000
+  duplex full
+
+interface Ethernet104/1/11
+
+interface Ethernet104/1/12
+
+interface Ethernet104/1/13
+
+interface Ethernet104/1/14
+
+interface Ethernet104/1/15
+
+interface Ethernet104/1/16
+
+interface Ethernet104/1/17
+
+interface Ethernet104/1/18
+
+interface Ethernet104/1/19
+
+interface Ethernet104/1/20
+
+interface Ethernet104/1/21
+
+interface Ethernet104/1/22
+
+interface Ethernet104/1/23
+
+interface Ethernet104/1/24
+
+interface Ethernet104/1/25
+
+interface Ethernet104/1/26
+
+interface Ethernet104/1/27
+
+interface Ethernet104/1/28
+
+interface Ethernet104/1/29
+
+interface Ethernet104/1/30
+
+interface Ethernet104/1/31
+
+interface Ethernet104/1/32
+
+interface Ethernet104/1/33
+
+interface Ethernet104/1/34
+
+interface Ethernet104/1/35
+
+interface Ethernet104/1/36
+
+interface Ethernet104/1/37
+
+interface Ethernet104/1/38
+
+interface Ethernet104/1/39
+
+interface Ethernet104/1/40
+
+interface Ethernet104/1/41
+
+interface Ethernet104/1/42
+
+interface Ethernet104/1/43
+
+interface Ethernet104/1/44
+
+interface Ethernet104/1/45
+
+interface Ethernet104/1/46
+
+interface Ethernet104/1/47
+
+interface Ethernet104/1/48
+
+interface Ethernet106/1/1
+  shutdown
+
+interface Ethernet106/1/2
+  shutdown
+
+interface Ethernet106/1/3
+  description sa55vinmdedb03 -nomon 126.218.108.132 
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet106/1/4
+  description sa55vinmdedb01 -nomon Private VLAN 
+  switchport access vlan 812
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet106/1/5
+  description sa55vinmdedb02 -nomon Private VLAN 
+  switchport access vlan 812
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet106/1/6
+  description sa55vinmdedb03 -nomon Private VLAN 
+  switchport access vlan 812
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet106/1/7
+
+interface Ethernet106/1/8
+
+interface Ethernet106/1/9
+
+interface Ethernet106/1/10
+
+interface Ethernet106/1/11
+
+interface Ethernet106/1/12
+
+interface Ethernet106/1/13
+
+interface Ethernet106/1/14
+
+interface Ethernet106/1/15
+
+interface Ethernet106/1/16
+
+interface Ethernet106/1/17
+
+interface Ethernet106/1/18
+
+interface Ethernet106/1/19
+
+interface Ethernet106/1/20
+
+interface Ethernet106/1/21
+
+interface Ethernet106/1/22
+
+interface Ethernet106/1/23
+
+interface Ethernet106/1/24
+
+interface Ethernet106/1/25
+
+interface Ethernet106/1/26
+
+interface Ethernet106/1/27
+
+interface Ethernet106/1/28
+
+interface Ethernet106/1/29
+
+interface Ethernet106/1/30
+
+interface Ethernet106/1/31
+
+interface Ethernet106/1/32
+
+interface Ethernet106/1/33
+
+interface Ethernet106/1/34
+
+interface Ethernet106/1/35
+
+interface Ethernet106/1/36
+
+interface Ethernet106/1/37
+
+interface Ethernet106/1/38
+
+interface Ethernet106/1/39
+
+interface Ethernet106/1/40
+
+interface Ethernet106/1/41
+
+interface Ethernet106/1/42
+
+interface Ethernet106/1/43
+
+interface Ethernet106/1/44
+
+interface Ethernet106/1/45
+
+interface Ethernet106/1/46
+
+interface Ethernet106/1/47
+
+interface Ethernet106/1/48
+
+interface Ethernet108/1/1
+  shutdown
+
+interface Ethernet108/1/2
+  shutdown
+
+interface Ethernet108/1/3
+  description description sa55vbisdb04b DB2 Network
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet108/1/4
+  description sa55vbisdb05b DB2 Network 
+  switchport access vlan 900
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet108/1/5
+  shutdown
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet108/1/6
+  description Sa55vbis01 126.218.108.212
+  switchport access vlan 14
+  spanning-tree port type edge
+  spanning-tree guard root
+  spanning-tree bpdufilter enable
+
+interface Ethernet108/1/7
+
+interface Ethernet108/1/8
+
+interface Ethernet108/1/9
+
+interface Ethernet108/1/10
+
+interface Ethernet108/1/11
+
+interface Ethernet108/1/12
+
+interface Ethernet108/1/13
+
+interface Ethernet108/1/14
+
+interface Ethernet108/1/15
+
+interface Ethernet108/1/16
+
+interface Ethernet108/1/17
+
+interface Ethernet108/1/18
+
+interface Ethernet108/1/19
+
+interface Ethernet108/1/20
+
+interface Ethernet108/1/21
+
+interface Ethernet108/1/22
+
+interface Ethernet108/1/23
+
+interface Ethernet108/1/24
+
+interface Ethernet108/1/25
+
+interface Ethernet108/1/26
+
+interface Ethernet108/1/27
+
+interface Ethernet108/1/28
+
+interface Ethernet108/1/29
+
+interface Ethernet108/1/30
+
+interface Ethernet108/1/31
+
+interface Ethernet108/1/32
+
+interface Ethernet108/1/33
+
+interface Ethernet108/1/34
+
+interface Ethernet108/1/35
+
+interface Ethernet108/1/36
+
+interface Ethernet108/1/37
+
+interface Ethernet108/1/38
+
+interface Ethernet108/1/39
+
+interface Ethernet108/1/40
+
+interface Ethernet108/1/41
+
+interface Ethernet108/1/42
+
+interface Ethernet108/1/43
+
+interface Ethernet108/1/44
+
+interface Ethernet108/1/45
+
+interface Ethernet108/1/46
+
+interface Ethernet108/1/47
+
+interface Ethernet108/1/48
+cli alias name wr copy run start
+line console
+  exec-timeout 15
+line vty
+  exec-timeout 15
+  access-class 125 in
+boot kickstart bootflash:/n5000-uk9-kickstart.5.1.3.N1.1a.bin
+boot system bootflash:/n5000-uk9.5.1.3.N1.1a.bin 
+ip route 0.0.0.0/0 126.218.108.249
+mac address-table aging-time 16000
+logging server 126.170.38.121 6 use-vrf default
+logging server 126.172.24.96 6 use-vrf default
+
+
+st55in64hras# show | inc END opnet collection
+               ^
+st55in64hras# 

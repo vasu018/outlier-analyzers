@@ -1,0 +1,946 @@
+ST55IN80HRAS#show running-config
+Building configuration...
+
+Current configuration : 22582 bytes
+!
+! Last configuration change at 17:54:41 UTC Mon Apr 9 2018 by kv3c6dbdap
+! NVRAM config last updated at 05:10:56 UTC Mon May 7 2018 by intell3c6dbden
+!
+upgrade fpd auto
+version 12.2
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+service counters max age 5
+!
+hostname ST55IN80HRAS
+!
+boot-start-marker
+boot system sup-bootdisk:s72033-advipservicesk9_wan-mz.122-33.SXI6.bin
+boot-end-marker
+!
+security passwords min-length 1
+logging buffered 16384
+no logging console
+no logging monitor
+enable secret 5 $1$0000$RPBlp806HsozHJzX1qkX40
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+aaa session-id common
+svclc multiple-vlan-interfaces
+no ip source-route
+!
+!
+!
+no ip bootp server
+ip ssh time-out 60
+ip ssh version 2
+no ip domain-lookup
+ip domain-name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+vtp domain OCC_MainFrame
+vtp mode transparent
+no mls acl tcam share-global
+mls netflow interface
+no mls rate-limit unicast ip rpf-failure 
+no mls rate-limit unicast ip icmp unreachable no-route 
+no mls rate-limit unicast ip icmp unreachable acl-drop 
+no mls rate-limit unicast ip errors 
+mls cef error action freeze
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-3c6dbd
+!
+no power enable module 8
+diagnostic bootup level minimal
+access-list 11 permit 196.1.253.83 0.0.0.255
+access-list 11 permit 193.126.41.203 0.0.0.255
+access-list 45 permit 184.140.192.20 0.0.0.255
+access-list 45 permit 184.140.194.27 0.0.0.255
+access-list 45 permit 193.126.50.249 0.0.0.255
+access-list 45 permit 126.218.99.135 0.0.255.255
+access-list 46 permit 193.126.66.132 0.0.1.255
+access-list 46 permit 126.218.67.174 0.0.0.255
+access-list 46 permit 126.218.71.17 0.0.0.255
+access-list 46 permit 126.218.70.15 0.0.0.255
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 105 remark VACL Capture
+access-list 105 permit ip any any
+access-list 110 permit tcp host 193.126.67.37 eq 51102 any
+access-list 110 permit tcp host 126.218.64.151 eq 51102 any
+access-list 110 permit tcp host 193.126.30.249 eq 51122 any
+access-list 110 permit tcp host 193.126.50.253 eq 51102 any
+access-list 120 permit tcp host 193.126.41.220 any eq 50112
+access-list 120 permit tcp host 193.126.41.222 any eq 50112
+access-list 120 permit tcp host 196.1.253.118 any eq 50112
+access-list 120 permit tcp host 196.1.253.113 any eq 50112
+access-list 120 permit tcp host 196.1.253.114 any eq 50112
+access-list 120 permit tcp host 196.1.253.117 any eq 50112
+access-list 120 permit tcp host 126.218.78.240 any eq 50112
+access-list 120 permit tcp host 126.218.78.249 any eq 50112
+access-list 120 permit tcp host 126.218.78.250 any eq 50112
+access-list 120 permit tcp host 126.218.78.248 any eq 50122
+access-list 120 permit tcp host 126.218.78.241 any eq 50112
+access-list 120 permit tcp host 196.1.253.64 any eq 50112
+access-list 120 permit tcp host 196.1.253.21 any eq 50122
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+access-list 125 permit ip 183.108.7.7 0.15.255.255 any
+access-list 130 permit tcp any host 193.126.67.37 eq 51101
+access-list 130 permit tcp any eq 50111 host 193.126.41.220
+access-list 130 permit tcp any eq 50111 host 193.126.41.222
+access-list 130 permit tcp any eq 50111 host 196.1.253.113
+access-list 130 permit tcp any eq 50111 host 196.1.253.118
+access-list 130 permit tcp any eq 50111 host 196.1.253.114
+access-list 130 permit tcp any eq 50111 host 196.1.253.117
+access-list 130 permit tcp any eq 50111 host 126.218.78.240
+access-list 130 permit tcp any eq 50111 host 126.218.78.249
+access-list 130 permit tcp any eq 50111 host 126.218.78.250
+access-list 130 permit tcp any eq 50121 host 126.218.78.248
+access-list 130 permit tcp any host 126.218.64.151 eq 51101
+access-list 130 permit tcp any host 193.126.30.249 eq 51121
+access-list 130 permit tcp any host 193.126.50.253 eq 51101
+access-list 130 permit tcp any eq 50111 host 126.218.78.241
+access-list 130 permit tcp any eq 50111 host 196.1.253.64
+access-list 130 permit tcp any eq 50121 host 196.1.253.21
+!
+redundancy
+ main-cpu
+  auto-sync running-config
+ mode sso
+!
+ip access-list extended BRP
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit udp 126.218.78.129 0.0.0.3 range 12000 12004 126.218.78.129 0.0.0.3
+ permit udp 126.218.78.129 0.0.0.3 126.218.78.129 0.0.0.3 range 12000 12004
+ permit tcp any 126.218.78.129 0.0.0.3 eq 23023
+ permit tcp any eq 23023 126.218.78.129 0.0.0.3
+ permit tcp any host 126.218.77.13
+ permit tcp host 126.218.77.13 any
+ permit tcp any host 126.218.77.2
+ permit tcp host 126.218.77.2 any
+ permit udp any host 126.218.77.13
+ permit udp host 126.218.77.13 any
+ permit udp any host 126.218.77.2
+ permit udp host 126.218.77.2 any
+ permit tcp any host 126.218.78.134
+ permit tcp host 126.218.78.134 any
+ permit udp any host 126.218.78.134
+ permit udp host 126.218.78.134 any
+ permit tcp 126.218.78.129 0.0.0.3 eq 23023 any
+ permit ip 126.218.78.129 0.0.0.3 126.218.78.129 0.0.0.3
+ permit tcp host 126.218.78.129 range 11060 11100 host 196.1.253.113 range 11060 11100
+ permit tcp host 126.218.78.130 range 11060 11100 host 196.1.253.113 range 11060 11100
+ permit tcp host 196.1.253.113 range 11060 11100 host 126.218.78.129 range 11060 11100
+ permit tcp host 196.1.253.113 range 11060 11100 host 126.218.78.130 range 11060 11100
+ deny ip any any log
+ip access-list extended BRP_OUT
+ permit ospf any any
+ permit tcp any any eq bgp
+ permit tcp any eq bgp any
+ permit icmp any any
+ permit udp 126.218.78.129 0.0.0.3 range 12000 12004 126.218.78.129 0.0.0.3
+ permit udp 126.218.78.129 0.0.0.3 126.218.78.129 0.0.0.3 range 12000 12004
+ permit tcp any 126.218.78.129 0.0.0.3 eq 23023
+ permit tcp 126.218.78.129 0.0.0.3 eq 23023 any
+ permit ip 126.218.78.129 0.0.0.3 126.218.78.129 0.0.0.3
+ permit ip any host 126.218.79.53
+ permit ip host 126.218.79.53 any
+ permit ip any host 126.218.79.60
+ permit ip host 126.218.79.60 any
+ permit ip any host 126.218.78.134
+ permit ip host 126.218.78.134 any
+ permit tcp host 126.218.78.129 range 11060 11100 host 196.1.253.113 range 11060 11100
+ permit tcp host 126.218.78.130 range 11060 11100 host 196.1.253.113 range 11060 11100
+ permit tcp host 196.1.253.113 range 11060 11100 host 126.218.78.129 range 11060 11100
+ permit tcp host 196.1.253.113 range 11060 11100 host 126.218.78.130 range 11060 11100
+ deny ip any any log
+!
+vlan internal allocation policy ascending
+vlan access-log ratelimit 2000
+!
+vlan 40
+ name TANDEM_Prod_VLAN
+!
+vlan 70
+ name Tape_controller_Vlan
+!
+vlan 120
+ name INI_Server_Farm_Switch
+!
+vlan 401
+ name to_st55hr90
+!
+vlan 402
+ name to_st55hr91
+!
+vlan 444
+ name VLAN_for_ACE
+!
+vlan 445
+ name FT_VLAN_for_ACE
+!
+vlan 724
+ name F5_HA
+!
+! 
+!
+!
+!
+interface Loopback0
+ ip address 126.218.233.50 255.255.255.255
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Port-channel1
+ switchport
+ switchport access vlan 120
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 40,120,444,445,724
+ switchport mode trunk
+!
+interface Port-channel2
+ description F5 HA port-channel 
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 444,724
+ switchport mode trunk
+!
+interface GigabitEthernet1/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/3
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/4
+ description OCCMVSDACS01LMU02-01
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/5
+ description to SU55LMU03
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/6
+ description to VPUS550C
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/7
+ description to SU55LMU05
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/8
+ description to SU55LMU09
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/9
+ description to rc55escn01 
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/10
+ description to SU55LMU07 2B 
+ switchport
+ switchport access vlan 70
+ switchport mode access
+ load-interval 30
+ spanning-tree portfast edge
+!
+interface GigabitEthernet1/11
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/12
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/13
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/14
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/21
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/24
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/25
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/26
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/27
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/28
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/29
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/30
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/31
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/32
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/33
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/34
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/35
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/36
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/37
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/38
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/39
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/40
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/41
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/42
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/43
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/44
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/45
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/46
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/47
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/48
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/1
+ description link to st55hr90 port 21
+ switchport
+ switchport access vlan 401
+ switchport mode access
+!
+interface GigabitEthernet2/2
+ description link to st55hr91 port 21
+ switchport
+ switchport access vlan 402
+ switchport mode access
+!
+interface GigabitEthernet2/3
+ description to LB55IN03MVS 
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 444,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 2 mode active
+!
+interface GigabitEthernet2/4
+ description to LB55IN03MVS 
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 444,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 2 mode active
+!
+interface GigabitEthernet2/5
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/6
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/7
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/8
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/9
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/10
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/11
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/12
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/13
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/14
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/21
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet2/24
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet3/1
+ description To ST55IN81HRAS 3/1
+ switchport
+ switchport access vlan 120
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 40,120,444,445,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet3/2
+ description To RT55IN00HRCR 2/5
+ ip address 126.218.97.36 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet3/3
+ description To ST75HR82 3/3
+ ip address 126.218.76.255 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf cost 20
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet3/4
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet3/5
+ description CCPUB OSA LCSS0 CHP0F
+ ip address 126.218.77.37 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_MVS
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376473
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet3/6
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet3/7
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet3/8
+ description -nomon SPAN port for Network Tools
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet4/1
+ description To ST55IN81HRAS 4/1
+ switchport
+ switchport access vlan 40
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 40,120,444,445,724
+ switchport mode trunk
+ load-interval 30
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet4/2
+ description To RT75IN01HRCR 2/5
+ ip address 126.218.96.122 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet4/3
+ description To ST75HR82 4/3
+ ip address 126.218.76.235 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_EDGE
+ ip ospf network point-to-point
+ ip ospf cost 20
+ ip ospf hello-interval 1
+ ip ospf retransmit-interval 3
+ load-interval 30
+!
+interface TenGigabitEthernet4/4
+ description To BRP of MVS4 & M4N1 OSA 1
+ ip address 126.218.77.11 255.255.255.248
+ ip access-group BRP in
+ ip access-group BRP_OUT out
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_MVS
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376473
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+ shutdown
+!
+interface TenGigabitEthernet4/5
+ description CCPUB OSA LCSS1 CHP11
+ ip address 126.218.77.49 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376470
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet4/6
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet4/7
+ description To BRP of MVS4 & M4N1 OSA 1
+ ip address 126.218.77.11 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip policy route-map FROM_MVS
+ ip ospf message-digest-key 1 md5 7 09424B1D1A0A1913053E012724322D376473
+ ip ospf hello-interval 2
+ ip ospf priority 2
+ load-interval 30
+!
+interface TenGigabitEthernet4/8
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/2
+ no ip address
+ shutdown
+ media-type rj45
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan40
+ description VLAN for TANDEM Prod VLAN for GGS, VROL, CDI, etc
+ ip address 126.218.65.162 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ standby 40 ip 126.218.65.161
+ standby 40 timers 1 4
+ standby 40 priority 110
+!
+interface Vlan70
+ description Server Segment
+ ip address 126.218.53.238 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan120
+ description To ST55IN81HRAS IntraArea 1
+ ip address 126.218.76.241 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan401
+ description VLAN st55hr90
+ ip address 126.218.101.102 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan402
+ description VLAN st55hr91
+ ip address 126.218.101.108 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan444
+ description VLAN for ACE
+ ip address 126.218.71.108 255.255.255.224
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ standby 44 ip 126.218.71.111
+ standby 44 timers 1 4
+ standby 44 priority 110
+!
+interface Vlan445
+ description FT VLAN for ACE
+ ip address 126.218.71.92 255.255.255.224
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+router ospf 64555
+ router-id 126.218.233.50
+ log-adjacency-changes
+ area 1 authentication message-digest
+ area 1 stub no-summary
+ timers throttle spf 1000 5000 5000
+ redistribute rip metric-type 1 subnets
+ network 126.218.97.39 0.0.0.7 area 0
+ network 126.218.96.121 0.0.0.7 area 0
+ network 126.218.101.100 0.0.0.7 area 0
+ network 126.218.101.111 0.0.0.7 area 0
+ network 126.218.76.240 0.0.7.255 area 1
+ network 126.218.65.160 0.0.7.255 area 1
+ network 126.218.53.239 0.0.0.255 area 0
+ network 126.218.233.50 0.0.0.0 area 1
+!
+router bgp 64555
+ no synchronization
+ bgp log-neighbor-changes
+ bgp maxas-limit 254
+ bgp scan-time 5
+ timers bgp 3 9
+ neighbor 126.218.99.128 remote-as 64555
+ neighbor 126.218.99.128 update-source Loopback0
+ neighbor 126.218.99.128 next-hop-self
+ neighbor 126.218.99.128 send-community both
+ neighbor 126.218.99.128 advertisement-interval 10
+ neighbor 126.218.99.129 remote-as 64555
+ neighbor 126.218.99.129 update-source Loopback0
+ neighbor 126.218.99.129 next-hop-self
+ neighbor 126.218.99.129 send-community both
+ neighbor 126.218.99.129 advertisement-interval 10
+ neighbor 126.218.233.99 remote-as 64555
+ neighbor 126.218.233.99 shutdown
+ neighbor 126.218.233.99 update-source Loopback0
+ neighbor 126.218.233.99 next-hop-self
+ neighbor 126.218.233.99 send-community both
+ neighbor 126.218.233.99 advertisement-interval 10
+ neighbor 126.218.233.96 remote-as 64555
+ neighbor 126.218.233.96 shutdown
+ neighbor 126.218.233.96 update-source Loopback0
+ neighbor 126.218.233.96 next-hop-self
+ neighbor 126.218.233.96 send-community both
+ neighbor 126.218.233.96 advertisement-interval 10
+ no auto-summary
+!
+no ip classless
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+logging trap debugging
+logging source-interface Loopback0
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.171.244.6
+logging 126.170.38.121
+logging 126.172.24.96
+!
+route-map FROM_MVS permit 10
+ match ip address 120
+ set ip next-hop 126.218.71.105
+!
+route-map FROM_TPF permit 10
+ match ip address 110
+ set ip next-hop 126.218.71.105
+!
+route-map MVS_Floating_Address permit 10
+ match ip address 11
+ match route-type internal
+!
+route-map FROM_EDGE permit 10
+ match ip address 130
+ set ip next-hop 126.218.71.105
+!
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server ifindex persist
+snmp-server trap link ietf
+snmp-server trap-source Loopback0
+snmp-server tftp-server-list 99
+snmp-server location OCC
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+tacacs-server host 126.170.160.247
+tacacs-server host 126.175.58.45
+tacacs-server timeout 15
+tacacs-server directed-request
+tacacs-server key 7 09424B1D1A0A1913053E012724322D376471
+!
+!
+control-plane
+!
+!
+dial-peer cor custom
+!
+!
+!
+banner motd ^CCCC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376476
+ transport preferred none
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376476
+ logging synchronous
+ transport preferred none
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D376477
+ logging synchronous
+ transport preferred none
+ transport input ssh
+!
+ntp clock-period 17180047
+ntp update-calendar
+ntp server 126.170.165.28 prefer
+ntp server 126.175.61.217
+mac-address-table aging-time 480
+!
+end
+

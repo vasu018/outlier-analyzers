@@ -1,0 +1,735 @@
+rt55sn11hrcr#show running-config
+Building configuration...
+
+Current configuration : 16626 bytes
+!
+! Last configuration change at 11:22:26 GMT Fri May 11 2018 by evispera
+! NVRAM config last updated at 22:07:35 GMT Sun May 13 2018 by intell3c6dbden
+!
+version 12.2
+service nagle
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+service internal
+service compress-config
+service counters max age 10
+!
+hostname rt55sn11hrcr
+!
+boot-start-marker
+boot system flash bootdisk:c7600rsp72043-advipservicesk9-mz.122-33.SRC5.bin
+boot-end-marker
+!
+logging buffered 16384
+enable secret 5 $1$0000$WBqcDBJw1x2L/csfLk5Sn1
+!
+aaa new-model
+!
+!
+aaa authentication login default group tacacs+ enable
+aaa authentication enable default group tacacs+ enable
+aaa authorization console
+aaa authorization exec default group tacacs+ none 
+aaa authorization commands 1 default group tacacs+ none 
+aaa authorization commands 15 default group tacacs+ none 
+aaa accounting exec default start-stop group tacacs+
+aaa accounting commands 15 default start-stop group tacacs+
+aaa accounting network default start-stop group tacacs+
+aaa accounting connection default start-stop group tacacs+
+aaa accounting system default start-stop group tacacs+
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone GMT 0
+ip subnet-zero
+no ip source-route
+!
+!
+no ip bootp server
+no ip domain lookup
+ip domain name intl.e9ad96.net
+ip name-server 126.170.165.28
+ip name-server 126.175.61.217
+!
+!
+!
+!
+!
+mls ip multicast flow-stat-timer 9
+mls flow ip interface-full
+no mls flow ipv6
+no mls acl tcam share-global
+mls cef error action reset
+multilink bundle-e285e1 authenticated
+!
+!
+!
+spanning-tree mode rap3c6dbd-pvst
+spanning-tree extend system-3c6dbd
+spanning-tree vlan 10 priority 8192
+diagnostic cns publish cisco.cns.device.diag_results
+diagnostic cns subscribe cisco.cns.device.diag_commands
+!
+redundancy
+ main-cpu
+  auto-sync running-config
+ mode sso
+!
+vlan internal allocation policy ascending
+vlan access-log ratelimit 2000
+!
+! 
+!
+crypto isakmp policy 10
+ encr aes 256
+ authentication pre-share
+ group 2
+ lifetime 14400
+crypto isakmp key netconanRemoved1 address 126.62.54.208
+crypto isakmp invalid-spi-recovery
+crypto isakmp keepalive 10 3
+!
+!
+crypto ipsec transform-set IPSEC esp-aes 256 
+ mode transport
+!
+crypto map RT73SN11M5CR 10 ipsec-isakmp 
+ set peer 126.62.54.208
+ set transform-set IPSEC 
+ match address CRYPTO
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 126.62.196.129 255.255.255.255
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Port-channel1
+ description etherchannel to rt75sn10hrcr
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 2
+ switchport trunk allowed vlan 2,3,10
+ switchport mode trunk
+ load-interval 30
+!
+interface GigabitEthernet1/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/3
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/4
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/5
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/6
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/7
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/8
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/9
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/10
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/11
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/12
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/13
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/14
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/21
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/22
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet1/24
+ no ip address
+ shutdown
+!
+interface POS2/0/0
+ description RT73SN11M5CR 2/0/0 VBZ ckt OC48c-W0W39410
+ mtu 9216
+ no ip address
+ load-interval 30
+ shutdown
+ crypto connect vlan 73
+!
+interface GigabitEthernet3/1
+ mtu 9000
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/2
+ mtu 9000
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/3
+ mtu 9000
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/4
+ mtu 9000
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/5
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/6
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/7
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/8
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/9
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/10
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/11
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/12
+ switchport
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/13
+ description to fw55in11hrcpp Eth3-11
+ switchport
+ switchport access vlan 3
+ switchport mode access
+ logging event link-status
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet3/14
+ description to fw75in11hrcps Eth3-12
+ switchport
+ switchport access vlan 3
+ switchport mode access
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ spanning-tree guard root
+!
+interface GigabitEthernet3/15
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/16
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/17
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/18
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/19
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/20
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/21
+ description to fw55hr11ccs eth5
+ switchport
+ switchport access vlan 3
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/22
+ description to fw55hr11ccs eth3
+ switchport
+ switchport access vlan 3
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet3/23
+ no ip address
+ shutdown
+!
+interface GigabitEthernet3/24
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet4/1
+ description to rt75sn10h4cr 4/1 channel 1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 2
+ switchport trunk allowed vlan 2,3,10
+ switchport mode trunk
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet4/2
+ description to rt75sn10hrcr 4/2 channel 1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 2
+ switchport trunk allowed vlan 2,3,10
+ switchport mode trunk
+ channel-group 1 mode desirable non-silent
+!
+interface TenGigabitEthernet4/3
+ description to st55sn22hras 1/4 126.62.194.226
+ mtu 9000
+ ip address 126.62.194.224 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf mtu-ignore
+ load-interval 30
+ shutdown
+!
+interface TenGigabitEthernet4/4
+ description to st55sn23hras 1/5 126.62.194.238
+ mtu 9000
+ ip address 126.62.194.236 255.255.255.248
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf mtu-ignore
+ load-interval 30
+ shutdown
+!
+interface TenGigabitEthernet4/5
+ description connected to rt75sn14hrce ten2/0/0
+ mtu 9216
+ ip address 126.62.194.99 255.255.255.248
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+ load-interval 30
+!
+interface TenGigabitEthernet4/6
+ description connected to rt55sn15hrce ten2/0/0
+ mtu 9216
+ ip address 126.62.194.108 255.255.255.248
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+ load-interval 30
+!
+interface TenGigabitEthernet4/7
+ description L3 to st55sn32hras on Eth1/1
+ mtu 9216
+ ip address 126.62.197.158 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+!
+interface TenGigabitEthernet4/8
+ description L3 to st75sn30hras on Eth1/9
+ mtu 9216
+ ip address 126.62.197.145 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+!
+interface GigabitEthernet5/1
+ no ip address
+ shutdown
+!
+interface GigabitEthernet5/2
+ no ip address
+ shutdown
+!
+interface GigabitEthernet7/0/1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 11,73
+ switchport mode trunk
+ mtu 9216
+ flowcontrol receive on
+ flowcontrol send off
+ spanning-tree portfast trunk
+!
+interface GigabitEthernet7/0/2
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan none
+ switchport mode trunk
+ mtu 9216
+ flowcontrol receive on
+ flowcontrol send off
+ spanning-tree portfast trunk
+!
+interface TenGigabitEthernet8/1
+ description to GIS Hadoop Rack #1
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 10
+ switchport mode trunk
+ mtu 9216
+ load-interval 30
+!
+interface TenGigabitEthernet8/2
+ switchport
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+!
+interface TenGigabitEthernet8/3
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet8/4
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet8/5
+ description L3 to st55sn33hras on Eth1/1
+ mtu 9216
+ ip address 126.62.197.155 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+!
+interface TenGigabitEthernet8/6
+ description L3 to st75sn31hras on Eth1/9
+ mtu 9216
+ ip address 126.62.197.151 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf mtu-ignore
+!
+interface TenGigabitEthernet8/7
+ no ip address
+ shutdown
+!
+interface TenGigabitEthernet8/8
+ no ip address
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan2
+ description VLAN for core interconnect & sP 
+ ip address 126.62.199.20 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf mtu-ignore
+ standby 2 ip 126.62.199.19
+ standby 2 timers 1 4
+ standby 2 preempt
+ standby 2 track POS2/0/0
+ standby 4 ip 126.62.199.17
+ standby 4 timers 1 4
+ standby 4 priority 105
+ standby 4 preempt
+ standby 4 track POS2/0/0
+!
+interface Vlan3
+ description VLAN for core interconnect & FW 
+ ip address 126.62.198.220 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf mtu-ignore
+ standby 3 ip 126.62.198.216
+ standby 3 timers 1 4
+ standby 3 preempt
+!
+interface Vlan10
+ description GIS Hadoop Rack - ETL Server Connectivity
+ ip address 126.62.201.121 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip ospf mtu-ignore
+ standby 10 ip 126.62.201.123
+ standby 10 timers 1 4
+ standby 10 preempt
+!
+interface Vlan11
+ description OCE_OCC
+ no ip address
+ load-interval 30
+ crypto engine slot 7/0
+!
+interface Vlan73
+ mtu 9216
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip mroute-cache
+ load-interval 30
+ shutdown
+ crypto map RT73SN11M5CR
+ crypto engine slot 7/0
+!
+router ospf 65298
+ router-id 126.62.196.129
+ log-adjacency-changes
+ redistribute bgp 65298 subnets
+ passive-interface POS2/0/0
+ passive-interface Vlan10
+ passive-interface Vlan73
+ network 126.62.196.136 0.0.127.255 area 0
+!
+router bgp 65298
+ no synchronization
+ bgp router-id 126.62.196.129
+ bgp log-neighbor-changes
+ network 126.62.194.225 mask 255.255.255.248
+ network 126.62.201.122 mask 255.255.255.0
+ network 126.62.217.103 mask 255.255.255.0
+ network 126.62.219.121 mask 255.255.255.0
+ aggregate-address 126.62.196.136 255.255.192.0 summary-only
+ timers bgp 3 9
+ neighbor OCC_SBR peer-group
+ neighbor OCC_SBR remote-as 65175
+ neighbor OCC_SBR description OCC Backbone eBGP Peers
+ neighbor OCC_SBR ebgp-multihop 2
+ neighbor OCC_SBR send-community
+ neighbor OCC_SBR advertisement-interval 10
+ neighbor OCC_SBR route-map STORAGE_TO_SBR out
+ neighbor 126.62.196.128 remote-as 65298
+ neighbor 126.62.196.128 update-source Loopback0
+ neighbor 126.62.196.128 next-hop-self
+ neighbor 126.62.196.128 send-community both
+ neighbor 126.62.196.128 advertisement-interval 10
+ neighbor 126.62.196.134 remote-as 65298
+ neighbor 126.62.196.134 update-source Loopback0
+ neighbor 126.62.196.134 next-hop-self
+ neighbor 126.62.196.134 send-community both
+ neighbor 126.62.196.134 advertisement-interval 10
+ neighbor 126.62.196.135 remote-as 65298
+ neighbor 126.62.196.135 update-source Loopback0
+ neighbor 126.62.196.135 next-hop-self
+ neighbor 126.62.196.135 send-community both
+ neighbor 126.62.196.135 advertisement-interval 10
+ neighbor 126.62.54.210 remote-as 65299
+ neighbor 126.62.54.210 description rt73sn11m5cr 
+ neighbor 126.62.54.210 shutdown
+ neighbor 126.62.54.210 ebgp-multihop 2
+ neighbor 126.62.54.210 send-community both
+ neighbor 126.62.54.210 advertisement-interval 10
+ neighbor 126.200.50.162 remote-as 64896
+ neighbor 126.200.50.162 description rt55hr07
+ neighbor 126.200.50.162 shutdown
+ neighbor 126.200.50.162 ebgp-multihop 2
+ neighbor 126.200.50.162 send-community
+ neighbor 126.200.50.162 advertisement-interval 10
+ neighbor 126.200.50.162 route-map SNW-to-ISR out
+ neighbor 126.200.50.164 remote-as 64896
+ neighbor 126.200.50.164 description rt55hr08
+ neighbor 126.200.50.164 shutdown
+ neighbor 126.200.50.164 ebgp-multihop 2
+ neighbor 126.200.50.164 send-community
+ neighbor 126.200.50.164 advertisement-interval 10
+ neighbor 126.200.50.164 route-map SNW-to-ISR out
+ neighbor 126.201.215.236 peer-group OCC_SBR
+ neighbor 126.201.215.236 description eBGP to rt55bb01hrsr
+ neighbor 126.201.215.237 peer-group OCC_SBR
+ neighbor 126.201.215.237 description eBGP to rt75bb02dvsr
+ no auto-summary
+!
+ip classless
+ip route 126.200.50.160 255.255.255.0 126.62.198.218
+ip route 126.201.215.238 255.255.255.240 126.62.198.210
+!
+ip bgp-community new-format
+!
+no ip http server
+no ip http secure-server
+ip tacacs source-interface Loopback0
+!
+ip access-list extended CRYPTO
+ permit ip any any
+!
+!
+ip prefix-list Storage-networks description SNWinfrastructure-Subnets
+ip prefix-list Storage-networks seq 10 permit 126.62.196.136/16 le 18
+logging trap debugging
+logging source-interface Loopback0
+logging 126.170.164.99
+logging 126.175.60.250
+logging 126.171.244.6
+logging 126.170.38.121
+logging 126.172.24.96
+access-list 98 permit 126.173.34.41 0.3.255.255
+access-list 98 permit 126.168.136.164 0.0.255.255
+access-list 98 permit 126.170.176.15 0.0.255.255
+access-list 98 permit 126.171.246.80 0.0.15.255
+access-list 98 deny any log
+access-list 99 permit 126.182.152.234
+access-list 99 permit 126.182.155.209
+access-list 99 permit 126.183.172.226
+access-list 99 permit 126.183.173.231
+access-list 99 permit 126.173.34.41 0.3.255.255
+access-list 99 permit 126.168.136.164 0.0.255.255
+access-list 99 permit 126.170.176.15 0.0.255.255
+access-list 99 permit 126.171.246.80 0.0.15.255
+access-list 99 deny any log
+access-list 125 permit ip 126.105.145.135 0.255.255.255 any
+!
+route-map STORAGE_TO_SBR permit 20
+ match ip address prefix-list Storage-networks
+ set community 64555:1
+!
+route-map SNW-to-ISR permit 20
+ match ip address prefix-list Storage-networks
+!
+snmp-server community netconanRemoved3 RO 99
+snmp-server community netconanRemoved4 RW 98
+snmp-server trap link ietf
+snmp-server trap-source Loopback0
+snmp-server tftp-server-list 99
+snmp-server location OCX
+snmp-server contact GLANOPS 6730-4625
+snmp-server enable traps snmp linkdown linkup coldstart warmstart
+snmp-server enable traps config
+snmp-server enable traps entity
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server host 126.170.164.99 netconanRemoved5 
+snmp-server host 126.170.38.121 netconanRemoved5 
+snmp-server host 126.171.244.6 netconanRemoved5 
+snmp-server host 126.172.24.96 netconanRemoved5 
+snmp-server host 126.175.60.250 netconanRemoved5 
+snmp-server file-transfer access-group 99 protocol tftp
+snmp ifmib ifindex persist
+!
+tacacs-server host 126.170.160.247 key 7 09424B1D1A0A1913053E012724322D376C74
+tacacs-server host 126.175.58.45 key 7 09424B1D1A0A1913053E012724322D376675
+!
+control-plane
+!
+banner motd ^CCC
+******************************* WARNING **********************************
+* *
+* If you are not authorized to access this system, disconnect now. *
+* *
+* All attempts to access this system and/or its resources are recorded. *
+* Unauthorized attempts may subject you to a fine and/or imprisonment in *
+* accordance with Title 18, USC, Section 1030. For questions regarding *
+* this system please contact Information Security Hotline (650)432-4329. *
+* *
+****************************************************************************
+^C
+!
+line con 0
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647640
+ logging synchronous
+line vty 0 4
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647647
+ logging synchronous
+ transport input ssh
+line vty 5 15
+ access-class 125 in
+ exec-timeout 15 0
+ password 7 09424B1D1A0A1913053E012724322D37647647
+ transport input ssh
+!
+exception crashinfo buffersize 80
+!
+monitor session 1 source interface TenGigabitEthernet4/5 - 6
+monitor session 1 destination interface TenGigabitEthernet8/2
+scheduler runtime netinput 300
+ntp clock-period 17179912
+ntp update-calendar
+ntp server 126.170.165.28
+ntp server 126.175.61.217 prefer
+!
+end
+
