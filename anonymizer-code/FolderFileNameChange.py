@@ -7,6 +7,7 @@ if len(sys.argv) != 2:
     print "Usage : python rename.py <path>"
     sys.exit()
 
+ext = [".config", ".cfg"]
 source_path = sys.argv[1]
 source_path = source_path + "/configs/"
 print("Source Folder to be anonymized is:", source_path)
@@ -27,7 +28,8 @@ count =1
 try:
     for x in os.walk(source_path):
         for source_file_name in x[2]:
-            if source_file_name.endswith(".cfg"):
+            #if source_file_name.endswith(".cfg"): 
+            if source_file_name.endswith(tuple(ext)): 
                 source_file_name = os.path.join(source_path,source_file_name)
                 target_file_name = "%s/node-%d" %(target_folder_path, count)
                 print("Copying %s to %s", source_file_name, target_file_name)
