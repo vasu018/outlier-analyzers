@@ -1,0 +1,5 @@
+{"acl_name":"Advertising-OCC-LAN","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":2}
+{"acl_name":"Orange1","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
+{"acl_name":"Orange2","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
+{"acl_name":"Orange3","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
+{"acl_name":"Orange4","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
