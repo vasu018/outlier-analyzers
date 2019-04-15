@@ -1,0 +1,2 @@
+{"acl_name":"STORAGE-OCB","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
+{"acl_name":"STORAGE-OCS","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
