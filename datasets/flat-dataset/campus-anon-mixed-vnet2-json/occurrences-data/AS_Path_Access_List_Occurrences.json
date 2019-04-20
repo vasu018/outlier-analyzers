@@ -1,7 +1,0 @@
-{"acl_name":"1","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":18}
-{"acl_name":"10","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":2}
-{"acl_name":"2","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":10}
-{"acl_name":"21","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
-{"acl_name":"3","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":2}
-{"acl_name":"62","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
-{"acl_name":"93","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}

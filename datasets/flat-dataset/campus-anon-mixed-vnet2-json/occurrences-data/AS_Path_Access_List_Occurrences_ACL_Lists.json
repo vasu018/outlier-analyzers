@@ -1,0 +1,14 @@
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"},{"action":"PERMIT","regex":"^64765(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^64555$"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^64655$"},{"action":"PERMIT","regex":"^$"},{"action":"PERMIT","regex":"^64555$"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64896(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )65175(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^64574$"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64665$"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64665(,|\\{|\\}|^|$| )"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64555(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"^64662(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64642$"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64664(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64665(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64666(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64667(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["10","1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"}]},"acl_count":4}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64652(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64664(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64665(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64666(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64667(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["1"],"acl_structure":{"lines":[{"action":"DENY","regex":"^64674(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"^$"}]},"acl_count":2}
+{"acl_name":["2","3","21"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64574$"}]},"acl_count":8}
+{"acl_name":["2","21"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64555$"}]},"acl_count":6}
+{"acl_name":["2"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"^$"},{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64665$"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64665(,|\\{|\\}|^|$| )"},{"action":"DENY","regex":"(,|\\{|\\}|^|$| )64573(,|\\{|\\}|^|$| )"},{"action":"PERMIT","regex":"^64662(,|\\{|\\}|^|$| )"}]},"acl_count":2}
+{"acl_name":["62"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64605(,|\\{|\\}|^|$| )"}]},"acl_count":4}
+{"acl_name":["93"],"acl_structure":{"lines":[{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"}]},"acl_count":4}
