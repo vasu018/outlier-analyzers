@@ -28,6 +28,7 @@ def error_msg():
 edit_key = ""
 edit_value = ""
 ACTION_FLAG = 0
+k_select = 0
 # Reading Data
 try:
     flag_file = '.flag_'+sys.argv[2]
@@ -68,12 +69,29 @@ print(Fore.GREEN, end='')
 # *****************************************************************************
 # Helper Methods Start
 
+def plot_elbow_graph(df):
+
+    features = df[df.columns]
+    ran = min(len(df.columns), len(datas))
+    k_range = range(1, ran)
+    clusters_list = [KMeans(n_clusters=i).fit(features) for i in k_range]
+    centroid_list = [i.cluster_centers_ for i in clusters_list]
+    k_distance = [cdist(features, centroid, "euclidean") for centroid in centroid_list]
+    cluster_index = [np.argmin(kdist, axis=1) for kdist in k_distance]
+    distances = [np.min(kdist, axis=1) for kdist in k_distance]
+    avg_within = [np.sum(dist) / features.shape[0] for dist in distances]
+    
+    for i in range(1, len(avg_within)):
+        if (avg_within[i-1] - avg_within[i]) < 1:
+            break
+    return i-1
+
 # Perform K-Means Clustering
 def perform_kmeans_clustering(df):
     labels = []
+    global k_select
+    k_select = plot_elbow_graph(df)
     features = df[df.columns]
-    # TODO: Check for k-range
-    k_select = 13
     kmeans = KMeans(n_clusters = k_select)
     kmeans.fit(features)
     kmeans_centroids = kmeans.cluster_centers_
@@ -151,6 +169,94 @@ def overall_dict(data_final):
         overall_array.append(overall)
         overall = {}
     return overall_array
+
+def get_overall_dict(data_final):
+    overall_array = []
+    for data in data_final:
+        overall = {}
+        value = None
+        result = None
+        new_value = None
+        flag = 0
+        for item in data:
+            visited = {"lines=name":1}
+            if item[0] is None:
+                continue
+            result = extract_keys(item[0])
+            for element in result:
+                value = item[0]
+                for key in element.split("="):
+                    if element not in visited:
+                        visited[element] = 1
+                        new_value = value[key]
+                        flag = 0
+                        if type(new_value) == list:
+                            if len(new_value) > 0:
+                                for list_data in new_value:
+                                    if element not in overall:
+                                        overall[element] = {}
+                                    temp = element
+                                    temp_val = list_data
+                                    temp = temp.split("=", 1)[-1]
+                                    while len(temp.split("=")) > 1:
+                                        temp_val = temp_val[temp.split("=")[0]]
+                                        temp = temp.split("=", 1)[-1]
+                                    
+                                    list_key = temp
+                                    check = 0
+                                    try:
+                                        if type(temp_val[list_key]) == list:
+                                            if temp_val[list_key][0] not in overall[element]:
+                                                overall[element][temp_val[list_key][0]] = 1
+                                                check = 1
+                                        else:
+                                            if temp_val[list_key] not in overall[element]:
+                                                overall[element][temp_val[list_key]] = 1
+                                                check = 1
+                                    except:
+                                        dummy=0
+                                        #do nothing
+                                    try:
+                                        if check == 0:
+                                            if type(temp_val[list_key]) == list:
+                                                if temp_val[list_key][0] in overall[element]:
+                                                    overall[element][temp_val[list_key][0]] += 1
+                                            else:
+                                                if temp_val[list_key] in overall[element]:
+                                                    overall[element][temp_val[list_key]] += 1
+                                    except:
+                                        dummy=0
+                                        
+                                    flag = 1
+                                value = new_value
+                                
+                        else:
+                            # Type is not list
+                            value = new_value
+                            
+                    else:
+                        if flag == 0:
+                            if element not in overall:
+                                overall[element] = {}
+
+                            if new_value not in overall[element]:
+                                overall[element][new_value] = 1
+                            else:
+                                overall[element][new_value] += 1
+                        
+                if flag == 0:
+                    if element not in overall:
+                        overall[element] = {}
+
+                    if new_value not in overall[element]:
+                        overall[element][new_value] = 1
+                    else:
+                        overall[element][new_value] += 1
+                        
+        overall_array.append(overall)
+        overall = {}
+    return overall_array  
+        
 
 # Calculating the Signature
 def calculate_signature_d(overall_arr, index, data_final):
@@ -278,7 +384,8 @@ def calculate_acl_scores(data_final, all_signatures):
                                     count += sig_val[1]
                 else:
                     # Deviant Key
-                    deviant.append(data_key)
+                    if data_key != "lines=name":
+                        deviant.append(data_key)
             if flag == 1:
                 count_arr.append(count)
                 deviant_arr.append(deviant)
@@ -340,7 +447,6 @@ for col in df.columns:
             continue
 
 if (ACTION_FLAG != 3) and (flag == '0'):
-    print("Inside1")
     acl_dict = {}
     acl_arr = []
     node_name_dict = {}
@@ -391,7 +497,6 @@ if (ACTION_FLAG != 3) and (flag == '0'):
             acl_arr.append((name, acl))
 
 elif (ACTION_FLAG != 0) and (flag != '0'):
-    print("Inside2")
     acl_dict = {}
     acl_arr = []
     node_name_dict = {}
@@ -537,11 +642,12 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
     print("data encoding done...")
 
     # Perform K-Means
+    print("starting data clustering...")
     perform_kmeans_clustering(df_enc)
     print("data clustering done...")
 
     # Grouping data based on their Clusters
-    cluster_range = np.arange(13)
+    cluster_range = np.arange(k_select)
     data_final = []
     data_final_enc = []
     for index in cluster_range:
@@ -560,7 +666,11 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
     # print("cluster data written to file...")
 
     # Calculating Overall Structure per Cluster
-    overall_array = overall_dict(data_final)
+    if ACTION_FLAG == 0:
+        overall_array = get_overall_dict(data_final)
+    elif ACTION_FLAG == 3:
+        overall_array = overall_dict(data_final)
+
 
     # Generating Signatures
     all_signatures = []

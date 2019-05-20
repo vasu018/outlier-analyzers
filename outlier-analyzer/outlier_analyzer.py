@@ -42,6 +42,19 @@ def view_outliers():
     file_name = input("=> ")
     os.system('python3 cal_outlier.py -d '+file_name)
 
+def deviant_plot():
+    print(Fore.BLUE, end='')
+    print("\nEnter the complete file name with path")
+    print(Style.RESET_ALL, end='')
+    file_name = input("=> ")
+    os.system('python3 view_analysis.py -p '+file_name)
+
+def score_plot():
+    print(Fore.BLUE, end='')
+    print("\nEnter the complete file name with path")
+    print(Style.RESET_ALL, end='')
+    file_name = input("=> ")
+    os.system('python3 view_analysis.py -s '+file_name)
 
 def choose_action():
     action_selected = 0
@@ -53,7 +66,9 @@ def choose_action():
         print("2 => CALCULATE OUTLIERS - ACLs")
         print("3 => EDIT OUTLIERS")
         print("4 => VIEW OUTLIER NODES")
-        print("5 => EXIT APPLICATION")
+        print("5 => DEVIANT PROPERTIES PLOT")
+        print("6 => SCORING COMPARISION PLOT")
+        print("7 => EXIT APPLICATION")
         print("==========================")
 
         action_selected = input("\nAction => ")
@@ -80,6 +95,16 @@ def choose_action():
             print(Style.RESET_ALL, end='')
             view_outliers()
         elif action_selected == 5:
+            print(Fore.RED, end='')
+            print("*Deviant Properties Plot Selected*")
+            print(Style.RESET_ALL, end='')
+            deviant_plot()
+        elif action_selected == 6:
+            print(Fore.RED, end='')
+            print("*Scoring Comparision Plot Selected*")
+            print(Style.RESET_ALL, end='')
+            score_plot()
+        elif action_selected == 7:
             print(Fore.BLUE, end='')
             print("Exiting Function ...\n")
             print(Style.RESET_ALL, end='')
