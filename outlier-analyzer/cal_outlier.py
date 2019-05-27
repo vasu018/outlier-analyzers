@@ -80,7 +80,7 @@ def plot_elbow_graph(df):
     cluster_index = [np.argmin(kdist, axis=1) for kdist in k_distance]
     distances = [np.min(kdist, axis=1) for kdist in k_distance]
     avg_within = [np.sum(dist) / features.shape[0] for dist in distances]
-    
+    i = 2
     for i in range(1, len(avg_within)):
         if (avg_within[i-1] - avg_within[i]) < 1:
             break
@@ -317,7 +317,10 @@ def transform_data(data):
                         if flag == 0:
                             count = len(new_value)
                             flag = 1
-                        new_value = new_value[i]
+                        try:
+                            new_value = new_value[i]
+                        except:
+                            continue
                     elif (type(new_value) == list) and (len(new_value) == 1):
                         new_value = new_value[0]
                     value = new_value
@@ -325,7 +328,7 @@ def transform_data(data):
                 if element not in overall:
                     overall[element] = {}
                 
-                if type(value) != dict:
+                if ((type(value) != dict) and (type(value) != list)):
                     if value not in overall[element]:
                         overall[element][value] = 1
         i += 1 
@@ -450,6 +453,7 @@ if (ACTION_FLAG != 3) and (flag == '0'):
     acl_dict = {}
     acl_arr = []
     node_name_dict = {}
+    mode = 0
     for acl_list in acl_list_arr:
         name = acl_list['name'].split(":")[0]
         node = acl_list['name'].split(":")[1]
@@ -457,7 +461,9 @@ if (ACTION_FLAG != 3) and (flag == '0'):
         acl = json.dumps(acl_list, sort_keys=True)
         if acl not in acl_dict:
             try:
+                acl_list['lines']
                 flag = 0
+                mode = 0
                 #Checking if actually unique or just jumbled
                 for dump_acl in acl_arr:
                     if dump_acl[0] == name:
@@ -487,6 +493,7 @@ if (ACTION_FLAG != 3) and (flag == '0'):
                 else:
                     acl_arr.append((name, acl))
             except:
+                mode = 1
                 acl_dict[acl] = set()
                 acl_dict[acl].add(name)
                 acl_arr.append((name, acl))
@@ -610,6 +617,8 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                 acl_dict[acl].add(name)
                 acl_arr.append((name, acl))
         
+if mode == 1:
+    ACTION_FLAG = 3
 
 acl_name_arr = []
 datas = []
