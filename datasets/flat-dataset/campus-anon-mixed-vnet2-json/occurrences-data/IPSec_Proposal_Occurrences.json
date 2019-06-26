@@ -1,2 +1,0 @@
-{"acl_name":"IPSEC","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":20}
-{"acl_name":"STORAGE","acl_structure":{"action":"PERMIT","regex":"(,|\\{|\\}|^|$| )64693(,|\\{|\\}|^|$| )"},"acl_count":4}
