@@ -8,7 +8,7 @@
 
 #Upon completion, the output should be:
 
-#Creating directory  test_network json files(only if the directory doesn't already exists)
+#Creating directory  test_network-json (only if the directory doesn't already exists)
 #JSON files saved
 
 #########################################################
@@ -74,7 +74,7 @@ for struct in Structure_types:
         struct_df.loc[index,column] = [value]
 
     fileName=str(struct)+".json"
-    directory = "./"+str(NETWORK_NAME)+" json files"
+    directory = "./"+str(NETWORK_NAME)+"-json"
     if not os.path.exists(directory):
         print("Creating directory ",directory[2:])
         os.mkdir(directory)
@@ -83,7 +83,7 @@ for struct in Structure_types:
 
 
 nodeProp = bfq.nodeProperties().answer().frame()
-directory = "./"+str(NETWORK_NAME)+" json files"
+directory = "./"+str(NETWORK_NAME)+"-json"
 nodeProp.to_json(os.path.join(directory,"nodeProperties.json"),orient = 'records', lines = True)
 
 temp = bfq.edges().answer().frame()
