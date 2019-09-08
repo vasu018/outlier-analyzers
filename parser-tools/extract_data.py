@@ -20,6 +20,7 @@ import pandas as pd
 import sys
 import networkx as nx
 import json
+import re
 
 from IPython.display import display
 from pandas.io.formats.style import Styler
@@ -31,13 +32,7 @@ from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints
 from pybatfish.question import bfq, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
-bf_logger.setLevel(logging.WARN)
-
 load_questions()
-
-
-
-
 
 NETWORK_NAME = sys.argv[2]#"campus-anon-net1"  #Name of the network
 SNAPSHOT_NAME = "example_snapshot"
@@ -51,9 +46,7 @@ load_questions()
 
 data = bfq.namedStructures().answer().frame()
 
-
 Structure_types = list(data.Structure_Type.unique())
-
 
 for struct in Structure_types:
 
@@ -93,6 +86,7 @@ del temp["Remote_IPs"]
 def convert(x):
     s = str(x)
     a = s.split(':')
+    a[0] = re.sub("\[(.*?)\]","",a[0])
     return a[0]
 
 temp = temp.applymap(convert)
