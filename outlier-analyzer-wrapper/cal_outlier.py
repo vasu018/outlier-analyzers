@@ -31,7 +31,8 @@ ACTION_FLAG = 0
 k_select = 0
 # Reading Data
 try:
-    flag_file = '.flag_'+sys.argv[2]
+    fileName = sys.argv[2].split("/")[-1]
+    flag_file = '.flag_'+fileName
     if sys.argv[1] == "-j":
         df = pd.read_json(sys.argv[2],orient = "index")
         try:
@@ -55,10 +56,10 @@ try:
 except:
     error_msg()
 
-outlier_filename = 'outlier_'+sys.argv[2]
-cluster_filename = '.cluster_'+sys.argv[2]
-sig_filename = '.sig_'+sys.argv[2]
-outlier_nodes_filename = '.outlier_nodes_'+sys.argv[2]
+outlier_filename = 'outlier_'+fileName
+cluster_filename = '.cluster_'+fileName
+sig_filename = '.sig_'+fileName
+outlier_nodes_filename = '.outlier_nodes_'+fileName
 print("===========================================================")
 print(Fore.BLUE, end='')
 print("outlier-analyzer code started ...")
@@ -788,9 +789,20 @@ with open(sig_filename, 'w') as f:
     f.write(json.dumps(all_signatures))  
 
 acl_names = []
-for k,v in acl_dict.items():
-    temp = acl_dict[k]
-    acl_names.append(temp)
+for i in range(len(acls_arr)): 
+    temp = json.dumps(acls_arr[i], sort_keys=True)
+    tempArr = []
+    for item in acl_dict[temp]:
+        tempArr.append(item)
+    acl_names.append(tempArr)
+
+nodes = []
+for i in range(len(acls_arr)): 
+    temp = json.dumps(acls_arr[i], sort_keys=True)
+    tempArr = []
+    for item in node_name_dict[temp]:
+        tempArr.append(item)
+    nodes.append(tempArr)
 
 # Creating dataframe and exporting as a json file
 df_final = pd.DataFrame()
