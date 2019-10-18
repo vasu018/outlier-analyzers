@@ -1,3 +1,8 @@
+#This script will plot and save all the relevant plots regarding network configurations. 
+#This script must be copied in the folder containing all the networks.
+#You'll need to start the batfish server before running the script.
+#To run the script use: python Plot_all_network_configs.py 
+
 import logging
 import random
 import os
@@ -51,6 +56,7 @@ def show(df):
     display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
             .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))
 
+#Setting the figure size and other parameters.
 plt.rcParams['figure.figsize'] = 15,10
 plt.rcParams['xtick.labelsize']=18
 plt.rcParams['ytick.labelsize']=18
@@ -59,7 +65,11 @@ plt.rcParams["axes.titlesize"] = 20
 plt.rcParams["legend.fontsize"] = 10
 
 #Plotting the number of network properties for each network
+print("Plotting the number of network properties for each network")
+
 directories = [x[1] for x in os.walk(os.getcwd())][0]
+#directories will contain all the folders in the current drectory.
+
 named_structures = set()
 main_d = defaultdict(dict)
 for directory in directories:
@@ -83,16 +93,16 @@ for directory in directories:
     for struct in Structure_types:
     
         df = data[data['Structure_Type']==struct]
-        curr_d[struct] = df.size
-    main_d[directory] = dict(curr_d)
+        curr_d[struct] = df.size # this has the number of configurations for a particular named structure.
+    main_d[directory] = dict(curr_d)# this has all the directories containing data about all the networks.
 
-
+# For the named structures which weren't present in some networks, we add 0 as the number of configurations.
 for network in main_d:
     c = main_d[network]
     for struct in named_structures:
         if struct not in c:
             c[struct] = 0
-            
+#dividing the dataframe into parts depending on their total number of cofigurations.           
 df = pd.DataFrame(main_d).T
 df['Total'] = df.sum(axis = 1)
 df = df.drop(df[df.Total < 1].index)
@@ -103,37 +113,35 @@ del df1['Total']
 del df2['Total']
 del df3['Total']
 
+#plotting different plots.
 df.plot(kind = "bar", stacked = True,figsize=(15,10))
 plt.xlabel("Networks")
 plt.yscale("log")
 plt.ylabel("Number of properties")
 plt.title("Network property distribution (Log Scale)")
 plt.savefig("network_property_distribution_log.png")
-plt.show()
 
 df1.plot(kind = "bar", stacked = True,figsize=(15,10))
 plt.xlabel("Networks")
 plt.ylabel("Number of properties")
 plt.title("Network property distribution(Large Networks)")
 plt.savefig("network_property_distribution0.png")
-plt.show()
 
 df2.plot(kind = "bar", stacked = True,figsize=(15,10))
 plt.xlabel("Networks")
 plt.ylabel("Number of properties")
 plt.title("Network property distribution(Medium Sized Networks)")
 plt.savefig("network_property_distribution1.png")
-plt.show()
 
 df3.plot(kind = "bar", stacked = True,figsize=(15,10))
 plt.xlabel("Networks")
 plt.ylabel("Number of properties")
 plt.title("Network property distribution(Small Networks)")
 plt.savefig("network_property_distribution2.png")
-plt.show()
 
 
 #Plotting the number of nodes in each network
+print("Plotting the number of nodes in each network")
 directories = [x[1] for x in os.walk(os.getcwd())][0]
 num_nodes = defaultdict(int)
 for directory in directories:
@@ -151,11 +159,12 @@ for directory in directories:
         continue
     load_questions()
     data = bfq.namedStructures().answer().frame()
-    num_nodes[directory] = len(data.Node.unique())
+    num_nodes[directory] = len(data.Node.unique())#this has the number of nodes in the network.
 
 df = pd.DataFrame(num_nodes.items())
 df.columns = ["Network","Nodes"]
 
+#dividing the dataframe into different parts depending on the number of nodes.
 df = df.drop(df[df.Nodes < 1].index)
 df1 = df[(df['Nodes']>80) & (df['Nodes']<300)]
 df2 = df[df['Nodes']<80]
@@ -173,10 +182,15 @@ ax.set_xticklabels(ax.get_xticklabels(),rotation=90)
 plt.title("Small Networks")
 plt.savefig("Num_of_nodes_small.png")
 
+# Performance Scalability plot.
+# We run the entire processing code for all networks and calculate how much time is needed by each network.
+
+print("Performance Scalability plot.")
+
 directories = [x[1] for x in os.walk(os.getcwd())][0]
 time_dict = defaultdict(float)
 for directory in directories:
-    start = time()
+    start = time()# Starting time.
     NETWORK_NAME = directory
     SNAPSHOT_NAME = "example_snapshot"
 
@@ -224,7 +238,7 @@ for directory in directories:
 
         G=nx.from_pandas_edgelist(temp, 'Interface','Remote_Interface')
         pr = nx.pagerank(G,alpha = 0.9)
-    end = time()
+    end = time()#End time.
     time_dict[directory] = end - start
 
 df = pd.DataFrame(time_dict.items())
