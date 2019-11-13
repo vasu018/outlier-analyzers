@@ -1,7 +1,9 @@
 # This code generates the list of outliers which require manual inspection to determine whether they are bugs or FPs. 
 # It is used in creating ground truth for the tool. The input of the tool is the json file of outliers. 
 # The output is a json file of list of outliers which require manual inspection.
-# The tool can be run as: python ground_truth_creation.py json_file_name. The input file must be in the same folder as the script.
+# The tool can be run as: python ground_truth_creation.py json_file_name verbose_flag.
+# The input file must be in the same folder as the script. Verbose_flag can be 0 or 1 (default = 1).
+# If verbose = 0, it will display the count of nodes in the final output. If verbose = 1, the node names will be displayed.
 # The resulting json file will be saved with the same name as the input file, with "_Inspection" appended at the end.
 # For example, if the input file name is XYZ_outliers.json, the output file will be XYZ_outliers_Inspection.json.
 
@@ -22,11 +24,16 @@ import sys
 # Hard coded variables
 Score = "Score"
 similarity_score = "similarity_score"
-max_sig_score = "max_sig_score"
+acl_score = "acl_score"
 cluster_number = "cluster_number"
 Labels = "Labels"
-fileName_prefix = "_Inspection.json"
+fileName_prefix = "_Inspection.csv"
 matrix = "matrix"
+
+try:
+    verbose = int(sys.argv[2])
+except:
+    verbose = 1
 
 # Import the outlier file which you want to work on and load it in a dataframe.
 file = sys.argv[1]
@@ -38,7 +45,7 @@ except:
 df = df.reset_index()
 
 # Calculate the ratio of similarity score and max_sig_score and sort the dataframe by that score in descending order.
-df[Score] = df[similarity_score]/df[max_sig_score]
+df[Score] = df[similarity_score]/df[acl_score]
 df = df.sort_values(by = [Score],ascending = False)
 
 #Exclude the ones which have score of 1, as they match with the signature and hence are not bugs.
@@ -71,9 +78,18 @@ final_df = pd.concat(final_df)
 
 # filter out the outliers which require manual inspection (label = 1)
 manual_inspection = final_df[final_df[Labels]==1]
-
-# store it as json file for further use.
+# Adding the flag column 
+manual_inspection['Flag'] = "Needs inspection"
+# Selecting the columns which need to be presented for manula inspection
+final_manual_inspection = manual_inspection[['acl_name','acl_structure','nodes','deviant_properties',"Flag"]]
+# renaming the dataframe columns
+final_manual_inspection.columns = ['acl_name','conformer_definition','nodes','deviant_properties','flag']
+# If verbose = 0, we display only the number of nodes not the ndes themselves.
+if verbose==0:
+    print("in verbose")
+    final_manual_inspection['nodes'] = final_manual_inspection['nodes'].apply(lambda x: len(x))
+# save it as csv file for further use.
 fileName = file.split(".")[0]+fileName_prefix
-manual_inspection.to_json(fileName)
+final_manual_inspection.to_csv(fileName,index = False)
 print("Output file saved as: " ,fileName)
-	
+
