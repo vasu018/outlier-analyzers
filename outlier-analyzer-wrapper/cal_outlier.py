@@ -15,6 +15,7 @@ from scipy.spatial.distance import cdist, pdist
 from colorama import Fore, Back, Style
 import copy
 import time
+import pickle
 
 # Error Message
 def error_msg():
@@ -124,17 +125,17 @@ def extract_keys(the_dict, prefix=''):
     return key_list
 
 def calculate_z_score(arr):
-    
-    z_score = []
-    
-    mean = np.mean(arr)
-    std = np.std(arr)
-    if(std == 0):
+
+    if len(arr) == 1:
+        return arr
+
+    median_y = np.median(arr)
+    median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
+    if median_absolute_deviation_y == 0:
         return np.ones(len(arr))*1000
-    for val in arr:
-        z_score.append((val-mean)/std)
-        
-    return z_score
+    modified_z_scores = [0.6745 * (y - median_y) / median_absolute_deviation_y for y in arr]
+
+    return modified_z_scores
 
 # Calculating the overall dictionary
 def overall_dict(data_final):
@@ -273,21 +274,21 @@ def calculate_signature_d(overall_arr, index, data_final):
             data_points.append(v)
 
         if(len(data_points) == 1):
-            sig_values.append((key_points[0], (data_points[0]/len(data_final[index]))))
+            sig_values.append((key_points[0], (data_points[0])))
         # Check for two data points case
         else:
             z_score = calculate_z_score(data_points)
-            max_z_score = max(z_score)
-            bug_threshold = bug_threshold + (max_z_score - sig_threshold)
+            avg_z_score = sum(z_score)/len(z_score)
+            bug_threshold = bug_threshold + (avg_z_score - sig_threshold)
             for i in range(len(z_score)):
                 if z_score[i] == 1000.0:
-                    sig_values.append((key_points[i], "*", (data_points[i]/len(data_final[index]))))
+                    sig_values.append((key_points[i], "*", (data_points[i])))
                 elif z_score[i] >= sig_threshold:
-                    sig_values.append((key_points[i], (data_points[i]/len(data_final[index]))))
+                    sig_values.append((key_points[i], (data_points[i])))
                 elif z_score[i] <= bug_threshold:
-                    sig_values.append((key_points[i], "!", (data_points[i]/len(data_final[index]))))
+                    sig_values.append((key_points[i], "!", (data_points[i])))
                 elif (z_score[i] < sig_threshold) and (z_score[i] > bug_threshold):
-                    sig_values.append((key_points[i], "*", (data_points[i]/len(data_final[index]))))
+                    sig_values.append((key_points[i], "*", (data_points[i])))
 
         if key in signature:
             signature[key].append(sig_values)
@@ -318,7 +319,10 @@ def transform_data(data):
                         if flag == 0:
                             count = len(new_value)
                             flag = 1
-                        new_value = new_value[i]
+                        try:
+                            new_value = new_value[i]
+                        except:
+                            new_value = new_value[-1]
                     elif (type(new_value) == list) and (len(new_value) == 1):
                         new_value = new_value[0]
                     value = new_value
@@ -326,7 +330,7 @@ def transform_data(data):
                 if element not in overall:
                     overall[element] = {}
                 
-                if type(value) != dict:
+                if type(value) != dict and type(value) != list:
                     if value not in overall[element]:
                         overall[element][value] = 1
         i += 1 
@@ -341,6 +345,8 @@ def calculate_signature_score(signature):
             for val in value:
                 if (val[1] != "!") and (val[1] != "*"):
                     score += val[1]
+                elif val[1] == "!":
+                    score += val[2]
         score_arr.append(score)
     return score_arr
 
@@ -350,8 +356,10 @@ def calculate_acl_scores(data_final, all_signatures):
     count_arr = []
     acls_dict = {}
     acls_arr = []
+    acls_score = []
     sig_score = []
     dev_score = []
+    cluster_num = []
     i = 0
     flag = 0
     for acl_list in data_final:
@@ -361,6 +369,7 @@ def calculate_acl_scores(data_final, all_signatures):
             if str(acl[0]) not in acls_dict:
                 acls_dict[str(acl[0])] = 1
                 acls_arr.append(acl[0])
+                cluster_num.append(i)
                 flag = 1
             else:
                 continue
@@ -368,6 +377,7 @@ def calculate_acl_scores(data_final, all_signatures):
             deviant = []
             count = 0
             dev_c = 0
+            acl_c = 0
             data = transform_data(acl)
             for data_key, data_val in data.items():
                 if data_key in signature:
@@ -378,21 +388,27 @@ def calculate_acl_scores(data_final, all_signatures):
                                 # value also present. Now check if value part of bug/sig/skip
                                 if sig_val[1] == "!":
                                     dev_c += sig_val[2]
+                                    acl_c += sig_val[2]
                                     deviant.append((data_key, sig_val[0]))
                                 elif sig_val[1] == "*":
                                     continue
                                 else:
                                     count += sig_val[1]
+                                    acl_c += sig_val[1]
                 else:
                     # Deviant Key
                     if data_key != "lines=name":
                         deviant.append(data_key)
+                        dev_c += data_val
+                        acl_c += data_val
+
             if flag == 1:
                 count_arr.append(count)
                 deviant_arr.append(deviant)
                 dev_score.append(dev_c)
+                acls_score.append(acl_c)
         i += 1
-    return deviant_arr, count_arr, dev_score, acls_arr, sig_score
+    return deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score
 
 def calculate_similarity_score():
     ratio_arr = []
@@ -667,10 +683,13 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
     # print("cluster data written to file...")
 
     # Calculating Overall Structure per Cluster
-    if ACTION_FLAG == 0:
-        overall_array = get_overall_dict(data_final)
-    elif ACTION_FLAG == 3:
+    if ACTION_FLAG == 3:
         overall_array = overall_dict(data_final)
+    try:
+        overall_array = get_overall_dict(data_final)
+    except:
+        overall_array = overall_dict(data_final)
+        
 
 
     # Generating Signatures
@@ -770,7 +789,7 @@ signature_scores = calculate_signature_score(all_signatures)
 print("signature scoring done...")
 
 # Scoring ACLs
-deviant_arr, count_arr, dev_score, acls_arr, sig_score = calculate_acl_scores(data_final, all_signatures)
+deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score = calculate_acl_scores(data_final, all_signatures)
 print("acl scoring done...")
 
 # Calculate outlier nodes
@@ -810,8 +829,9 @@ df_final['acl_name'] = acl_names
 df_final['acl_structure'] = acls_arr
 df_final['deviant_properties'] = deviant_arr
 df_final['similarity_score'] = count_arr
-df_final['deviant_score'] = dev_score
+df_final['acl_score'] = acls_score
 df_final['max_sig_score'] = sig_score
+df_final['cluster_number'] = cluster_num
 
 df_final.to_json(outlier_filename, orient='split', index=False)
 print(Style.RESET_ALL, end="")
