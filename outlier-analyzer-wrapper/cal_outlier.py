@@ -26,8 +26,8 @@ def error_msg():
     print("****************************")
     sys.exit(0)
 
-edit_key = ""
-edit_value = ""
+whitelistDict = {}
+Z_SCORE_FLAG = 0
 ACTION_FLAG = 0
 k_select = 0
 # Reading Data
@@ -37,17 +37,24 @@ try:
     if sys.argv[1] == "-j":
         df = pd.read_json(sys.argv[2],orient = "index")
         try:
-            if sys.argv[3] == "-a":
+            if sys.argv[4] == "-a":
                 ACTION_FLAG = 3
         except:
             ACTION_FLAG = 0
+        try:
+            Z_SCORE_FLAG = int(sys.argv[3])
+        except:
+            error_msg()
         f = open(flag_file,'w')
         f.write('{}'.format(ACTION_FLAG))
         f.close()
     elif sys.argv[1] == "-e":
         df = pd.read_json(sys.argv[2],orient = "index")
-        edit_key = sys.argv[3]
-        edit_value = sys.argv[4]
+        try:
+            with open(sys.argv[3], 'rb') as handle:
+                whitelistDict = pickle.load(handle)
+        except:
+            print("FileNotFoundError: Please check if file exists.")
         ACTION_FLAG = 1
     elif sys.argv[1] == "-d":
         df = pd.read_json(sys.argv[2],orient = "index")
@@ -129,13 +136,24 @@ def calculate_z_score(arr):
     if len(arr) == 1:
         return arr
 
-    median_y = np.median(arr)
-    median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
-    if median_absolute_deviation_y == 0:
-        return np.ones(len(arr))*1000
-    modified_z_scores = [0.6745 * (y - median_y) / median_absolute_deviation_y for y in arr]
+    z_score = []
+    # Z-Score Method
+    if Z_SCORE_FLAG:
+        mean = np.mean(arr)
+        std = np.std(arr)
+        if std == 0:
+            return np.ones(len(arr))*1000
+        for val in arr:
+            z_score.append((val-mean)/std)
+    # Modified Z-Score Method (Default)
+    else:
+        median_y = np.median(arr)
+        median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
+        if median_absolute_deviation_y == 0:
+            return np.ones(len(arr))*1000
+        z_score = [0.6745 * (y - median_y) / median_absolute_deviation_y for y in arr]
 
-    return modified_z_scores
+    return z_score
 
 # Calculating the overall dictionary
 def overall_dict(data_final):
@@ -278,8 +296,9 @@ def calculate_signature_d(overall_arr, index, data_final):
         # Check for two data points case
         else:
             z_score = calculate_z_score(data_points)
-            avg_z_score = sum(z_score)/len(z_score)
-            bug_threshold = bug_threshold + (avg_z_score - sig_threshold)
+            if len(z_score) > 0:
+                avg_z_score = sum(z_score)/len(z_score)
+                bug_threshold = bug_threshold + (avg_z_score - sig_threshold)
             for i in range(len(z_score)):
                 if z_score[i] == 1000.0:
                     sig_values.append((key_points[i], "*", (data_points[i])))
@@ -650,12 +669,20 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
         encodedLists.append(encodedList)
         
     data_df = []
+    minLen = float('inf')
     for i in range(len(encodedLists)):
-        data_df.append(encodedLists[i][0])
-        
+        extended_arr = []
+        for j in range(min(minLen, len(encodedLists[i]))):
+            tempSum = 0
+            for k in range(len(encodedLists[i][j])):
+                if encodedLists[i][j][k] == 1:
+                    tempSum += (k**2)
+            extended_arr.append(tempSum)
+            minLen = min(minLen, len(encodedLists[i]))
+        data_df.append(extended_arr)      
 
     df_enc = pd.DataFrame(data_df)
-    df_enc = df_enc.fillna(1000)
+    df_enc = df_enc.dropna(axis=1, how='any')
     print("data encoding done...")
 
     # Perform K-Means
@@ -720,23 +747,27 @@ elif ACTION_FLAG == 1:
 
     # print("original signature retrieved...")
 
-    flag = 0
     all_signatures = all_signatures[0]
-    for signature in all_signatures:
-        if edit_key in signature:
-            for j in range(len(signature[edit_key])):
-                if edit_value in signature[edit_key][j][0]:
-                    if signature[edit_key][j][1] == "!" or signature[edit_key][j][1] == "*":
-                        try:
-                            temp = (edit_value, signature[edit_key][j][2])
-                            signature[edit_key][j] = temp
-                            flag = 1
-                        except Exception as e:
-                            print(e)
+    wlDict = whitelistDict['deviant']
+    for edit_key, edit_value in whitelistDict['deviant']:
+        flag = 0
+        for signature in all_signatures:
+            if edit_key in signature:
+                for j in range(len(signature[edit_key])):
+                    if edit_value in signature[edit_key][j][0]:
+                        if signature[edit_key][j][1] == "!" or signature[edit_key][j][1] == "*":
+                            try:
+                                temp = (edit_value, signature[edit_key][j][2])
+                                signature[edit_key][j] = temp
+                                flag = 1
+                            except Exception as e:
+                                print(e)
+        if flag == 1:
+             wlDict.remove((edit_key, edit_value))
 
-    if flag == 0:
+    if wlDict:
         print(Fore.RED, end='')
-        print("\nERROR : Specified Attributes either\n\tnot present or not a bug!")
+        print("\nERROR : Specified Attributes {} either\n\tnot present or not a bug!".format(wlDict))
         print(Style.RESET_ALL, end='')
         print("__________________________________")
         print(Fore.RED, end='')
