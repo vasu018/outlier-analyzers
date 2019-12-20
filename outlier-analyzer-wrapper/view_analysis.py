@@ -14,9 +14,9 @@ def error_msg():
     sys.exit(0)
 
 ACTION_FLAG = 0
-
+fileName = sys.argv[2].split("/")[-1]
 try:
-	df = pd.read_json('outlier_'+sys.argv[2], orient = "split")
+	df = pd.read_json('outlier_'+fileName, orient = "split")
 	# For properties
 	if sys.argv[1] == "-p":
 		ACTION_FLAG = 1
@@ -81,7 +81,7 @@ elif ACTION_FLAG == 2:
 	ax = fig.add_subplot(111)
 
 	ax.plot(x, df['similarity_score'])
-	ax.plot(x, df['deviant_score'])
+	ax.plot(x, df['acl_score'] - df['similarity_score'])
 	ax.plot(x, df['max_sig_score'])
 
 	plt.legend(['similar', 'deviant', 'signature'], loc=0)
