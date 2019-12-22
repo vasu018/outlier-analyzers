@@ -16,6 +16,7 @@ from colorama import Fore, Back, Style
 import copy
 import time
 import pickle
+import os
 
 # Error Message
 def error_msg():
@@ -33,7 +34,13 @@ k_select = 0
 # Reading Data
 try:
     fileName = sys.argv[2].split("/")[-1]
-    flag_file = '.flag_'+fileName
+    networkName = "outliers_"+sys.argv[2].split("/")[-2]
+
+    # Making Outlier Directory for Current Network
+    if not os.path.exists(networkName):
+        os.makedirs(networkName)
+
+    flag_file = networkName+'/'+'.flag_'+fileName
     if sys.argv[1] == "-j":
         df = pd.read_json(sys.argv[2],orient = "index")
         try:
@@ -64,10 +71,10 @@ try:
 except:
     error_msg()
 
-outlier_filename = 'outlier_'+fileName
-cluster_filename = '.cluster_'+fileName
-sig_filename = '.sig_'+fileName
-outlier_nodes_filename = '.outlier_nodes_'+fileName
+outlier_filename = networkName+'/'+'outlier_'+fileName
+cluster_filename = networkName+'/'+'.cluster_'+fileName
+sig_filename = networkName+'/'+'.sig_'+fileName
+outlier_nodes_filename = networkName+'/'+'.outlier_nodes_'+fileName
 print("===========================================================")
 print(Fore.BLUE, end='')
 print("outlier-analyzer code started ...")
@@ -93,7 +100,7 @@ def plot_elbow_graph(df):
     for i in range(1, len(avg_within)):
         if (avg_within[i-1] - avg_within[i]) < 1:
             break
-    return i-1
+    return i-1 if len(avg_within) > 1 else 1
 
 # Perform K-Means Clustering
 def perform_kmeans_clustering(df):
@@ -379,6 +386,8 @@ def calculate_acl_scores(data_final, all_signatures):
     sig_score = []
     dev_score = []
     cluster_num = []
+    human_errors_arr = []
+    human_errors_score = []
     i = 0
     flag = 0
     for acl_list in data_final:
@@ -397,11 +406,19 @@ def calculate_acl_scores(data_final, all_signatures):
             count = 0
             dev_c = 0
             acl_c = 0
+            human_errors = []
+            human_error_category = {}
             data = transform_data(acl)
             for data_key, data_val in data.items():
                 if data_key in signature:
                     # Key Valid. Now check for actual Value
                     for val in data_val.items():
+                        (error_key, error_value), error_category = calculateHumanErrors(data_key, val[0], signature[data_key], fileName.split(".")[0])
+                        if error_category:
+                            human_errors.append((error_key, error_value))
+                            if error_category not in human_error_category:
+                                human_error_category[error_category] = 0
+                            human_error_category[error_category] += 1
                         for sig_val in signature[data_key]:
                             if val[0] == sig_val[0]:
                                 # value also present. Now check if value part of bug/sig/skip
@@ -426,8 +443,10 @@ def calculate_acl_scores(data_final, all_signatures):
                 deviant_arr.append(deviant)
                 dev_score.append(dev_c)
                 acls_score.append(acl_c)
+                human_errors_arr.append(human_errors)
+                human_errors_score.append(calculate_human_error_score(human_error_category))
         i += 1
-    return deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score
+    return deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score
 
 def calculate_similarity_score():
     ratio_arr = []
@@ -444,6 +463,138 @@ def calculate_similarity_score():
             temp = 0
         ratio_arr.append(temp)
     return ratio_arr, bug_arr
+
+
+def checkIPValidity(ip_address):
+    try:
+        ip_address = ip_address.split(":")
+        for ip in ip_address:
+            match = re.match("^(\d{0,3})\.(\d{0,3})\.(\d{0,3})\.(\d{0,3})\/*\d{1,3}$", ip)
+            if not match:
+                return False
+        return True
+    except:
+        return True
+
+def checkPortRange(port_range):
+    try:
+        port_split = port_range.split("-")
+        if port_split[-1] < port_split[0]:
+            return False
+        return True
+    except:
+        return True
+
+def checkDigitRepetition(digit, signature):
+    try:
+        if type(digit) == str:
+            digit = float(digit.split(":")[0])
+        if digit == 0:
+            return False
+        for item in signature:
+            if type(item) == str:
+                item = int(item.split(":")[0])
+            if digit == (item*10+item%10):
+                return True
+        return False
+    except:
+        return False
+
+
+def calculateHumanErrors(data_key, data, signature, namedStructure):
+
+    human_error = (None, None)
+    category = None
+    data_key = data_key.split("=")[-1]
+    signature_items = []
+    for sig_item in signature:
+        signature_items.append(sig_item[0])
+
+
+    if namedStructure == "IP_Access_List":
+        if data_key == "ipWildcard":
+            if not checkIPValidity(data):
+                # Invalid IP
+                human_error = (data_key, data)
+                category = "IP"
+        elif data_key in ["dstPorts", "srcPorts"]:
+            if not checkPortRange(data):
+                # Invalid Ports Range
+                human_error = (data_key, data)
+                category = "RANGE"
+
+
+    elif namedStructure == "Route_Filter_List":
+        if data_key == "ipWildcard":
+            if not checkIPValidity(data):
+                # Invalid IP
+                human_error = (data_key, data)
+                category = "IP"
+        elif data_key == "lengthRange":
+            if not checkPortRange(data):
+                # Invalid Ports Range
+                human_error = (data_key, data)
+                category = "RANGE"
+
+
+    elif namedStructure == "Routing_Policy":
+        if data_key == "communities":
+            if checkDigitRepetition(data, signature_items):
+                # Error Copying digits
+                human_error = (data_key, data)
+                category = "DIGIT"
+        elif data_key == "ips":
+            if not checkIPValidity(data):
+                # Invalid IP
+                human_error = (data_key, data)
+                category = "IP"
+
+
+    elif namedStructure == "VRF":
+        if data_key in ["administrativeCost", "remoteAs", "metric", "localAs", "referenceBandwidth", ]:
+            if checkDigitRepetition(data, signature_items):
+                # Error Copying digits
+                human_error = (data_key, data)
+                category = "DIGIT"
+        elif data_key in ["peerAddress", "localIp", "routerId", "network"]:
+            if not checkIPValidity(data):
+                # Invalid IP
+                human_error = (data_key, data)
+                category = "IP"
+
+    # Any Other namedStructure
+    else:
+        try:
+            if re.search('IP|ip', data_key) and not re.search('[a-zA-Z]', data):
+                if not checkIPValidity(data):
+                    # Invalid IP
+                    human_error = (data_key, data)
+                    category = "IP"
+            elif not re.search("[a-zA-Z]", data):
+                if checkDigitRepetition(data, signature_items):
+                    # Error Copying digits
+                    human_error = (data_key, data)
+                    category = "DIGIT" 
+        except:
+            pass
+
+    return human_error, category
+
+
+def calculate_human_error_score(category_dict):
+
+    total_score = 0
+    low = 0.2
+    medium = 0.5
+    high = 0.8
+    weightage_dict = {"IP":high, "RANGE":medium, "DIGIT":high}
+    for category, count in category_dict.items():
+        if count != 0:
+            print("* Human Error Found *")
+            total_score += weightage_dict[category]/np.log(1+count)
+
+    return round(total_score/len(category_dict), 2) if category_dict else total_score
+
 
 def get_final_outlier_nodes():
     outlier_list = set()
@@ -748,7 +899,7 @@ elif ACTION_FLAG == 1:
     # print("original signature retrieved...")
 
     all_signatures = all_signatures[0]
-    wlDict = whitelistDict['deviant']
+    wlDict = copy.deepcopy(whitelistDict['deviant'])
     for edit_key, edit_value in whitelistDict['deviant']:
         flag = 0
         for signature in all_signatures:
@@ -763,7 +914,7 @@ elif ACTION_FLAG == 1:
                             except Exception as e:
                                 print(e)
         if flag == 1:
-             wlDict.remove((edit_key, edit_value))
+            wlDict.remove((edit_key, edit_value))
 
     if wlDict:
         print(Fore.RED, end='')
@@ -820,7 +971,7 @@ signature_scores = calculate_signature_score(all_signatures)
 print("signature scoring done...")
 
 # Scoring ACLs
-deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score = calculate_acl_scores(data_final, all_signatures)
+deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score = calculate_acl_scores(data_final, all_signatures)
 print("acl scoring done...")
 
 # Calculate outlier nodes
@@ -850,15 +1001,21 @@ nodes = []
 for i in range(len(acls_arr)): 
     temp = json.dumps(acls_arr[i], sort_keys=True)
     tempArr = []
-    for item in node_name_dict[temp]:
-        tempArr.append(item)
-    nodes.append(tempArr)
+    try:
+        for item in node_name_dict[temp]:
+            tempArr.append(item)
+        nodes.append(tempArr)
+    except:
+        nodes.append(None)
 
 # Creating dataframe and exporting as a json file
 df_final = pd.DataFrame()
 df_final['acl_name'] = acl_names
 df_final['acl_structure'] = acls_arr
+df_final['nodes'] = nodes
 df_final['deviant_properties'] = deviant_arr
+df_final['human_error_properties'] = human_errors_arr
+df_final['human_error_score'] = human_errors_score
 df_final['similarity_score'] = count_arr
 df_final['acl_score'] = acls_score
 df_final['max_sig_score'] = sig_score
