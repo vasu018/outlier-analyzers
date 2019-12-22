@@ -1,13 +1,15 @@
 ###############################################################################
+# This script is used to calculate the severity of the outiers and rank them accoridingly. It also accepts user input in 
+# whether a particular outlier is a bug or FP and udpates the ranking accordingly.
+
 #running the script:
 
-#python ranking.py <node_ranks.py(file with PageRank scores of all the nodes)> <list of all outliers json files>
+#python ranking.py <node_ranks.json(file with PageRank scores of all the nodes)> <directory of all outliers json files>
 
 #example:
-#python ranking.py node_ranks.json signature-ip-access.json signature-route-filter.json signature-route-policy.json
+#python ranking.py node_ranks.json XYZ_outliers
 
 ###############################################################################33
-
 
 import pandas as pd
 import numpy as np
@@ -21,126 +23,201 @@ from sklearn.cluster import KMeans
 import seaborn as sns
 import json
 import os
+from IPython.display import display
 import sys
+from colorama import Fore, Back, Style
 
-
-## Here, we are accessing all the json files mentioned in the command line arguments, and loading the data into dataframes.
-## Before final merging of all dataframes, we perform the required operations to calculate the different metrics and the severity score of all outliers.
-## We caclulate the metric 2 based on the pageRank score of the nodes, and meric3 score using the staticticaal approach.
+# Reading the node_ranks.json file and storing the data in a dictionary.
 with open(sys.argv[1], 'r') as fp:
     ranks = json.load(fp)
 
-num_files = len(sys.argv)-2
-nodes_set = set()
-def store_nodes(nodes):
-    s = []
-    ret = 0
-    for node in nodes:
-        ret = max(ret,ranks[node])
-    return ret
-
-def score_df_sum(node_score,score,df_score):
-    print("df_score",node_score,score,df_score)
-    df_score[0] += (node_score*score)
-
-def score_df_mean(node_score,score,df_score):
-    #print("df_score",node_score,score,df_score)
-    df_score.append(node_score*score)
-
+# Helper function to calculate metric_2 score of outliers
 def calc_m2(nodes):
-    s = []
+    s = 0
     for node in nodes:
-        s.append(ranks[node])
-    return np.median(sorted(s[int(len(s)/2):]))+np.mean(s)
-def get_name(outlier):
-    return outlier['name']
+        try:
+            s = max(s,ranks[node])
+        except KeyError:
+            s = s
+    return s  
 
-json_files =[]
-for file in sys.argv[2:]:
-    df = pd.read_json(file,orient = "split")
-    df['outlier_id'] = df.apply(lambda row: get_name(row['outlier_names']), axis=1)
-    df = df[df['score_ratio']<=0.7]
-    df_score =[]
-    df['Metric_1'] = 1 - df['score_ratio']
-    df['node_scores'] = df.apply(lambda row: store_nodes(row['outlier_nodes']), axis=1)
-    df.apply(lambda row: score_df_mean(row['node_scores'],1-row['score_ratio'],df_score), axis=1)
-    df["Metric_3"] = np.mean(df_score)*100
-    df['Metric_2'] = df.apply(lambda row: calc_m2(row['outlier_nodes']), axis=1)
-    x = df[['Metric_2']] #returns a numpy array
+# Reading all the outlier files in the directory 
+directory = sys.argv[2]
+try:
+	files = os.listdir(directory)
+except:
+	print("Directory path incorrect")
+
+print("JSON files gathered, loading the data")
+json_files=[]
+
+# Feature scores which we calculated seperately
+feature_scores = {'Routing_Policy': 0.10256905808871317,
+ 'Route_Filter_List': 0.1590760837298577,
+ 'IP_Access_List': 0.11335485818142918,
+ 'IKE_Phase1_Proposals': 0.125,
+ 'AS_Path_Access_List': 0.125,
+ 'IKE_Phase1_Policies': 0.125,
+ 'IKE_Phase1_Keys': 0.125,
+ 'IPsec_Phase2_Policies': 0.125,
+ 'VRF': 0.125}
+
+# We iterate all the outlier files and process them seperately.
+# At the end, we will merge all the outliers in a single dataframe.
+for file in files:
+    print("Processing the file: ", file)
+    # Loading the data in a dataframe.
+    try:
+        df1 = pd.read_json(os.path.join(directory,file), orient='split')
+    except:
+        continue
+	
+	# Calculating metric 1 for all outliers
+    df1['Metric1'] = df1['similarity_score']/df1["acl_score"]
+	# Removing the entries which have similarity_score = 1, as they are not bugs.
+    df1 = df1[df1['Metric1']<1]  
+    # If there are no outliers left, move on to the next file.    
+    if len(df1)==0:
+        continue
+	# Calculating metric2 using the helper functions.
+	# Metric 2 takes into account how well connected a node, which has the particular outlier, is to the other nodes and 
+	# gives a score to the outlier on this basis.
+    df1['Metric2'] = df1.apply(lambda row: calc_m2(row['nodes']), axis=1)
+              
+    file_name = file[8:-5]
+    df1['Metric3'] = feature_scores[file_name]
+    
+	# Scaling both metric 1 and meric 2.
+    x = df1[['Metric1']] #returns a numpy array
     min_max_scaler = preprocessing.MinMaxScaler()
     x_scaled = min_max_scaler.fit_transform(x)
-    df['Metric_2'] = x_scaled
-    del df['node_scores']
-    json_files.append(df)
+    df1['Metric1'] = x_scaled
+    
+    x = df1[['Metric2']] #returns a numpy array
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    df1['Metric2'] = x_scaled
+    
+    x = df1[['Metric3']] #returns a numpy array
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    df1['Metric3'] = x_scaled
+   
+	# Calculating the severity score
+    df1['Severity_score'] = df1['Metric1']+df1['Metric2']+df1['Metric2']
 
+	# Renaming the cluster number of each outlier. The new cluster number will be unique across all named structures.
+	# The format of the new cluster number will be = "named_structure" + "_" + "original cluster number"
+	# Example = IP_Access_List_12, VRF_2
+    df1['cluster_name'] = file.split(".")[0]+"_" + df1['cluster_number'].astype(str)
 
-## This dataframe will contain all the outliers with all the relevant info.(metric scores, severity scores)
+	#Appending the dataframe to a list of dataframes.
+    json_files.append(df1)
+
+print("Processig done")
+# Merging the list of dataframes .  
 df = pd.concat(json_files)
-df['severity_score'] = df['Metric_3']*(df['Metric_1'] + df['Metric_2'])
 
+# Assigning an outlier_id to each entry. This will be used later in metric 4 when the user has to specify whether the outlier is a bug or FP.
+df['Outlier_id'] = list(range(0,len(df)))
 
-## The following code is for incorporating the user feedback into the severity calculationself.
-# We start by building populations of correleated outliers, and whenever any outier is marked as a bug or false-positive, we update
-# the other outlers in that outlier's population respectively.
-populations = defaultdict(set)
-indices = list(df.index.values)
-i=[0]
-def build_populations(outlier_id,index):
-    populations[outlier_id].add(indices[i[0]])
-    i[0]+=1
+# Sorting the dataframe in descending order by their severity score.
+df=df.sort_values(by = "Severity_score",ascending = False)
 
-df.apply(lambda row: build_populations(row['outlier_id'],row), axis=1)
-x=0
-final_pop=defaultdict(set)
-for p in populations:
-    if len(populations[p])>1:
-        final_pop[p] = populations[p]
+# Creating a dictionary which will store which outliers belong to the same clusters.
+clusters = defaultdict(list)
 
+print("Saving clusters")
+def extract_clusters(row):
+    clusters[row['cluster_name']].append(row['Outlier_id'])
+df.apply(lambda row:extract_clusters(row),axis = 1)
 
-def update_score(index,frac):
-    df.at[index, 'severity_score'] = df.loc[index]['severity_score']*frac
+# Helper function to update the scores when the user marks an outlier as a bug.
+def found_bug(index,df=df):
+    try:
+		# We get the cluster_number of the outlier which has been marked as a bug.
+        cluster_number = df.loc[df["Outlier_id"]==index,"cluster_name"].iloc[0]
+    except:
+        print("Index out of range")
+        return
 
-# The following two functions are to be called when we find a bug/false-positive. It takes the index of the outlier as the argument.
-def found_bug(idx,df = df):
-    o_id = df.loc[idx]['outlier_id']
-    if o_id in final_pop:
-        l = final_pop[o_id]
-        for n in l:
-            update_score(n,1.1)
+	# Get all the outliers which belong to that cluster.
+    cluster = clusters[cluster_number]
 
+	# Update the scores of all these outliers by increasing their severity scores by 10%.	
+    for i in cluster:
+        df.loc[df.Outlier_id==i,'Severity_score'] = df.loc[df.Outlier_id==i,'Severity_score']*1.1
 
+# Helper function to update the scores when the user marks an outlier as a FP.
+def found_fp(index,df=df):
+    try:
+		# We get the cluster_number of the outlier which has been marked as FP.
+        cluster_number = df.loc[df["Outlier_id"]==index,"cluster_name"].iloc[0]
+    except:
+        print("Index out of range")
+        return
 
-def found_fp(idx,df=df):
-    o_id = df.loc[idx]['outlier_id']
-    if o_id in final_pop:
-        l = final_pop[o_id]
-        for n in l:
-            update_score(n,0.9)
+	# Get all the outliers which belong to that cluster.
+    cluster = clusters[cluster_number]
 
+	# Update the scores of all these outliers by decreasing their severity scores by 10%.	
+    for i in cluster:
+        df.loc[df.Outlier_id==i,'Severity_score'] = df.loc[df.Outlier_id==i,'Severity_score']*0.9
 
+# Delete all the columns which are no longer required.
+del df['similarity_score']
+del df['acl_score']
+del df['max_sig_score']
+del df['Metric1']
+del df['Metric2']
+del df['Metric3']
+del df['cluster_number']
 
-## The following assigns severity to the outliers using Kmeans, 
+# Helper function to display the list of outliers.
+def display_dataframe(df):
+    columns = df.columns
+    for i in range(len(df)):
+        print(Fore.GREEN)
+        print("############################################################")
+        print("OUTLIER NO ",i+1)
+        print(Style.RESET_ALL) 
+        for col in columns:
+            print(Fore.RED)
+            print(col,":")
+            print(Style.RESET_ALL) 
+            print(df.iloc[i][col])
 
-kmeans = KMeans(n_clusters=4)
-df['label'] = kmeans.fit_predict(df[['severity_score']])
-centers = []
-for i in kmeans.cluster_centers_:
-    centers.append(i[0])
-centers_index = np.argsort(centers)[::-1]
-label_dict = {}
-for i,it in enumerate(centers_index):
-    label_dict[it]=i
-final_ranks = []
-for i in centers:
-    final_ranks.append(list(df[df['label']==i].index))
-def assign_label(label):
-    return 4 - label_dict[label]
-df['final_label'] = df.apply(lambda row: assign_label(row['label']), axis=1)
-plt.rcParams['figure.figsize']=(15,10)
-sns.scatterplot(x="Metric_1", y="Metric_2", size=df.index,sizes = (50,200),hue ="final_label",data=df)
-plt.show()
-sns.distplot(df['Metric_1'],kde = True)
-plt.ylabel("Frequency")
-plt.show()
-sns.distplot(df['Metric_2'],kde = True)
-plt.show()
+# We run a loop where the user can examine the outliers and mark them as a bug or FP.
+while True:
+    print("Choose action:")
+    print("1 = Display top outliers")
+    print("2 = Found Bug")
+    print("3 = Found FP")
+    print("4 = Display all outliers")
+    print("5 = Exit")
+    print("Action->",end = " ")
+    x = int(input())
+    if x == 1:
+        print("Top 5 outliers:")
+        display_dataframe(df.head())
+    elif x ==2:
+        print("Enter Outlier_id of the bug")
+        index = int(input())
+        found_bug(index)
+        df = df.sort_values(by="Severity_score",ascending = False)
+        print("Scores updated")
+    elif x ==3:
+        print("Enter Outlier_id of the FP")
+        index = int(input())
+        found_fp(index)
+        df = df.sort_values(by="Severity_score",ascending = False)
+        print("Scores updated")
+    elif x==4:
+        print("All outliers:")
+        display_dataframe(df)
+    elif x ==5:
+        print("Exiting application")
+        break
+    else:
+        print("Invalid action")
+
