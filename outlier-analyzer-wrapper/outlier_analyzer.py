@@ -1,5 +1,6 @@
 import sys
 import os 
+from pathlib import Path
 from colorama import Fore, Back, Style
 
 def selectZScoreMethod():
@@ -59,9 +60,20 @@ def score_plot():
     file_name = input("=> ")
     os.system('python3 view_analysis.py -s '+file_name)
 
+def run_ranking_module():
+    print(Fore.BLUE, end='')
+    print("\nEnter the Network Directory path for which you want to run Severity Module")
+    print(Style.RESET_ALL, end='')
+    network_directory = input("=> ").strip()
+    node_rank_file = network_directory+"/node_ranks.json"
+    curr_directory = os.path.dirname(os.path.abspath(__file__))
+    outlier_directory_path = curr_directory+"/outliers_"+network_directory.split("/")[-1]
+    ranking_file_path = str(Path(curr_directory).parent)+'/ranking-severity/ranking.py'
+    os.system('python3 '+ranking_file_path+' '+node_rank_file+' '+outlier_directory_path)
+
 def choose_action():
     action_selected = 0
-    options_count = 7
+    options_count = 8
     while action_selected <= options_count:
         
         print("==========================")
@@ -72,7 +84,8 @@ def choose_action():
         print("4 => VIEW OUTLIER NODES")
         print("5 => DEVIANT PROPERTIES PLOT")
         print("6 => SCORING COMPARISION PLOT")
-        print("7 => EXIT APPLICATION")
+        print("7 => RUN RANKING MODULE")
+        print("8 => EXIT APPLICATION")
         print("==========================")
 
         action_selected = input("\nAction => ")
@@ -109,6 +122,11 @@ def choose_action():
             print(Style.RESET_ALL, end='')
             score_plot()
         elif action_selected == 7:
+            print(Fore.RED, end='')
+            print("*Ranking Module Selected*")
+            print(Style.RESET_ALL, end='')
+            run_ranking_module()
+        elif action_selected == 8:
             print(Fore.BLUE, end='')
             print("Exiting Function ...\n")
             print(Style.RESET_ALL, end='')

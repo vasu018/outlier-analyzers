@@ -2,6 +2,7 @@ import sys
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 from colorama import Fore, Back, Style
 
 
@@ -14,9 +15,12 @@ def error_msg():
     sys.exit(0)
 
 ACTION_FLAG = 0
-fileName = sys.argv[2].split("/")[-1]
+curr_directory = os.path.dirname(os.path.abspath(__file__))
+networkName = "/outliers_"+sys.argv[2].split("/")[-2]
+fileName = curr_directory+networkName+'/outlier_'+sys.argv[2].split("/")[-1]
+
 try:
-	df = pd.read_json('outlier_'+fileName, orient = "split")
+	df = pd.read_json(fileName, orient = "split")
 	# For properties
 	if sys.argv[1] == "-p":
 		ACTION_FLAG = 1
