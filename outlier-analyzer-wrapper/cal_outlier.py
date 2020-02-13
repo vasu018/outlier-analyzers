@@ -19,67 +19,21 @@ import pickle
 import os
 
 # Error Message
-def error_msg():
+def error_msg(errormsg, arg):
     print("****************************")
-    print(Fore.BLUE, end='')
-    print("Invalid flags sent!")
+    print(Fore.RED, end='')
+    print(errormsg,":", arg)
     print(Style.RESET_ALL, end='')
     print("****************************")
     sys.exit(0)
 
-whitelistDict = {}
-Z_SCORE_FLAG = 0
-ACTION_FLAG = 0
-k_select = 0
-# Reading Data
-try:
-    fileName = sys.argv[2].split("/")[-1]
-    networkName = "outliers_"+sys.argv[2].split("/")[-2]
+# Print INFO
+def printINFO(info):
+    print(Fore.BLUE, end='')
+    print(info)
+    print(Style.RESET_ALL, end='')
 
-    # Making Outlier Directory for Current Network
-    if not os.path.exists(networkName):
-        os.makedirs(networkName)
 
-    flag_file = networkName+'/'+'.flag_'+fileName
-    if sys.argv[1] == "-j":
-        df = pd.read_json(sys.argv[2],orient = "index")
-        try:
-            if sys.argv[4] == "-a":
-                ACTION_FLAG = 3
-        except:
-            ACTION_FLAG = 0
-        try:
-            Z_SCORE_FLAG = int(sys.argv[3])
-        except:
-            error_msg()
-        f = open(flag_file,'w')
-        f.write('{}'.format(ACTION_FLAG))
-        f.close()
-    elif sys.argv[1] == "-e":
-        df = pd.read_json(sys.argv[2],orient = "index")
-        try:
-            with open(sys.argv[3], 'rb') as handle:
-                whitelistDict = pickle.load(handle)
-        except:
-            print("FileNotFoundError: Please check if file exists.")
-        ACTION_FLAG = 1
-    elif sys.argv[1] == "-d":
-        df = pd.read_json(sys.argv[2],orient = "index")
-        ACTION_FLAG = 2
-    else:
-        error_msg()
-except:
-    error_msg()
-
-outlier_filename = networkName+'/'+'outlier_'+fileName
-cluster_filename = networkName+'/'+'.cluster_'+fileName
-sig_filename = networkName+'/'+'.sig_'+fileName
-outlier_nodes_filename = networkName+'/'+'.outlier_nodes_'+fileName
-print("===========================================================")
-print(Fore.BLUE, end='')
-print("outlier-analyzer code started ...")
-print(Style.RESET_ALL)
-print(Fore.GREEN, end='')
 
 # *****************************************************************************
 # *****************************************************************************
@@ -610,6 +564,66 @@ def get_final_outlier_nodes():
 # Helper Methods End 
 # *****************************************************************************
 # *****************************************************************************
+
+
+
+
+whitelistDict = {}
+Z_SCORE_FLAG = 0
+ACTION_FLAG = 0
+k_select = 0
+# Reading Data
+try:
+    fileName = sys.argv[2].split("/")[-1]
+    networkName = "outliers_"+sys.argv[2].split("/")[-2]
+
+    # Making Outlier Directory for Current Network
+    if not os.path.exists(networkName):
+        os.makedirs(networkName)
+
+    flag_file = networkName+'/'+'.flag_'+fileName
+    if sys.argv[1] == "-j":
+        df = pd.read_json(sys.argv[2],orient = "index")
+        try:
+            if sys.argv[4] == "-a":
+                ACTION_FLAG = 3
+        except:
+            ACTION_FLAG = 0
+        try:
+            Z_SCORE_FLAG = int(sys.argv[3])
+        except:
+            error_msg("Invalid Z-Score Argument sent", sys.argv[3])
+
+        f = open(flag_file,'w')
+        f.write('{}'.format(ACTION_FLAG))
+        f.close()
+    elif sys.argv[1] == "-e":
+        df = pd.read_json(sys.argv[2],orient = "index")
+        try:
+            with open(sys.argv[3], 'rb') as handle:
+                whitelistDict = pickle.load(handle)
+        except:
+            print("FileNotFoundError: Please check if file exists.")
+        ACTION_FLAG = 1
+    elif sys.argv[1] == "-d":
+        df = pd.read_json(sys.argv[2],orient = "index")
+        ACTION_FLAG = 2
+    else:
+        error_msg("Invalid Argument or flags sent", sys.argv[1])
+
+except:
+    error_msg("Invalid File specified. Please check the input dataset", sys.argv[2])
+
+outlier_filename = networkName+'/'+'outlier_'+fileName
+cluster_filename = networkName+'/'+'.cluster_'+fileName
+sig_filename = networkName+'/'+'.sig_'+fileName
+outlier_nodes_filename = networkName+'/'+'.outlier_nodes_'+fileName
+print("===========================================================")
+print(Fore.BLUE, end='')
+print("outlier-analyzer code started ...")
+print(Style.RESET_ALL)
+print(Fore.GREEN, end='')
+
 
 start = time.time()
 # Calculating outliers selected
