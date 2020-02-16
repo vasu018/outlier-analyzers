@@ -33,13 +33,19 @@ def printINFO(info):
     print(info)
     print(Style.RESET_ALL, end='')
 
-
-
 # *****************************************************************************
 # *****************************************************************************
 # Helper Methods Start
 
-def plot_elbow_graph(df):
+
+def calculate_num_clusters(df):
+    """
+    Calculates the optimal number of clusters using the elbow_graph approach. 
+    Input:
+       The Pandas dataframe of the input file (ACL.json)
+    output:
+       The value of k that provides least MSE. 
+    """
 
     features = df[df.columns]
     ran = min(len(df.columns), len(datas))
@@ -56,11 +62,21 @@ def plot_elbow_graph(df):
             break
     return i-1 if len(avg_within) > 1 else 1
 
-# Perform K-Means Clustering
+
 def perform_kmeans_clustering(df):
-    labels = []
+    """
+    To get a mapping of the rows into respective clusters generated using the K-means algorithm. 
+    Input:
+        The Pandas data-frame of the input file (ACL.json)
+    Output:
+        Adding respective K-means cluster label to the input dataframe.
+        Example:
+        Row1 - Label 0 //Belongs to Cluster 0
+        Row2 - Label 0 //Belongs to Cluster 0
+        Row3 - Label 1 //Belongs to Cluster 1
+    """
     global k_select
-    k_select = plot_elbow_graph(df)
+    k_select = calculate_num_clusters(df)
     features = df[df.columns]
     kmeans = KMeans(n_clusters = k_select)
     kmeans.fit(features)
@@ -68,7 +84,18 @@ def perform_kmeans_clustering(df):
     labels = kmeans.labels_
     df["kmeans_cluster_number"] = pd.Series(labels)
 
+
 def extract_keys(the_dict, prefix=''):
+    """
+    Recursive approach to gather all the keys that have nested keys in the input file.
+    Input:
+        The dictionary file to find all the keys in.
+    Output:
+        All the keys found in the nested dictionary.
+        Example:
+        Consider {key1:value1, key2:{key3:value3}, key4:[value4], key5:[key6:{key7:value7}]}
+        The function returns key2, key5=key6
+    """    
     key_list = []
 
     for key, value in the_dict.items():
@@ -92,13 +119,24 @@ def extract_keys(the_dict, prefix=''):
 
     return key_list
 
+
 def calculate_z_score(arr):
+    """
+    Calculates the Z-score (uses mean) (or) Modified Z-score (uses median) of data-points
+    Input:
+        Data points generated from parsing through the input file.
+        Also considers the Z_SCORE_FLAG that is set previously with 0 (default) using the Modified Z-score and 1 using Z-score.
+    Output:
+        The Z-score of given data-points array.
+    """
 
     if len(arr) == 1:
         return arr
 
     z_score = []
-    # Z-Score Method
+    '''
+        Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
+    '''
     if Z_SCORE_FLAG:
         mean = np.mean(arr)
         std = np.std(arr)
@@ -106,7 +144,10 @@ def calculate_z_score(arr):
             return np.ones(len(arr))*1000
         for val in arr:
             z_score.append((val-mean)/std)
-    # Modified Z-Score Method (Default)
+
+    #        Modified Z-score approach.
+    #        Calculates the Z-score using median. Generally used if distribution is skewed.
+
     else:
         median_y = np.median(arr)
         median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
@@ -116,8 +157,30 @@ def calculate_z_score(arr):
 
     return z_score
 
+
 # Calculating the overall dictionary
 def overall_dict(data_final):
+    """
+    Parses through the dictionary and appends the frequency with which the keys occur.
+    Input:
+        A nested dictionary.
+        Example:
+            {key1:{key2:value1, key3:value2, key4:{key5:value3}}
+            {key6:{key7:value2}
+            {key8:{key3:value3, key4:value5, key6:value3}}
+    Output:
+        Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
+        [{
+        key1=key2:{'value1':1},
+        key1=key3:{'value2':2},
+        key1=key4=key5:{'value3':3},
+        key6=key7:{'value2':2},
+        key8=key3:{'value3':3},
+        key8=key4:{'value5':1},
+        key8=key6:{'value3':1}
+       }]
+    """
+
     overall_array = []
     for data in data_final:
         overall = {}
@@ -148,10 +211,32 @@ def overall_dict(data_final):
                     overall[element][value] += 1
 
         overall_array.append(overall)
-        overall = {}
+
     return overall_array
 
+
 def get_overall_dict(data_final):
+    """
+    Parses through the dictionary and appends the frequency with which the keys occur.
+    Input:
+        A nested dictionary.
+        Example:
+            {key1:{key2:value1, key3:value2, key4:{key5:value3}}
+            {key6:{key7:value2}
+            {key8:{key3:value3, key4:value5, key6:value3}}
+    Output:
+        Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
+        [{
+        key1=key2:{'value1':1},
+        key1=key3:{'value2':2},
+        key1=key4=key5:{'value3':3},
+        key6=key7:{'value2':2},
+        key8=key3:{'value3':3},
+        key8=key4:{'value5':1},
+        key8=key6:{'value3':1}
+       }]
+    """
+
     overall_array = []
     for data in data_final:
         overall = {}
@@ -235,12 +320,22 @@ def get_overall_dict(data_final):
                         overall[element][new_value] += 1
                         
         overall_array.append(overall)
-        overall = {}
+
     return overall_array  
         
 
 # Calculating the Signature
-def calculate_signature_d(overall_arr, index, data_final):
+def calculate_signature_d(overall_arr):
+    """
+    Uses Z-score to generate the signatures of data-points and also maps points on level of significance (include for signature calculation, include for bug calculation, no significance).
+    If Z-score is equal to 1000.0 or in between sig_threshold and bug_threshold, no-significance.
+    If Z-score is >= sig_threshold, include for signature calculation.
+    If Z-score is <= bug_threshold, include for bug calculation.
+    Input:
+        [[TODO]]
+    Output:
+        An array containing dictionaries marked with tags that represent the action that needs to be performed on them.
+    """
     signature = {}
     for key, value in overall_arr.items():
         sig_threshold = 1.5
@@ -252,7 +347,7 @@ def calculate_signature_d(overall_arr, index, data_final):
             key_points.append(k)
             data_points.append(v)
 
-        if(len(data_points) == 1):
+        if len(data_points) == 1:
             sig_values.append((key_points[0], (data_points[0])))
         # Check for two data points case
         else:
@@ -274,16 +369,41 @@ def calculate_signature_d(overall_arr, index, data_final):
             signature[key].append(sig_values)
         else:
             signature[key] = []
-            signature[key]+=(sig_values)
-        
+            signature[key] += sig_values
     return signature
+
 
 # Helper Function for Scoring the Signature
 def transform_data(data):
+    """
+    A helper function to extract nested keys from the ACL and to add the frequency of the repeated value.
+    Input:
+        An ACL in the form {key1:value1, key2:{key3:value3}, key4:[value4], key5:[key6:{key7:value7}]}.
+    Output:
+        Extracted nested keys from the extrat_keys function along with the frequency count.
+        Example:
+            [
+            {key1:{key2:value1, key3:value2, key4:{key5:value3}}
+            {key6:{key7:value2}
+            {key8:{key3:value3, key4:value5, key6:value3}}
+            ]
+             Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
+            [{
+            key1=key2:{'value1':1},
+            key1=key3:{'value2':2},
+            key1=key4=key5:{'value3':3},
+            key6=key7:{'value2':2},
+            key8=key3:{'value3':3},
+            key8=key4:{'value5':1},
+            key8=key6:{'value3':1}
+           }]
+]
+    """
     count = 1
     overall = {}
     flag = 0
     i = 0
+    print(data)
     while i < count:
         value = None
         result = None
@@ -313,12 +433,29 @@ def transform_data(data):
                 if type(value) != dict and type(value) != list:
                     if value not in overall[element]:
                         overall[element][value] = 1
-        i += 1 
+        i += 1
+    print("Overall=", overall)
     return overall
+
 
 # Scoring Signature
 def calculate_signature_score(signature):
+    """
+    Calculates the signature score for each signature as the sum of all the weights in it but ignoring the weights marked with "*".
+    Input:
+        A signature that contains tags of whether or not the weight should be included in calculating the signature.
+    Output:
+        An array containing the weights of all the signatures that should be considered.
+        Example:
+        Consider [
+        {'key1=key2':['val1', 40], 'key3=key4':['val2':90]}, //40 + 90
+        {'key5=key6=key7':['val3', *, 20], 'key8=key9':['val4':80]}, //80
+        {'key10=key11':['val5', 40]}  //40
+
+        Returns [130, 80, 40].
+    """
     score_arr = []
+
     for sig in signature:
         score = 0
         for key, value in sig.items():
@@ -328,10 +465,19 @@ def calculate_signature_score(signature):
                 elif val[1] == "!":
                     score += val[2]
         score_arr.append(score)
+
     return score_arr
 
 # Calculating ACLs similarity Score
 def calculate_acl_scores(data_final, all_signatures):
+    """
+    [TODO]
+    Input:
+
+    Output:
+
+    """
+
     deviant_arr = []
     count_arr = []
     acls_dict = {}
@@ -402,24 +548,16 @@ def calculate_acl_scores(data_final, all_signatures):
         i += 1
     return deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score
 
-def calculate_similarity_score():
-    ratio_arr = []
-    bug_arr = []
-    for i in range(len(acls_arr)):
-        try:
-            temp = count_arr[i]/sig_score[i]
-            if len(deviant_arr[i]) != 0:
-                bug_arr.append(True)
-            else:
-                bug_arr.append(False)
-        except:
-            bug_arr.append(True)
-            temp = 0
-        ratio_arr.append(temp)
-    return ratio_arr, bug_arr
-
 
 def checkIPValidity(ip_address):
+    """
+    A reg-ex check to verify the validity of an IP address.
+    Input:
+        A list of IP addresses
+    Output:
+        A boolean representing the validity of the IP address.
+        Returns 'True' if all the IPs are valid and 'False' if any of the IP is invalid.
+    """
     try:
         ip_address = ip_address.split(":")
         for ip in ip_address:
@@ -430,7 +568,20 @@ def checkIPValidity(ip_address):
     except:
         return True
 
+
 def checkPortRange(port_range):
+    """
+    A check to verify that the port range is specified correctly (elem0 <= elem1).
+    Input:
+        A string that contains two numbers separated by a '-'.
+    Output:
+        A boolean representing the validity of the range (elem0 <= elem1).
+        Example:
+            52108-52109 (True)
+            466 - 466 (True)
+            466 - 465 (False)
+    """
+
     try:
         port_split = port_range.split("-")
         if port_split[-1] < port_split[0]:
@@ -439,7 +590,16 @@ def checkPortRange(port_range):
     except:
         return True
 
+
 def checkDigitRepetition(digit, signature):
+    """
+    [TODO]
+    Input:
+
+    Output:
+
+    """
+
     try:
         if type(digit) == str:
             digit = float(digit.split(":")[0])
@@ -449,6 +609,7 @@ def checkDigitRepetition(digit, signature):
             if type(item) == str:
                 item = int(item.split(":")[0])
             if digit == (item*10+item%10):
+                print("--------", digit, item*10 + item%10)
                 return True
         return False
     except:
@@ -456,14 +617,28 @@ def checkDigitRepetition(digit, signature):
 
 
 def calculateHumanErrors(data_key, data, signature, namedStructure):
-
+    """
+    Checks for simple human errors like entering invalid IP Addresses, incorrect port-ranges, and digit repetitions.
+    Input:
+        data_key: The nested keys calculated in the overall_dict and get_overall_dict methods.
+        Example: key1=key2=key4
+        data: The data value for the keys.
+        signature: The signature for the keys that was calculated in the calculate_signature_d method.
+        namedStructure: The type of the IP file.
+        Possible values: IP_Access_List, Route_Filter_List, Routing_Policy, VRF, others.
+    Output:
+        Returns the error and the category it belongs to.
+        Example:
+            key1=key2=key3 [1333.0.0.13] [1333.0.0.13] IP_Access_List
+            Returns:
+                key1=key2=key3 [1333.0.0.13] IP
+    """
     human_error = (None, None)
     category = None
     data_key = data_key.split("=")[-1]
     signature_items = []
     for sig_item in signature:
         signature_items.append(sig_item[0])
-
 
     if namedStructure == "IP_Access_List":
         if data_key == "ipWildcard":
@@ -490,7 +665,6 @@ def calculateHumanErrors(data_key, data, signature, namedStructure):
                 human_error = (data_key, data)
                 category = "RANGE"
 
-
     elif namedStructure == "Routing_Policy":
         if data_key == "communities":
             if checkDigitRepetition(data, signature_items):
@@ -502,7 +676,6 @@ def calculateHumanErrors(data_key, data, signature, namedStructure):
                 # Invalid IP
                 human_error = (data_key, data)
                 category = "IP"
-
 
     elif namedStructure == "VRF":
         if data_key in ["administrativeCost", "remoteAs", "metric", "localAs", "referenceBandwidth", ]:
@@ -536,7 +709,16 @@ def calculateHumanErrors(data_key, data, signature, namedStructure):
 
 
 def calculate_human_error_score(category_dict):
+    """
+    Scores the human_errors that have been found with IPValidity and DigitRepetition errors
+    weighed as 'high,' i.e, 0.8 and PortRange errors weighed 'medium,' i.e., 0.5.
+    Input:
+        A dictionary containing the count of the error occurrences.
+    Output:
+        A weighted sum of all the errors found.
 
+    """
+    print(category_dict)
     total_score = 0
     low = 0.2
     medium = 0.5
@@ -550,23 +732,9 @@ def calculate_human_error_score(category_dict):
     return round(total_score/len(category_dict), 2) if category_dict else total_score
 
 
-def get_final_outlier_nodes():
-    outlier_list = set()
-    nodes_dict = dict(zip(list(df.index), np.arange(0, len(list(df.index)))))
-    for i in range(len(acls_arr)):
-        if bug_arr[i] == True:
-            for j in range(len(nodes_arr[i])):
-                outlier_list.add(nodes_dict[nodes_arr[i][j]])
-        else:
-            continue
-    return list(outlier_list)
-
 # Helper Methods End 
 # *****************************************************************************
 # *****************************************************************************
-
-
-
 
 whitelistDict = {}
 Z_SCORE_FLAG = 0
@@ -887,7 +1055,7 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
     # Generating Signatures
     all_signatures = []
     for i in range(len(overall_array)):
-        signature = calculate_signature_d(overall_array[i], i, data_final)
+        signature = calculate_signature_d(overall_array[i])
         all_signatures.append(signature)
     print("signature creation done...")
 
