@@ -1,34 +1,43 @@
 import sys
 import re
-import copy
-import math
 import json
-import ast
-import random
 import numpy as np
 import pandas as pd
-from collections import abc
 from sklearn.cluster import KMeans
-from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import MultiLabelBinarizer
-from scipy.spatial.distance import cdist, pdist
-from colorama import Fore, Back, Style
+from scipy.spatial.distance import cdist
+from colorama import Fore, Style
 import copy
 import time
 import pickle
 import os
 
-# Error Message
-def error_msg(errormsg, arg):
+
+def error_msg(error_msg, arg):
+    """
+    Helper function to display error message on the screen.
+    Input:
+        The error message along with its respective argument.
+        (Values include - filename, selected action).
+    Output:
+        The formatted error message on the screen along with the argument.
+    """
     print("****************************")
     print(Fore.RED, end='')
-    print(errormsg,":", arg)
+    print(error_msg,":", arg)
     print(Style.RESET_ALL, end='')
     print("****************************")
     sys.exit(0)
 
-# Print INFO
+
 def printINFO(info):
+    """
+    Helper function to ask the user for Input.
+    Input:
+        The message that is to be displayed.
+    Output:
+        The formatted message on the screen.
+    """
     print(Fore.BLUE, end='')
     print(info)
     print(Style.RESET_ALL, end='')
@@ -36,7 +45,6 @@ def printINFO(info):
 # *****************************************************************************
 # *****************************************************************************
 # Helper Methods Start
-
 
 def calculate_num_clusters(df):
     """
@@ -49,18 +57,21 @@ def calculate_num_clusters(df):
 
     features = df[df.columns]
     ran = min(len(df.columns), len(datas))
-    k_range = range(1, ran)
+    k_range = range(1, ran//20)
+
     clusters_list = [KMeans(n_clusters=i).fit(features) for i in k_range]
     centroid_list = [i.cluster_centers_ for i in clusters_list]
     k_distance = [cdist(features, centroid, "euclidean") for centroid in centroid_list]
     cluster_index = [np.argmin(kdist, axis=1) for kdist in k_distance]
     distances = [np.min(kdist, axis=1) for kdist in k_distance]
     avg_within = [np.sum(dist) / features.shape[0] for dist in distances]
-    
+
     for i in range(1, len(avg_within)):
         if (avg_within[i-1] - avg_within[i]) < 1:
             break
-    return i-1 if len(avg_within) > 1 else 1
+    # return i-1 if len(avg_within) > 1 else 1
+    # return i - 1 if i > 1 else 1
+    return 15
 
 
 def perform_kmeans_clustering(df):
@@ -134,9 +145,11 @@ def calculate_z_score(arr):
         return arr
 
     z_score = []
+
     '''
         Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
     '''
+    
     if Z_SCORE_FLAG:
         mean = np.mean(arr)
         std = np.std(arr)
@@ -145,11 +158,15 @@ def calculate_z_score(arr):
         for val in arr:
             z_score.append((val-mean)/std)
 
-    #        Modified Z-score approach.
-    #        Calculates the Z-score using median. Generally used if distribution is skewed.
-
+        '''
+        Modified Z-score approach.
+        Calculates the Z-score using median. Generally used if distribution is skewed.
+        '''
     else:
         median_y = np.median(arr)
+        medians = [np.abs(y - median_y) for y in arr]
+        med = np.median(medians)
+
         median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
         if median_absolute_deviation_y == 0:
             return np.ones(len(arr))*1000
@@ -158,7 +175,6 @@ def calculate_z_score(arr):
     return z_score
 
 
-# Calculating the overall dictionary
 def overall_dict(data_final):
     """
     Parses through the dictionary and appends the frequency with which the keys occur.
@@ -184,9 +200,6 @@ def overall_dict(data_final):
     overall_array = []
     for data in data_final:
         overall = {}
-        value = None
-        result = None
-        new_value = None
         for item in data:
             if item[0] is None:
                 continue
@@ -240,8 +253,6 @@ def get_overall_dict(data_final):
     overall_array = []
     for data in data_final:
         overall = {}
-        value = None
-        result = None
         new_value = None
         flag = 0
         for item in data:
@@ -281,7 +292,9 @@ def get_overall_dict(data_final):
                                                 check = 1
                                     except:
                                         dummy=0
-                                        #do nothing
+                                        '''
+                                        do nothing
+                                        '''
                                     try:
                                         if check == 0:
                                             if type(temp_val[list_key]) == list:
@@ -297,7 +310,9 @@ def get_overall_dict(data_final):
                                 value = new_value
                                 
                         else:
-                            # Type is not list
+                            '''
+                            Type is not list
+                            '''
                             value = new_value
                             
                     else:
@@ -322,9 +337,8 @@ def get_overall_dict(data_final):
         overall_array.append(overall)
 
     return overall_array  
-        
 
-# Calculating the Signature
+
 def calculate_signature_d(overall_arr):
     """
     Uses Z-score to generate the signatures of data-points and also maps points on level of significance (include for signature calculation, include for bug calculation, no significance).
@@ -338,31 +352,35 @@ def calculate_signature_d(overall_arr):
     """
     signature = {}
     for key, value in overall_arr.items():
-        sig_threshold = 1.5
-        bug_threshold = -1.5
+        sig_threshold = 0.5
+        bug_threshold = -0.1
         key_points = []
         data_points = []
         sig_values = []
+
         for k, v in value.items():
             key_points.append(k)
             data_points.append(v)
 
         if len(data_points) == 1:
             sig_values.append((key_points[0], (data_points[0])))
-        # Check for two data points case
+            '''
+            Check for two data points case
+            '''
         else:
             z_score = calculate_z_score(data_points)
             if len(z_score) > 0:
                 avg_z_score = sum(z_score)/len(z_score)
                 bug_threshold = bug_threshold + (avg_z_score - sig_threshold)
             for i in range(len(z_score)):
-                if z_score[i] == 1000.0:
+                present_zscore = z_score[i]
+                if present_zscore == 1000.0:
                     sig_values.append((key_points[i], "*", (data_points[i])))
-                elif z_score[i] >= sig_threshold:
+                elif present_zscore >= sig_threshold:
                     sig_values.append((key_points[i], (data_points[i])))
-                elif z_score[i] <= bug_threshold:
+                elif present_zscore <= bug_threshold:
                     sig_values.append((key_points[i], "!", (data_points[i])))
-                elif (z_score[i] < sig_threshold) and (z_score[i] > bug_threshold):
+                elif (present_zscore < sig_threshold) and (present_zscore > bug_threshold):
                     sig_values.append((key_points[i], "*", (data_points[i])))
 
         if key in signature:
@@ -373,10 +391,10 @@ def calculate_signature_d(overall_arr):
     return signature
 
 
-# Helper Function for Scoring the Signature
+
 def transform_data(data):
     """
-    A helper function to extract nested keys from the ACL and to add the frequency of the repeated value.
+    A helper function to extract nested keys from the ACL and to add the frequency of the repeated value. Helps score data.
     Input:
         An ACL in the form {key1:value1, key2:{key3:value3}, key4:[value4], key5:[key6:{key7:value7}]}.
     Output:
@@ -389,21 +407,20 @@ def transform_data(data):
             ]
              Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
             [{
-            key1=key2:{'value1':1},
-            key1=key3:{'value2':2},
-            key1=key4=key5:{'value3':3},
-            key6=key7:{'value2':2},
-            key8=key3:{'value3':3},
-            key8=key4:{'value5':1},
-            key8=key6:{'value3':1}
-           }]
-]
+              key1=key2:{'value1':1},
+              key1=key3:{'value2':2},
+              key1=key4=key5:{'value3':3},
+              key6=key7:{'value2':2},
+              key8=key3:{'value3':3},
+              key8=key4:{'value5':1},
+              key8=key6:{'value3':3}
+            }]
     """
     count = 1
     overall = {}
     flag = 0
     i = 0
-    print(data)
+
     while i < count:
         value = None
         result = None
@@ -434,12 +451,11 @@ def transform_data(data):
                     if value not in overall[element]:
                         overall[element][value] = 1
         i += 1
-    print("Overall=", overall)
+
     return overall
 
 
-# Scoring Signature
-def calculate_signature_score(signature):
+  def calculate_signature_score(signature):
     """
     Calculates the signature score for each signature as the sum of all the weights in it but ignoring the weights marked with "*".
     Input:
@@ -468,14 +484,34 @@ def calculate_signature_score(signature):
 
     return score_arr
 
-# Calculating ACLs similarity Score
+
 def calculate_acl_scores(data_final, all_signatures):
     """
-    [TODO]
+    Calculate the individual scores for each discrete-ACL. This includes calculating human_error scores, signature_scores, and deviant scores.
     Input:
-
+        data_final:
+            List of ACLs grouped into a Cluster.
+            Example:
+                [
+                    [acl-1, acl-4, acl-5, acl-9], //Cluster-0
+                    [acl-2, acl-3], //Cluster-1
+                    [acl-7], //Cluster-2
+                    [acl-6, acl-8] //Cluster-3
+                ]
+        all_signatures:
+            Consolidated signature for each Cluster.
     Output:
-
+        deviant_arr: Returns all deviant properties for the ACL. Empty list is returned if no deviant property in the ACL.
+        count_arr: [[TODO]]
+        dev_score: Returns the deviant score for the deviant properties found. 0 if no deviant property.
+        acls_arr: [[TODO]]
+        sig_score: Returns the signature score of the ACL.
+        cluster_num: Returns the cluster number that the ACL belongs to.
+        acls_score: [[TODO]]
+        human_errors_arr: Returns the human_error properties (IPValidity, DigitRepetition, PortRange) for each ACL and
+        empty list if no human_error properties present in the ACL.
+        human_error_score: Returns the score of the human error property calculated for the ACL. 0 is returned if
+        no human_error property exists in the ACL.
     """
 
     deviant_arr = []
@@ -511,7 +547,10 @@ def calculate_acl_scores(data_final, all_signatures):
             data = transform_data(acl)
             for data_key, data_val in data.items():
                 if data_key in signature:
-                    # Key Valid. Now check for actual Value
+
+                    '''
+                    Key Valid. Now check for actual Value
+                    '''
                     for val in data_val.items():
                         (error_key, error_value), error_category = calculateHumanErrors(data_key, val[0], signature[data_key], fileName.split(".")[0])
                         if error_category:
@@ -521,7 +560,10 @@ def calculate_acl_scores(data_final, all_signatures):
                             human_error_category[error_category] += 1
                         for sig_val in signature[data_key]:
                             if val[0] == sig_val[0]:
-                                # value also present. Now check if value part of bug/sig/skip
+
+                                '''
+                                value also present. Now check if value part of bug/sig/skip
+                                '''
                                 if sig_val[1] == "!":
                                     dev_c += sig_val[2]
                                     acl_c += sig_val[2]
@@ -532,7 +574,10 @@ def calculate_acl_scores(data_final, all_signatures):
                                     count += sig_val[1]
                                     acl_c += sig_val[1]
                 else:
-                    # Deviant Key
+
+                    '''
+                    Deviant Key
+                    '''
                     if data_key != "lines=name":
                         deviant.append(data_key)
                         dev_c += data_val
@@ -561,11 +606,14 @@ def checkIPValidity(ip_address):
     try:
         ip_address = ip_address.split(":")
         for ip in ip_address:
-            match = re.match("^(\d{0,3})\.(\d{0,3})\.(\d{0,3})\.(\d{0,3})\/*\d{1,3}$", ip)
+            IP_check = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])?(\/)?((3[01]|3[02]|[12][0-9]|[0-9])?)$"
+            match = re.match(IP_check, ip)
+
             if not match:
                 return False
         return True
-    except:
+    except e:
+        print(e)
         return True
 
 
@@ -593,11 +641,11 @@ def checkPortRange(port_range):
 
 def checkDigitRepetition(digit, signature):
     """
-    [TODO]
+    Checks for Digit repetition.
     Input:
-
+        The value for the following keys: srcPorts, dstPorts, lengthRange
     Output:
-
+        Returns True if there is any Human Error and the digit is repeated twice.
     """
 
     try:
@@ -643,63 +691,94 @@ def calculateHumanErrors(data_key, data, signature, namedStructure):
     if namedStructure == "IP_Access_List":
         if data_key == "ipWildcard":
             if not checkIPValidity(data):
-                # Invalid IP
+
+                '''
+                Invalid IP
+                '''
                 human_error = (data_key, data)
                 category = "IP"
         elif data_key in ["dstPorts", "srcPorts"]:
             if not checkPortRange(data):
-                # Invalid Ports Range
+
+                '''
+                Invalid Ports Range
+                '''
                 human_error = (data_key, data)
                 category = "RANGE"
-
 
     elif namedStructure == "Route_Filter_List":
         if data_key == "ipWildcard":
             if not checkIPValidity(data):
-                # Invalid IP
+
+                '''
+                Invalid IP
+                '''
                 human_error = (data_key, data)
                 category = "IP"
         elif data_key == "lengthRange":
             if not checkPortRange(data):
-                # Invalid Ports Range
+
+                '''
+                Invalid Ports Range
+                '''
                 human_error = (data_key, data)
                 category = "RANGE"
 
     elif namedStructure == "Routing_Policy":
         if data_key == "communities":
             if checkDigitRepetition(data, signature_items):
-                # Error Copying digits
+
+                '''
+                Error Copying digits
+                '''
                 human_error = (data_key, data)
                 category = "DIGIT"
         elif data_key == "ips":
             if not checkIPValidity(data):
-                # Invalid IP
+
+                '''
+                Invalid IP
+                '''
                 human_error = (data_key, data)
                 category = "IP"
 
     elif namedStructure == "VRF":
         if data_key in ["administrativeCost", "remoteAs", "metric", "localAs", "referenceBandwidth", ]:
             if checkDigitRepetition(data, signature_items):
-                # Error Copying digits
+
+                '''
+                Error Copying digits
+                '''
                 human_error = (data_key, data)
                 category = "DIGIT"
         elif data_key in ["peerAddress", "localIp", "routerId", "network"]:
             if not checkIPValidity(data):
-                # Invalid IP
+
+                '''
+                Invalid IP
+                '''
                 human_error = (data_key, data)
                 category = "IP"
 
-    # Any Other namedStructure
+        '''
+        Any Other namedStructure
+        '''
     else:
         try:
             if re.search('IP|ip', data_key) and not re.search('[a-zA-Z]', data):
                 if not checkIPValidity(data):
-                    # Invalid IP
+
+                    '''
+                    Invalid IP
+                    '''
                     human_error = (data_key, data)
                     category = "IP"
             elif not re.search("[a-zA-Z]", data):
                 if checkDigitRepetition(data, signature_items):
-                    # Error Copying digits
+
+                    '''
+                    Error Copying digits
+                    '''
                     human_error = (data_key, data)
                     category = "DIGIT" 
         except:
@@ -716,9 +795,8 @@ def calculate_human_error_score(category_dict):
         A dictionary containing the count of the error occurrences.
     Output:
         A weighted sum of all the errors found.
-
     """
-    print(category_dict)
+    
     total_score = 0
     low = 0.2
     medium = 0.5
@@ -732,23 +810,155 @@ def calculate_human_error_score(category_dict):
     return round(total_score/len(category_dict), 2) if category_dict else total_score
 
 
+def flatten_json(data, delimiter):
+    """
+    Flattens a JSON file.
+    Input:
+        data:
+            A JSON dictionary of hierarchical format.
+            {key1: {key2: value2, key3: value3}, key4: {key5: value5, key6: [value6, value7, value8]}}
+        delimiter:
+            A parameter to separate the keys in order to facilitate easy splitting.
+    Output:
+        A flattened dictionary with keys separated by the delimiter parater.
+        key1_key2:value2, key1_key3:value3, key4_key5:value5, key4_key6:value6, key4_key6:value7, key4_key6:value8
+    """
+
+    out = {}
+
+    def flatten(data, name=''):
+        if type(data) is dict:
+            for key in data:
+                flatten(data[key], name + key + delimiter)
+        elif type(data) is list:
+            i = 0
+            for elem in data:
+                flatten(elem, name + str(i) + delimiter)
+                i += 1
+        else:
+            out[name[:-1]] = data
+
+    flatten(data)
+    return out
+
+
+def encode_data(data):
+    """
+    Converts categorical values into numeric values. We use MultiLabelBinarizer to encode categorical data.
+    This is done in order to pass the data into clustering and other similar algorithms that can only handle numerical data.
+    Flattens each ACL list and then encodes them.
+    Input:
+        A Python list that contains all discrete-ACLs.
+    Output:
+        A Python list after encoding.
+    """
+
+    flattenedData = []
+
+    for ACL in data:
+        flattenedData.append(flatten_json(ACL, '_'))
+    mergedData = []
+    for ACL in flattenedData:
+        mergedACL = []
+        for key, value in ACL.items():
+            # mergedACL.append(key + ":" + str(value))
+            mergedACL.append(str(value))
+        mergedData.append(mergedACL)
+    mlb = MultiLabelBinarizer()
+    '''
+    for index, discreteACL in enumerate(mergedData):
+        encodedList = mlb.fit_transform
+    '''
+    data_T = mlb.fit_transform(mergedData)
+    return data_T
+
+
+def export_clusters(data):
+    """
+        Helper Method to verify authenticity of Clusters being formed.
+        Input:
+            The data that is sorted into list of Clusters.
+            Example:
+                [
+                    [acl-1, acl-4, acl-5, acl-9], //Cluster-0
+                    [acl-2, acl-3], //Cluster-1
+                    [acl-7], //Cluster-2
+                    [acl-6, acl-8] //Cluster-3
+                ]
+            We also make use of acl_dict and node_name_dict dictionaries by searching for the ACL and
+            then getting the appropriate ACL_name and the nodes that the ACL is present in.
+        Output:
+            A csv file by the name of Generated_Clusters is written in the format:
+            Cluster-0  ||||  Cluster-0 Names      |||| Cluster-0 Nodes              |||| Cluster-1 |||| Cluster-1 Names          |||| Cluster-1                 Nodes
+            acl-1      ||||  permit tcp eq 51107  |||| st55in15hras                 |||| acl-2     |||| permit udp any eq 1200   |||| rt73ve11m5ar
+            acl-4      ||||  permit tcp eq 51102  |||| st55in15hras, st55in17hras   |||| acl-3     |||| permit udp any eq 120002 |||| rt73ve10m4ar
+            acl-5      ||||  permit tcp eq 51100  |||| st55in17hras                 ||||
+            acl-9      ||||  permit tcp eq 51109  |||| st55in17hras                 ||||
+
+    """
+
+    column_labels = []
+
+    for index in range(len(data)):
+        column_labels.append("Cluster " + str(index))
+        column_labels.append("Cluster " + str(index) + " Name")
+        column_labels.append("Cluster " + str(index) + " Nodes")
+
+    data_to_export = pd.DataFrame(columns = column_labels)
+    for cluster_index, cluster_data in enumerate(data):
+        cleaned_cluster = []
+
+        for discreteACL in cluster_data:
+            cleaned_cluster.append(discreteACL)
+
+        discrete_ACL_names = []
+        discrete_ACL_nodes = []
+
+        for discrete_ACL in cleaned_cluster:
+            temp = json.dumps(discrete_ACL[0], sort_keys=True)
+            tempArr = []
+            for name in acl_dict[temp]:
+                tempArr.append(name)
+            discrete_ACL_names.append(tempArr)
+
+            tempArr = []
+            try:
+                for node in node_name_dict[temp]:
+                    tempArr.append(node)
+                discrete_ACL_nodes.append(tempArr)
+            except:
+                discrete_ACL_nodes.append(None)
+
+        data_to_export["Cluster " + str(cluster_index)] = pd.Series(cleaned_cluster)
+        data_to_export["Cluster " + str(cluster_index) + " Name"] = pd.Series(discrete_ACL_names)
+        data_to_export["Cluster " + str(cluster_index) + " Nodes"] = pd.Series(discrete_ACL_nodes)
+
+    # data_to_export.to_csv("Modified_Clusters.csv")
+
+
+'''
 # Helper Methods End 
 # *****************************************************************************
 # *****************************************************************************
+'''
 
 whitelistDict = {}
 Z_SCORE_FLAG = 0
 ACTION_FLAG = 0
 k_select = 0
-# Reading Data
+
+'''
+Parsing Data
+'''
+
 try:
     fileName = sys.argv[2].split("/")[-1]
     networkName = "outliers_"+sys.argv[2].split("/")[-2]
-
-    # Making Outlier Directory for Current Network
+    '''
+    Making Outlier Directory for Current Network
+    '''
     if not os.path.exists(networkName):
         os.makedirs(networkName)
-
     flag_file = networkName+'/'+'.flag_'+fileName
     if sys.argv[1] == "-j":
         df = pd.read_json(sys.argv[2],orient = "index")
@@ -757,6 +967,7 @@ try:
                 ACTION_FLAG = 3
         except:
             ACTION_FLAG = 0
+
         try:
             Z_SCORE_FLAG = int(sys.argv[3])
         except:
@@ -765,6 +976,7 @@ try:
         f = open(flag_file,'w')
         f.write('{}'.format(ACTION_FLAG))
         f.close()
+
     elif sys.argv[1] == "-e":
         df = pd.read_json(sys.argv[2],orient = "index")
         try:
@@ -782,6 +994,7 @@ try:
 except:
     error_msg("Invalid File specified. Please check the input dataset", sys.argv[2])
 
+
 outlier_filename = networkName+'/'+'outlier_'+fileName
 cluster_filename = networkName+'/'+'.cluster_'+fileName
 sig_filename = networkName+'/'+'.sig_'+fileName
@@ -794,28 +1007,38 @@ print(Fore.GREEN, end='')
 
 
 start = time.time()
-# Calculating outliers selected
+
+'''
+Calculating outliers selected
+'''
 
 f = open(flag_file, 'r')
 flag = f.readline()
 f.close()
 
-# Parsing Data from Dataframe
+'''
+Parsing Data from Dataframe
+'''
 for index, row in df.iterrows():
     for col in df.columns:
-        if row[col] != None:
+        if row[col] is not None:
             row[col][0]['name'] = row[col][0]['name']+':'+str(index)
+
 
 acl_list_arr = []
 for col in df.columns:
     for i in range(len(df[col])):
-        if df[col][i] != None:
+        if df[col][i] is not None:
             temp = df[col][i][0] 
             acl_list_arr.append(temp)
         else:
             continue
 
+
 if (ACTION_FLAG != 3) and (flag == '0'):
+    '''
+    [TODO]: Remove parsing and handling composite ACLs
+    '''
     acl_dict = {}
     acl_arr = []
     node_name_dict = {}
@@ -827,13 +1050,20 @@ if (ACTION_FLAG != 3) and (flag == '0'):
         if acl not in acl_dict:
             try:
                 flag = 0
-                #Checking if actually unique or just jumbled
+
+                '''
+                Checking if actually unique or just jumbled
+                '''
                 for dump_acl in acl_arr:
                     if dump_acl[0] == name:
-                        #Check conditions of ACLs
+
+                        '''
+                        Check conditions of ACLs
+                        '''
                         temp_acl = json.loads(dump_acl[1])
                         main_acl = json.loads(acl)
-                        if(len(temp_acl['lines']) != len(main_acl['lines'])):
+
+                        if len(temp_acl['lines']) != len(main_acl['lines']):
                             flag = 0
                             continue
                         total = len(temp_acl['lines'])
@@ -843,7 +1073,10 @@ if (ACTION_FLAG != 3) and (flag == '0'):
                                 if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
                                     count += 1
                         if count == total:
-                            #ACLs are equal, just jumbled
+
+                            '''
+                            ACLs are equal, just jumbled
+                            '''
                             flag = 1
                             break
 
@@ -855,6 +1088,7 @@ if (ACTION_FLAG != 3) and (flag == '0'):
                     node_name_dict[acl].add(node)
                 else:
                     acl_arr.append((name, acl))
+
             except:
                 acl_dict[acl] = set()
                 acl_dict[acl].add(name)
@@ -864,6 +1098,7 @@ if (ACTION_FLAG != 3) and (flag == '0'):
         else:               
             acl_dict[acl].add(name)
             acl_arr.append((name, acl))
+
 
 elif (ACTION_FLAG != 0) and (flag != '0'):
     acl_dict = {}
@@ -879,7 +1114,10 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
             temp = acl_list['lines']
             
             try:
-                # Divide into ACLs
+
+                '''
+                Divide into ACLs
+                '''
                 try:
                     temp = acl_list['lines'][0]['name']
                     flag_set.add(1)
@@ -895,7 +1133,6 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                             acl_dict[temp_acl].add(temp_name)
                         else:
                             node_name_dict[temp_acl].add(node)
-                            #del acl['name']
                             acl_dict[temp_acl].add(temp_name)
                 except:
                     flag_set.add(2)
@@ -911,17 +1148,26 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                             node_name_dict[temp_acl].add(node)
                 
             except:
-                # Divide into ACL Lists
+
+                '''
+                Divide into ACL Lists
+                '''
                 flag_set.add(3)
                 if acl not in acl_dict:
                     flag = 0
-                    #Checking if actually unique or just jumbled
+
+                    '''
+                    Checking if actually unique or just jumbled
+                    '''
                     for dump_acl in acl_arr:
                         if dump_acl[0] == name:
-                            #Check conditions of ACLs
+
+                            '''
+                            Check conditions of ACLs
+                            '''
                             temp_acl = json.loads(dump_acl[1])
                             main_acl = json.loads(acl)
-                            if(len(temp_acl['lines']) != len(main_acl['lines'])):
+                            if len(temp_acl['lines']) != len(main_acl['lines']):
                                 flag = 0
                                 continue
                             total = len(temp_acl['lines'])
@@ -930,8 +1176,12 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                                 for sub_acl_main in main_acl['lines']:
                                     if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
                                         count += 1
+
                             if count == total:
-                                #ACLs are equal, just jumbled
+
+                                '''
+                                ACLs are equal, just jumbled
+                                '''
                                 flag = 1
                                 break
 
@@ -946,16 +1196,25 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                     acl_arr.append((name, acl))
         except:
             flag_set.add(4)
-            # RouteFilterList
+
+            '''
+            RouteFilterList
+            '''
             if acl not in acl_dict:
                 flag = 0
-                #Checking if actually unique or just jumbled
+
+                '''
+                Checking if actually unique or just jumbled
+                '''
                 for dump_acl in acl_arr:
                     if dump_acl[0] == name:
-                        #Check conditions of ACLs
+
+                        '''
+                        Check conditions of ACLs
+                        '''
                         temp_acl = json.loads(dump_acl[1])
                         main_acl = json.loads(acl)
-                        if(len(temp_acl['statements']) != len(main_acl['statements'])):
+                        if len(temp_acl['statements']) != len(main_acl['statements']):
                             flag = 0
                             continue
                         total = len(temp_acl['statements'])
@@ -965,7 +1224,10 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
                                 if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
                                     count += 1
                         if count == total:
-                            #ACLs are equal, just jumbled
+
+                            '''
+                            ACLs are equal, just jumbled
+                            '''
                             flag = 1
                             break
 
@@ -982,48 +1244,42 @@ elif (ACTION_FLAG != 0) and (flag != '0'):
 
 acl_name_arr = []
 datas = []
+data_for_clustering = []
+
 for key, val in acl_dict.items():
     acl_name_arr.append(val)
     datas.append(key)
+    import json
+    res = json.loads(key)
+    data_for_clustering.append(res)
+
+
 
 print("data parsing done...")
 
+with open('datas.txt', 'w') as fileHandler:
+    for discrete_ACL in datas:
+        fileHandler.write('%s\n' % discrete_ACL)
+
 
 if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
-    # Encoding Categorical data
+
     mlb = MultiLabelBinarizer()
-    encodedLists = []
-    frequencyLists = []
-    uniqueClasses = []
-    proportion = 0 
-
-    for i, data in enumerate(datas):
-        encodedList = mlb.fit_transform(datas[i])
-        encodedLists.append(encodedList)
-        
-    data_df = []
-    minLen = float('inf')
-    for i in range(len(encodedLists)):
-        extended_arr = []
-        for j in range(min(minLen, len(encodedLists[i]))):
-            tempSum = 0
-            for k in range(len(encodedLists[i][j])):
-                if encodedLists[i][j][k] == 1:
-                    tempSum += (k**2)
-            extended_arr.append(tempSum)
-            minLen = min(minLen, len(encodedLists[i]))
-        data_df.append(extended_arr)      
-
-    df_enc = pd.DataFrame(data_df)
+    encodedLists = encode_data(data_for_clustering)
+    df_enc = pd.DataFrame(encodedLists)
     df_enc = df_enc.dropna(axis=1, how='any')
     print("data encoding done...")
 
-    # Perform K-Means
+    '''
+    Perform K-Means
+    '''
     print("starting data clustering...")
     perform_kmeans_clustering(df_enc)
     print("data clustering done...")
 
-    # Grouping data based on their Clusters
+    '''
+    Grouping data based on their Clusters
+    '''
     cluster_range = np.arange(k_select)
     data_final = []
     data_final_enc = []
@@ -1037,29 +1293,35 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
         data_final.append(temp)
         data_final_enc.append(temp_enc)
 
-    # Writing Clustered Data into a file
+    export_clusters(data_final)
+    '''
+    Writing Clustered Data into a file
+    '''
     with open(cluster_filename, 'w') as f:
         f.write(json.dumps(data_final))
-    # print("cluster data written to file...")
 
-    # Calculating Overall Structure per Cluster
+    '''
+    Calculating Overall Structure per Cluster
+    '''
     if ACTION_FLAG == 3:
-        overall_array = overall_dict(data_final)
+        overall_array_0 = overall_dict(data_final)
     try:
         overall_array = get_overall_dict(data_final)
     except:
         overall_array = overall_dict(data_final)
-        
 
-
-    # Generating Signatures
+    '''
+    Generating Signatures
+    '''
     all_signatures = []
     for i in range(len(overall_array)):
         signature = calculate_signature_d(overall_array[i])
         all_signatures.append(signature)
     print("signature creation done...")
 
-# Re-Tuning the Signature
+    '''
+    Retuning Signature
+    '''
 elif ACTION_FLAG == 1:
 
     all_signatures = []
@@ -1077,8 +1339,6 @@ elif ACTION_FLAG == 1:
         print(Style.RESET_ALL)
         print("__________________________________")
         sys.exit()
-
-    # print("original signature retrieved...")
 
     all_signatures = all_signatures[0]
     wlDict = copy.deepcopy(whitelistDict['deviant'])
@@ -1117,7 +1377,9 @@ elif ACTION_FLAG == 1:
             data_final.append(json.loads(item))
     data_final = data_final[0]
 
-# Displaying the Outlier Nodes
+    '''
+    Displaying the Outlier Nodes
+    '''
 elif ACTION_FLAG == 2:
 
     outlier_nodes_arr = []
@@ -1136,7 +1398,6 @@ elif ACTION_FLAG == 2:
         print("__________________________________")
         sys.exit()
 
-    # print("outliers list retrieved...")
     print(Style.RESET_ALL)
     print("########################")
     print("Outlier Nodes are:")
@@ -1148,15 +1409,21 @@ elif ACTION_FLAG == 2:
     sys.exit(0)
 
 
-# Scoring Signature
+'''
+Scoring Signature
+'''
 signature_scores = calculate_signature_score(all_signatures)
 print("signature scoring done...")
 
-# Scoring ACLs
+'''
+Scoring ACLs
+'''
 deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score = calculate_acl_scores(data_final, all_signatures)
 print("acl scoring done...")
 
-# Calculate outlier nodes
+'''
+Calculate outlier nodes
+'''
 outlier_nodes = set()
 for i in range(len(deviant_arr)):
     if len(deviant_arr[i]) > 0:
@@ -1167,7 +1434,9 @@ for i in range(len(deviant_arr)):
 with open(outlier_nodes_filename, 'w') as f:
     f.write(json.dumps(list(outlier_nodes)))
 
-# writing all signature to a hidden file
+'''
+writing all signature to a hidden file
+'''
 with open(sig_filename, 'w') as f:
     f.write(json.dumps(all_signatures))  
 
@@ -1190,8 +1459,12 @@ for i in range(len(acls_arr)):
     except:
         nodes.append(None)
 
-# Creating dataframe and exporting as a json file
+'''
+    Creating dataframe and exporting as a json file
+'''
+
 df_final = pd.DataFrame()
+
 df_final['acl_name'] = acl_names
 df_final['acl_structure'] = acls_arr
 df_final['nodes'] = nodes
@@ -1215,7 +1488,9 @@ print("time to run : {} seconds".format(round(end - start), 3))
 print(Style.RESET_ALL, end='')
 print()
 
-# Final Outliers 
+'''
+Final Outliers 
+'''
 print("###########################################################")
 print(outlier_nodes)
 print(Fore.BLUE, end='')
@@ -1224,5 +1499,6 @@ print(Style.RESET_ALL, end='')
 print("\nTo view the detailed report, open the")
 print("json file named: '{}'\n".format(outlier_filename))
 print("###########################################################")
+
 
 sys.exit(0)
