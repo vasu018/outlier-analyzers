@@ -42,13 +42,9 @@ def printINFO(info):
     print(info)
     print(Style.RESET_ALL, end='')
 
-
-'''
-*****************************************************************************
-*****************************************************************************
-Helper Methods Start
-'''
-
+# *****************************************************************************
+# *****************************************************************************
+# Helper Methods Start
 
 def calculate_num_clusters(df):
     """
@@ -149,9 +145,11 @@ def calculate_z_score(arr):
         return arr
 
     z_score = []
+
     '''
-    Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
+        Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
     '''
+    
     if Z_SCORE_FLAG:
         mean = np.mean(arr)
         std = np.std(arr)
@@ -393,6 +391,7 @@ def calculate_signature_d(overall_arr):
     return signature
 
 
+
 def transform_data(data):
     """
     A helper function to extract nested keys from the ACL and to add the frequency of the repeated value. Helps score data.
@@ -408,21 +407,20 @@ def transform_data(data):
             ]
              Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
             [{
-            key1=key2:{'value1':1},
-            key1=key3:{'value2':2},
-            key1=key4=key5:{'value3':3},
-            key6=key7:{'value2':2},
-            key8=key3:{'value3':3},
-            key8=key4:{'value5':1},
-            key8=key6:{'value3':3}
-           }]
-]
+              key1=key2:{'value1':1},
+              key1=key3:{'value2':2},
+              key1=key4=key5:{'value3':3},
+              key6=key7:{'value2':2},
+              key8=key3:{'value3':3},
+              key8=key4:{'value5':1},
+              key8=key6:{'value3':3}
+            }]
     """
     count = 1
     overall = {}
     flag = 0
     i = 0
-    # print(data)
+
     while i < count:
         value = None
         result = None
@@ -453,10 +451,11 @@ def transform_data(data):
                     if value not in overall[element]:
                         overall[element][value] = 1
         i += 1
+
     return overall
 
 
-def calculate_signature_score(signature):
+  def calculate_signature_score(signature):
     """
     Calculates the signature score for each signature as the sum of all the weights in it but ignoring the weights marked with "*".
     Input:
@@ -658,6 +657,7 @@ def checkDigitRepetition(digit, signature):
             if type(item) == str:
                 item = int(item.split(":")[0])
             if digit == (item*10+item%10):
+                print("--------", digit, item*10 + item%10)
                 return True
         return False
     except:
@@ -796,7 +796,7 @@ def calculate_human_error_score(category_dict):
     Output:
         A weighted sum of all the errors found.
     """
-    # print(category_dict)
+    
     total_score = 0
     low = 0.2
     medium = 0.5
