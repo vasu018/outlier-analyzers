@@ -2,11 +2,14 @@ import sys
 import re
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import MultiLabelBinarizer
 from scipy.spatial.distance import cdist
 from colorama import Fore, Style
+from kneed import KneeLocator
 import copy
 import time
 import pickle
@@ -46,39 +49,81 @@ def printINFO(info):
 # *****************************************************************************
 # Helper Methods Start
 
-def calculate_num_clusters(df):
+
+def calculate_num_clusters(df, acl_weights):
     """
-    Calculates the optimal number of clusters using the elbow_graph approach. 
+    Calculates the optimal number of clusters using the elbow_graph approach.
     Input:
        The Pandas dataframe of the input file (ACL.json)
     output:
-       The value of k that provides least MSE. 
+       The value of k that provides the least MSE.
     """
+    files = ['IP_Access_List', 'Route_Filter_List', 'VRF', 'AS_Path_Access_List',
+             'IKE_Phase1_Keys', 'IPsec_Phase2_Proposals', 'Routing_Policy']
+    k_select_vals = [41, 17, 42, 5, 3, 2, 58]
+
+    curr_file = file_name.split(".")[0]
+
+    file_index = files.index(curr_file)
+    return k_select_vals[file_index]
 
     features = df[df.columns]
-    ran = min(len(df.columns), len(datas))
-    k_range = range(1, ran//20)
+    ran = min(len(df.columns), len(discrete_namedstructure))
+    if ran > 50:
+        k_range = range(1, 587)
+    else:
+        k_range = range(1, ran)
+    print(k_range)
+    k_range = range(1, 580)
+    distortions = []
+    np.seed = 0
+    clusters_list = []
+    f = open('distortions.txt', 'w')
+    for k in k_range:
+        print(k)
+        kmeans = KMeans(n_clusters=k).fit(features, None, sample_weight=acl_weights)
+        clusters_list.append(kmeans)
+        cluster_centers = kmeans.cluster_centers_
+        k_distance = cdist(features, cluster_centers, "euclidean")
+        distance = np.min(k_distance, axis=1)
+        distortion = np.sum(distance)/features.shape[0]
+        distortions.append(distortion)
+        f.write(str(distortion))
+        f.write("\n")
 
-    clusters_list = [KMeans(n_clusters=i).fit(features) for i in k_range]
-    centroid_list = [i.cluster_centers_ for i in clusters_list]
-    k_distance = [cdist(features, centroid, "euclidean") for centroid in centroid_list]
-    cluster_index = [np.argmin(kdist, axis=1) for kdist in k_distance]
-    distances = [np.min(kdist, axis=1) for kdist in k_distance]
-    avg_within = [np.sum(dist) / features.shape[0] for dist in distances]
+    kn = KneeLocator(list(k_range), distortions, S=3.0, curve='convex', direction='decreasing')
+    print("Knee is: ", kn.knee)
+    plt.xlabel('k')
+    plt.ylabel('Distortion')
+    plt.title('The Elbow Method showing the optimal k')
+    plt.plot(k_range, distortions, 'bx-')
+    plt.vlines(kn.knee, plt.ylim()[0], plt.ylim()[1], linestyles='dashed')
+    plt.show()
+    if kn.knee is None:
+        if ran < 5:
+            return ran - 1
+        else:
+            return 5
 
+
+    return kn.knee
+
+
+    '''
     for i in range(1, len(avg_within)):
         if (avg_within[i-1] - avg_within[i]) < 1:
             break
     # return i-1 if len(avg_within) > 1 else 1
     # return i - 1 if i > 1 else 1
-    return 15
+    '''
 
 
-def perform_kmeans_clustering(df):
+def perform_kmeans_clustering(df, ns_weights):
     """
-    To get a mapping of the rows into respective clusters generated using the K-means algorithm. 
+    To get a mapping of the rows into respective clusters generated using the K-means algorithm.
     Input:
-        The Pandas data-frame of the input file (ACL.json)
+        df:The Pandas data-frame of the input file (ACL.json)
+        ns_weights: The weights of each name structure which allows the weighted k-means algorithm to work.
     Output:
         Adding respective K-means cluster label to the input dataframe.
         Example:
@@ -87,11 +132,10 @@ def perform_kmeans_clustering(df):
         Row3 - Label 1 //Belongs to Cluster 1
     """
     global k_select
-    k_select = calculate_num_clusters(df)
+    k_select = calculate_num_clusters(df, ns_weights)
     features = df[df.columns]
-    kmeans = KMeans(n_clusters = k_select)
-    kmeans.fit(features)
-    kmeans_centroids = kmeans.cluster_centers_
+    kmeans = KMeans(n_clusters=k_select)
+    kmeans.fit(features, None, sample_weight=ns_weights)
     labels = kmeans.labels_
     df["kmeans_cluster_number"] = pd.Series(labels)
 
@@ -106,16 +150,15 @@ def extract_keys(the_dict, prefix=''):
         Example:
         Consider {key1:value1, key2:{key3:value3}, key4:[value4], key5:[key6:{key7:value7}]}
         The function returns key2, key5=key6
-    """    
+    """
     key_list = []
-
     for key, value in the_dict.items():
 
         if len(prefix) == 0:
             new_prefix = key
         else:
             new_prefix = prefix + '=' + key
-            
+
         try:
             if type(value) == dict:
                 key_list.extend(extract_keys(value, new_prefix))
@@ -131,48 +174,31 @@ def extract_keys(the_dict, prefix=''):
     return key_list
 
 
-def calculate_z_score(arr):
+def get_uniques(data):
     """
-    Calculates the Z-score (uses mean) (or) Modified Z-score (uses median) of data-points
+    A helper function to get unique elements in a List.
     Input:
-        Data points generated from parsing through the input file.
-        Also considers the Z_SCORE_FLAG that is set previously with 0 (default) using the Modified Z-score and 1 using Z-score.
+        A list that we need to capture uniques from.
     Output:
-        The Z-score of given data-points array.
+        A dictionary with unique entries and count of occurrences.
     """
+    acl_count_dict = {}
 
-    if len(arr) == 1:
-        return arr
+    for acl in data:
+        acl = json.dumps(acl)
+        if acl not in acl_count_dict:
+            acl_count_dict[acl] = 1
+        else:
+            value = acl_count_dict[acl]
+            value += 1
+            acl_count_dict[acl] = value
 
-    z_score = []
-
-    '''
-        Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
-    '''
-    
-    if Z_SCORE_FLAG:
-        mean = np.mean(arr)
-        std = np.std(arr)
-        if std == 0:
-            return np.ones(len(arr))*1000
-        for val in arr:
-            z_score.append((val-mean)/std)
-
-        '''
-        Modified Z-score approach.
-        Calculates the Z-score using median. Generally used if distribution is skewed.
-        '''
-    else:
-        median_y = np.median(arr)
-        medians = [np.abs(y - median_y) for y in arr]
-        med = np.median(medians)
-
-        median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
-        if median_absolute_deviation_y == 0:
-            return np.ones(len(arr))*1000
-        z_score = [0.6745 * (y - median_y) / median_absolute_deviation_y for y in arr]
-
-    return z_score
+    keys = []
+    values = []
+    for key, value in acl_count_dict.items():
+        keys.append(key)
+        values.append(value)
+    return keys, values
 
 
 def overall_dict(data_final):
@@ -185,7 +211,8 @@ def overall_dict(data_final):
             {key6:{key7:value2}
             {key8:{key3:value3, key4:value5, key6:value3}}
     Output:
-        Returns a new array with the nested keys appended along with a tuple containing the unnested value along with the frequency count.
+        Returns a new array with the nested keys appended along with a tuple containing the un-nested value along with
+        the frequency count.
         [{
         key1=key2:{'value1':1},
         key1=key3:{'value2':2},
@@ -278,7 +305,7 @@ def get_overall_dict(data_final):
                                     while len(temp.split("=")) > 1:
                                         temp_val = temp_val[temp.split("=")[0]]
                                         temp = temp.split("=", 1)[-1]
-                                    
+
                                     list_key = temp
                                     check = 0
                                     try:
@@ -305,16 +332,16 @@ def get_overall_dict(data_final):
                                                     overall[element][temp_val[list_key]] += 1
                                     except:
                                         dummy=0
-                                        
+
                                     flag = 1
                                 value = new_value
-                                
+
                         else:
                             '''
                             Type is not list
                             '''
                             value = new_value
-                            
+
                     else:
                         if flag == 0:
                             if element not in overall:
@@ -324,7 +351,7 @@ def get_overall_dict(data_final):
                                 overall[element][new_value] = 1
                             else:
                                 overall[element][new_value] += 1
-                        
+
                 if flag == 0:
                     if element not in overall:
                         overall[element] = {}
@@ -333,20 +360,65 @@ def get_overall_dict(data_final):
                         overall[element][new_value] = 1
                     else:
                         overall[element][new_value] += 1
-                        
+
         overall_array.append(overall)
 
-    return overall_array  
+    return overall_array
+
+
+def calculate_z_score(arr):
+    """
+    Calculates the Z-score (uses mean) (or) Modified Z-score (uses median) of data-points
+    Input:
+        Data points generated from parsing through the input file.
+        Also considers the Z_SCORE_FLAG that is set previously with 0 (default) using the Modified Z-score and 1 using Z-score.
+    Output:
+        The Z-score of given data-points array.
+    """
+
+    if len(arr) == 1:
+        return arr
+
+    z_score = []
+
+    '''
+        Calculates the Z-score using mean. Generally used if distribution is normal (Bell curve).
+    '''
+
+    if Z_SCORE_FLAG:
+        mean = np.mean(arr)
+        std = np.std(arr)
+        if std == 0:
+            return np.ones(len(arr)) * 1000
+        for val in arr:
+            z_score.append((val - mean) / std)
+
+        '''
+        Modified Z-score approach.
+        Calculates the Z-score using median. Generally used if distribution is skewed.
+        '''
+    else:
+        median_y = np.median(arr)
+        medians = [np.abs(y - median_y) for y in arr]
+        med = np.median(medians)
+
+        median_absolute_deviation_y = np.median([np.abs(y - median_y) for y in arr])
+        if median_absolute_deviation_y == 0:
+            return np.ones(len(arr)) * 1000
+        z_score = [0.6745 * (y - median_y) / median_absolute_deviation_y for y in arr]
+
+    return z_score
 
 
 def calculate_signature_d(overall_arr):
     """
-    Uses Z-score to generate the signatures of data-points and also maps points on level of significance (include for signature calculation, include for bug calculation, no significance).
+    Uses Z-score to generate the signatures of data-points and also maps points on level of significance (include for
+    signature calculation, include for bug calculation, no significance).
     If Z-score is equal to 1000.0 or in between sig_threshold and bug_threshold, no-significance.
     If Z-score is >= sig_threshold, include for signature calculation.
     If Z-score is <= bug_threshold, include for bug calculation.
     Input:
-        [[TODO]]
+        The individual master-signature generated for each Cluster.
     Output:
         An array containing dictionaries marked with tags that represent the action that needs to be performed on them.
     """
@@ -391,6 +463,74 @@ def calculate_signature_d(overall_arr):
     return signature
 
 
+def results(data, signatures):
+    title = file_name.split(".")[0] + "_Results.txt"
+    if not os.path.exists(os.path.dirname(title)):
+        os.makedirs(os.path.dirname(title))
+    f = open(title, "w")
+    f.write(title + "\n")
+    f.write("\n")
+    totalBugs = 0
+    totalConformers = 0
+
+    for cluster_index, clustered_namedStructure in enumerate(data):
+        numBugs = 0
+        numConformers = 0
+
+        cluster_signature = signatures[cluster_index]
+
+        for namedStructure in clustered_namedStructure:
+            keys = extract_keys(namedStructure[0])
+            namedStructure = flatten_json((namedStructure[0]), '=')
+            isNamedStructureABug = False
+
+            newNamedStructure = {}
+            for key, value in namedStructure.items():
+                flag = 0
+                for index, char in enumerate(key):
+                    if char == '0' or char == '1' or char == '2' or char == '3' or char == '4' or char == '5' or char == '6' or char == '7' or char == '8' or char == '9':
+                        flag = 1
+                        if index == len(key)-1:
+                            new_key = str(key[0:index-1])
+                            newNamedStructure[new_key] = value
+                        else:
+                            new_key = str(key[0:index-1]) + str(key[index+1:len(key)])
+                            newNamedStructure[new_key] = value
+                if not flag:
+                    newNamedStructure[key] = value
+                    flag = 0
+
+            for propertyKey, propertyValue in newNamedStructure.items():
+                try:
+                    propValues = cluster_signature[propertyKey]
+                except:
+                    print("EXCEPTION OCCURRED!")
+                    print(propertyKey)
+                for value in propValues:
+                    if value[0] == propertyValue and value[1] == '!':
+                        numBugs += 1
+                        isNamedStructureABug = True
+
+            if isNamedStructureABug:
+                numBugs += 1
+            else:
+                numConformers += 1
+
+        numBugs = len(clustered_namedStructure) - numConformers
+        f.write("Cluster Index: " + str(cluster_index) + "\n")
+        f.write("   Number of elements in Cluster = " + str(len(clustered_namedStructure)) + "\n")
+        f.write("   Number of Bugs using Z-score: " + str(len(clustered_namedStructure) - numConformers) + "\n")
+        f.write("   Number of Conformers using Z-score: " + str(numConformers) + "\n")
+        f.write("\n")
+        totalBugs += numBugs
+        totalConformers += numConformers
+    print("Total Bugs = ", totalBugs)
+    print("Total Confomers = ", totalConformers)
+    f.write("\n")
+    f.write("\n")
+    f.write("Total Bugs using Z-score: " + str(totalBugs) + "\n")
+    f.write("Total Conformers using Z-score: " + str(totalConformers))
+
 
 def transform_data(data):
     """
@@ -398,7 +538,7 @@ def transform_data(data):
     Input:
         An ACL in the form {key1:value1, key2:{key3:value3}, key4:[value4], key5:[key6:{key7:value7}]}.
     Output:
-        Extracted nested keys from the extrat_keys function along with the frequency count.
+        Extracted nested keys from the extract_keys function along with the frequency count.
         Example:
             [
             {key1:{key2:value1, key3:value2, key4:{key5:value3}}
@@ -431,7 +571,7 @@ def transform_data(data):
                 value = item
                 for key in element.split("="):
                     if key in value:
-                        new_value = value[key] 
+                        new_value = value[key]
                     if (type(new_value) == list) and (len(new_value) > 1):
                         if flag == 0:
                             count = len(new_value)
@@ -443,19 +583,18 @@ def transform_data(data):
                     elif (type(new_value) == list) and (len(new_value) == 1):
                         new_value = new_value[0]
                     value = new_value
-                    
+
                 if element not in overall:
                     overall[element] = {}
-                
+
                 if type(value) != dict and type(value) != list:
                     if value not in overall[element]:
                         overall[element][value] = 1
         i += 1
-
     return overall
 
 
-  def calculate_signature_score(signature):
+def calculate_signature_score(signature):
     """
     Calculates the signature score for each signature as the sum of all the weights in it but ignoring the weights marked with "*".
     Input:
@@ -485,9 +624,10 @@ def transform_data(data):
     return score_arr
 
 
-def calculate_acl_scores(data_final, all_signatures):
+def calculate_namedstructure_scores(data_final, all_signatures):
     """
-    Calculate the individual scores for each discrete-ACL. This includes calculating human_error scores, signature_scores, and deviant scores.
+    Calculate the individual scores for each discrete-ACL. This includes calculating human_error scores,
+    signature_scores, and deviant scores.
     Input:
         data_final:
             List of ACLs grouped into a Cluster.
@@ -501,13 +641,14 @@ def calculate_acl_scores(data_final, all_signatures):
         all_signatures:
             Consolidated signature for each Cluster.
     Output:
-        deviant_arr: Returns all deviant properties for the ACL. Empty list is returned if no deviant property in the ACL.
+        deviant_arr: Returns all deviant properties for the ACL. Empty list is returned if no deviant property
+        in the ACL.
         count_arr: [[TODO]]
         dev_score: Returns the deviant score for the deviant properties found. 0 if no deviant property.
         acls_arr: [[TODO]]
         sig_score: Returns the signature score of the ACL.
         cluster_num: Returns the cluster number that the ACL belongs to.
-        acls_score: [[TODO]]
+        acls_score: The score that is generated for each acl
         human_errors_arr: Returns the human_error properties (IPValidity, DigitRepetition, PortRange) for each ACL and
         empty list if no human_error properties present in the ACL.
         human_error_score: Returns the score of the human error property calculated for the ACL. 0 is returned if
@@ -525,8 +666,11 @@ def calculate_acl_scores(data_final, all_signatures):
     human_errors_arr = []
     human_errors_score = []
     i = 0
-    flag = 0
+
+
     for acl_list in data_final:
+        bug_count = 0
+        conformer_count = 0
         signature = all_signatures[i]
         for acl in acl_list:
             flag = 0
@@ -536,6 +680,8 @@ def calculate_acl_scores(data_final, all_signatures):
                 cluster_num.append(i)
                 flag = 1
             else:
+                print(acl[0])
+                print(acls_dict)
                 continue
             sig_score.append(signature_scores[i])
             deviant = []
@@ -552,7 +698,7 @@ def calculate_acl_scores(data_final, all_signatures):
                     Key Valid. Now check for actual Value
                     '''
                     for val in data_val.items():
-                        (error_key, error_value), error_category = calculateHumanErrors(data_key, val[0], signature[data_key], fileName.split(".")[0])
+                        (error_key, error_value), error_category = calculateHumanErrors(data_key, val[0], signature[data_key], file_name.split(".")[0])
                         if error_category:
                             human_errors.append((error_key, error_value))
                             if error_category not in human_error_category:
@@ -568,9 +714,12 @@ def calculate_acl_scores(data_final, all_signatures):
                                     dev_c += sig_val[2]
                                     acl_c += sig_val[2]
                                     deviant.append((data_key, sig_val[0]))
+                                    bug_count += 1
                                 elif sig_val[1] == "*":
+                                    conformer_count += 1
                                     continue
                                 else:
+                                    conformer_count += 1
                                     count += sig_val[1]
                                     acl_c += sig_val[1]
                 else:
@@ -780,7 +929,7 @@ def calculateHumanErrors(data_key, data, signature, namedStructure):
                     Error Copying digits
                     '''
                     human_error = (data_key, data)
-                    category = "DIGIT" 
+                    category = "DIGIT"
         except:
             pass
 
@@ -796,15 +945,15 @@ def calculate_human_error_score(category_dict):
     Output:
         A weighted sum of all the errors found.
     """
-    
+
     total_score = 0
     low = 0.2
     medium = 0.5
     high = 0.8
-    weightage_dict = {"IP":high, "RANGE":medium, "DIGIT":high}
+    weightage_dict = {"IP": high, "RANGE": medium, "DIGIT": high}
     for category, count in category_dict.items():
         if count != 0:
-            print("* Human Error Found *")
+            #print("* Human Error Found *")
             total_score += weightage_dict[category]/np.log(1+count)
 
     return round(total_score/len(category_dict), 2) if category_dict else total_score
@@ -820,7 +969,7 @@ def flatten_json(data, delimiter):
         delimiter:
             A parameter to separate the keys in order to facilitate easy splitting.
     Output:
-        A flattened dictionary with keys separated by the delimiter parater.
+        A flattened dictionary with keys separated by the delimiter parameter.
         key1_key2:value2, key1_key3:value3, key4_key5:value5, key4_key6:value6, key4_key6:value7, key4_key6:value8
     """
 
@@ -854,26 +1003,30 @@ def encode_data(data):
     """
 
     flattenedData = []
+    allKeys = []
+    for NS in data:
+        flattenedNamedStructure = flatten_json(NS, '_')
+        flattenedData.append(flattenedNamedStructure)
 
-    for ACL in data:
-        flattenedData.append(flatten_json(ACL, '_'))
+        for key in flattenedNamedStructure.keys():
+            if key not in allKeys:
+                allKeys.append(key)
+
     mergedData = []
-    for ACL in flattenedData:
-        mergedACL = []
-        for key, value in ACL.items():
-            # mergedACL.append(key + ":" + str(value))
-            mergedACL.append(str(value))
-        mergedData.append(mergedACL)
+    for NS in flattenedData:
+        mergedNS = []
+        for key, value in NS.items():
+            mergedNS.append(str(value))
+        mergedData.append(mergedNS)
     mlb = MultiLabelBinarizer()
-    '''
-    for index, discreteACL in enumerate(mergedData):
-        encodedList = mlb.fit_transform
-    '''
+
     data_T = mlb.fit_transform(mergedData)
-    return data_T
+    print("MLb classes=")
+    print(mlb.classes_)
+    return data_T, mlb.classes_
 
 
-def export_clusters(data):
+def export_clusters(data, acl_weight_mapper):
     """
         Helper Method to verify authenticity of Clusters being formed.
         Input:
@@ -894,46 +1047,186 @@ def export_clusters(data):
             acl-4      ||||  permit tcp eq 51102  |||| st55in15hras, st55in17hras   |||| acl-3     |||| permit udp any eq 120002 |||| rt73ve10m4ar
             acl-5      ||||  permit tcp eq 51100  |||| st55in17hras                 ||||
             acl-9      ||||  permit tcp eq 51109  |||| st55in17hras                 ||||
-
     """
 
     column_labels = []
 
     for index in range(len(data)):
         column_labels.append("Cluster " + str(index))
-        column_labels.append("Cluster " + str(index) + " Name")
+        column_labels.append("Cluster " + str(index) + " ACL Weights")
         column_labels.append("Cluster " + str(index) + " Nodes")
 
-    data_to_export = pd.DataFrame(columns = column_labels)
+    data_to_export = pd.DataFrame(columns=column_labels)
     for cluster_index, cluster_data in enumerate(data):
-        cleaned_cluster = []
-
-        for discreteACL in cluster_data:
-            cleaned_cluster.append(discreteACL)
-
-        discrete_ACL_names = []
         discrete_ACL_nodes = []
-
-        for discrete_ACL in cleaned_cluster:
+        cluster_weights = []
+        for discrete_ACL in cluster_data:
             temp = json.dumps(discrete_ACL[0], sort_keys=True)
-            tempArr = []
-            for name in acl_dict[temp]:
-                tempArr.append(name)
-            discrete_ACL_names.append(tempArr)
-
-            tempArr = []
+            temp_arr = []
             try:
-                for node in node_name_dict[temp]:
-                    tempArr.append(node)
-                discrete_ACL_nodes.append(tempArr)
+                for node in namedstructure_node_mapper[temp]:
+                    temp_arr.append(node)
+                discrete_ACL_nodes.append(temp_arr)
             except:
                 discrete_ACL_nodes.append(None)
+            cluster_weights.append(acl_weight_mapper[temp])
+        cluster_data = pd.Series(cluster_data)
+        cluster_weights_series = pd.Series(cluster_weights)
+        discrete_ACL_nodes = pd.Series(discrete_ACL_nodes)
+        data_to_export["Cluster " + str(cluster_index)] = cluster_data
+        data_to_export["Cluster " + str(cluster_index) + " ACL Weights"] = cluster_weights_series
+        data_to_export["Cluster " + str(cluster_index) + " Nodes"] = discrete_ACL_nodes
 
-        data_to_export["Cluster " + str(cluster_index)] = pd.Series(cleaned_cluster)
-        data_to_export["Cluster " + str(cluster_index) + " Name"] = pd.Series(discrete_ACL_names)
-        data_to_export["Cluster " + str(cluster_index) + " Nodes"] = pd.Series(discrete_ACL_nodes)
+    file = file_name.split(".")[0]
+    print(file)
+    title = "Clusters_" + file + ".csv"
+    print(title)
+    data_to_export.to_csv(title)
 
-    # data_to_export.to_csv("Modified_Clusters.csv")
+
+def parse_data():
+    """
+    A helper method to parse through the input configuration files and capture necessary information.
+    Input:
+        None. The file path parameter is read from the commandline arguments.
+    Output:
+        discrete_namedstructure: A list that contains stringified named-structures.
+        namedstructure_nod_mapper: A dictionary that contains the named-structure configuration as key and a list of
+        nodes it is a part of as value.
+    """
+    df = pd.read_json(sys.argv[2], orient="index")
+
+    discrete_namedstructure = []
+    namedstructure_node_mapper = {}  # Maps each discrete_acl with all the nodes that it belongs to
+    discrete_nodes = []
+
+    for column in df.columns:
+        for index, data in df[column].iteritems():
+            if data is not None:
+                if 'lines' in data[0]:
+                    data_holder = 'lines'
+                    data_to_look_under = data[0][data_holder]
+                elif 'statements' in data[0]:
+                    data_holder = 'statements'
+                    data_to_look_under = data[0][data_holder]
+                else:
+                    data_to_look_under = data
+
+                for discrete_acl in data_to_look_under:
+                    if 'name' in discrete_acl:
+                        del discrete_acl['name']
+
+                    discrete_acl = json.dumps(discrete_acl, sort_keys=True)
+                    discrete_namedstructure.append(discrete_acl)
+
+                    if discrete_acl in namedstructure_node_mapper:
+                        nodes = namedstructure_node_mapper[discrete_acl]
+                        if index not in nodes:
+                            nodes.append(index)
+                        namedstructure_node_mapper[discrete_acl] = nodes
+                    else:
+                        namedstructure_node_mapper[discrete_acl] = [index]
+
+                if index not in discrete_nodes:
+                    discrete_nodes.append(index)
+
+    print("The number of discrete nodes in a network is: ", len(discrete_nodes))
+    return discrete_namedstructure, namedstructure_node_mapper
+
+
+def perform_pca_analysis(encoded_data, column_names):
+    """
+        A helper method to analyse the data using PCA
+    """
+
+    pca = PCA()
+    pca.fit(encoded_data)
+
+    cumulative_variance = np.cumsum(np.round(pca.explained_variance_ratio_, decimals=8) * 100);
+    labels = [x for x in range(1, len(cumulative_variance) + 1)];
+    loadings = pd.DataFrame(pca.components_.T, columns=labels, index=column_names)
+
+    significance = {}
+
+    for index in loadings.index:
+        temp_list = loadings.loc[index]
+        sig = 0
+        for value in temp_list:
+            sig += value * value
+        significance[index] = sig
+
+    plt.plot(cumulative_variance)
+    plt.xlabel("N-components")
+    plt.ylabel("Cumulative Explained Variance")
+    plt.show()
+
+    sorted_significance = sorted(significance.items(), key=lambda kv: (kv[1], kv[0]), reverse=True)
+
+    top_ten_attributes = []
+
+    for sigAttr in sorted_significance:
+        top_ten_attributes.append(sigAttr[0])
+    print("Top Ten Attributes:")
+    print(top_ten_attributes)
+
+
+def silhouette_analysis(data, acl_weights):
+    """
+        A helper method to perform an analysis of various scoring functions
+    """
+    from sklearn.metrics import silhouette_score, davies_bouldin_score
+
+    k_range = range(2, 30)
+
+    elbow_scores = []
+    silhouette_scores = []
+    davies_bouldin_scores = []
+
+    elbow_file = open("elbow_scores.txt", "w")
+    silhouette_file = open("silhouette_scores.txt", "w")
+    davies_bouldin_file = open("davies_bouldin_scores.txt", "w")
+
+    for num_clusters in k_range:
+        print(num_clusters)
+        kmeans = KMeans(n_clusters=num_clusters)
+        cluster_labels = kmeans.fit_predict(data, None, sample_weight=acl_weights)
+
+        cluster_centers = kmeans.cluster_centers_
+        k_distance = cdist(data, cluster_centers, "euclidean")
+        distance = np.min(k_distance, axis=1)
+        distortion = np.sum(distance) / data.shape[0]
+
+        silhouette_avg = silhouette_score(data, cluster_labels)
+        davies_bouldin_avg = davies_bouldin_score(data, cluster_labels)
+
+        silhouette_scores.append(silhouette_avg)
+        davies_bouldin_scores.append(davies_bouldin_avg)
+        elbow_scores.append(distortion)
+
+        silhouette_file.write(str(silhouette_avg) + " ")
+        davies_bouldin_file.write(str(davies_bouldin_avg) + " ")
+        elbow_file.write(str(distortion) + " ")
+
+    kn_elbow = KneeLocator(list(k_range), elbow_scores, S=5.0, curve='convex', direction='decreasing')
+    plt.scatter(x=k_range, y=elbow_scores)
+    plt.xlabel("Range")
+    plt.ylabel("Elbow Score")
+    plt.vlines(kn_elbow.knee, plt.ylim()[0], plt.ylim()[1], linestyles='dashed')
+    plt.show()
+
+    kn_silhouette = KneeLocator(list(k_range), silhouette_scores, S=5.0, curve='convex', direction='increasing')
+    plt.scatter(x=k_range, y=silhouette_scores)
+    plt.xlabel("Range")
+    plt.ylabel("Silhouette Score")
+    plt.vlines(kn_silhouette.knee, plt.ylim()[0], plt.ylim()[1], linestyles='dashed')
+    plt.show()
+
+    kn_davies_bouldin = KneeLocator(list(k_range), davies_bouldin_scores, S=5.0, curve='convex', direction='decreasing')
+    plt.scatter(x=k_range, y=davies_bouldin_scores)
+    plt.xlabel("Range")
+    plt.ylabel("Davies Bouldin Score")
+    plt.vlines(kn_davies_bouldin.knee, plt.ylim()[0], plt.ylim()[1], linestyles='dashed')
+    plt.show()
 
 
 '''
@@ -952,16 +1245,17 @@ Parsing Data
 '''
 
 try:
-    fileName = sys.argv[2].split("/")[-1]
-    networkName = "outliers_"+sys.argv[2].split("/")[-2]
+    file_name = sys.argv[2].split("/")[-1]
+    network_name = "DATA_HERE_" + sys.argv[2].split("/")[-2]
+    print(network_name)
     '''
     Making Outlier Directory for Current Network
     '''
-    if not os.path.exists(networkName):
-        os.makedirs(networkName)
-    flag_file = networkName+'/'+'.flag_'+fileName
+    if not os.path.exists(network_name):
+        os.makedirs(network_name)
+    flag_file = network_name + '/' + '.flag_' + file_name
     if sys.argv[1] == "-j":
-        df = pd.read_json(sys.argv[2],orient = "index")
+        df = pd.read_json(sys.argv[2], orient="index")
         try:
             if sys.argv[4] == "-a":
                 ACTION_FLAG = 3
@@ -978,7 +1272,7 @@ try:
         f.close()
 
     elif sys.argv[1] == "-e":
-        df = pd.read_json(sys.argv[2],orient = "index")
+        df = pd.read_json(sys.argv[2], orient= "index")
         try:
             with open(sys.argv[3], 'rb') as handle:
                 whitelistDict = pickle.load(handle)
@@ -995,10 +1289,11 @@ except:
     error_msg("Invalid File specified. Please check the input dataset", sys.argv[2])
 
 
-outlier_filename = networkName+'/'+'outlier_'+fileName
-cluster_filename = networkName+'/'+'.cluster_'+fileName
-sig_filename = networkName+'/'+'.sig_'+fileName
-outlier_nodes_filename = networkName+'/'+'.outlier_nodes_'+fileName
+outlier_filename = network_name + '/' + 'outlier_' + file_name
+cluster_filename = network_name + '/' + '.cluster_' + file_name
+sig_filename = network_name + '/' + '.sig_' + file_name
+outlier_nodes_filename = network_name + '/' + '.outlier_nodes_' + file_name
+print(outlier_filename, cluster_filename ,sig_filename, outlier_nodes_filename)
 print("===========================================================")
 print(Fore.BLUE, end='')
 print("outlier-analyzer code started ...")
@@ -1009,273 +1304,52 @@ print(Fore.GREEN, end='')
 start = time.time()
 
 '''
-Calculating outliers selected
+    Calculating outliers selected
 '''
 
 f = open(flag_file, 'r')
 flag = f.readline()
 f.close()
 
-'''
-Parsing Data from Dataframe
-'''
-for index, row in df.iterrows():
-    for col in df.columns:
-        if row[col] is not None:
-            row[col][0]['name'] = row[col][0]['name']+':'+str(index)
-
-
-acl_list_arr = []
-for col in df.columns:
-    for i in range(len(df[col])):
-        if df[col][i] is not None:
-            temp = df[col][i][0] 
-            acl_list_arr.append(temp)
-        else:
-            continue
-
-
-if (ACTION_FLAG != 3) and (flag == '0'):
-    '''
-    [TODO]: Remove parsing and handling composite ACLs
-    '''
-    acl_dict = {}
-    acl_arr = []
-    node_name_dict = {}
-    for acl_list in acl_list_arr:
-        name = acl_list['name'].split(":")[0]
-        node = acl_list['name'].split(":")[1]
-        del acl_list['name']
-        acl = json.dumps(acl_list, sort_keys=True)
-        if acl not in acl_dict:
-            try:
-                flag = 0
-
-                '''
-                Checking if actually unique or just jumbled
-                '''
-                for dump_acl in acl_arr:
-                    if dump_acl[0] == name:
-
-                        '''
-                        Check conditions of ACLs
-                        '''
-                        temp_acl = json.loads(dump_acl[1])
-                        main_acl = json.loads(acl)
-
-                        if len(temp_acl['lines']) != len(main_acl['lines']):
-                            flag = 0
-                            continue
-                        total = len(temp_acl['lines'])
-                        count = 0
-                        for sub_acl in temp_acl['lines']:
-                            for sub_acl_main in main_acl['lines']:
-                                if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
-                                    count += 1
-                        if count == total:
-
-                            '''
-                            ACLs are equal, just jumbled
-                            '''
-                            flag = 1
-                            break
-
-                if flag == 0:
-                    acl_dict[acl] = set()
-                    acl_dict[acl].add(name)
-                    acl_arr.append((name, acl))
-                    node_name_dict[acl] = set()
-                    node_name_dict[acl].add(node)
-                else:
-                    acl_arr.append((name, acl))
-
-            except:
-                acl_dict[acl] = set()
-                acl_dict[acl].add(name)
-                acl_arr.append((name, acl))
-                node_name_dict[acl] = set()
-                node_name_dict[acl].add(node)
-        else:               
-            acl_dict[acl].add(name)
-            acl_arr.append((name, acl))
-
-
-elif (ACTION_FLAG != 0) and (flag != '0'):
-    acl_dict = {}
-    acl_arr = []
-    node_name_dict = {}
-    flag_set = set()
-    for acl_list in acl_list_arr:
-        name = acl_list['name'].split(":")[0]
-        node = acl_list['name'].split(":")[1]
-        del acl_list['name']
-        acl = json.dumps(acl_list, sort_keys=True)
-        try:
-            temp = acl_list['lines']
-            
-            try:
-
-                '''
-                Divide into ACLs
-                '''
-                try:
-                    temp = acl_list['lines'][0]['name']
-                    flag_set.add(1)
-                    for acl in acl_list['lines']:
-                        temp_name = name + ":" + acl['name']
-                        del acl['name']
-                        temp_acl = json.dumps(acl, sort_keys=True)
-                        if temp_acl not in acl_dict:
-                            node_name_dict[temp_acl] = set()
-                            node_name_dict[temp_acl].add(node)
-                            
-                            acl_dict[temp_acl] = set()
-                            acl_dict[temp_acl].add(temp_name)
-                        else:
-                            node_name_dict[temp_acl].add(node)
-                            acl_dict[temp_acl].add(temp_name)
-                except:
-                    flag_set.add(2)
-                    for acl in acl_list['lines']:
-                        temp_acl = json.dumps(acl, sort_keys=True)
-                        if temp_acl not in acl_dict:
-                            acl_dict[temp_acl] = set()
-                            acl_dict[temp_acl].add(name)
-                            node_name_dict[temp_acl] = set()
-                            node_name_dict[temp_acl].add(node)
-                        else:
-                            acl_dict[temp_acl].add(name)
-                            node_name_dict[temp_acl].add(node)
-                
-            except:
-
-                '''
-                Divide into ACL Lists
-                '''
-                flag_set.add(3)
-                if acl not in acl_dict:
-                    flag = 0
-
-                    '''
-                    Checking if actually unique or just jumbled
-                    '''
-                    for dump_acl in acl_arr:
-                        if dump_acl[0] == name:
-
-                            '''
-                            Check conditions of ACLs
-                            '''
-                            temp_acl = json.loads(dump_acl[1])
-                            main_acl = json.loads(acl)
-                            if len(temp_acl['lines']) != len(main_acl['lines']):
-                                flag = 0
-                                continue
-                            total = len(temp_acl['lines'])
-                            count = 0
-                            for sub_acl in temp_acl['lines']:
-                                for sub_acl_main in main_acl['lines']:
-                                    if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
-                                        count += 1
-
-                            if count == total:
-
-                                '''
-                                ACLs are equal, just jumbled
-                                '''
-                                flag = 1
-                                break
-
-                    if flag == 0:
-                        acl_dict[acl] = set()
-                        acl_dict[acl].add(name)
-                        acl_arr.append((name, acl))
-                    else:
-                        acl_arr.append((name, acl))
-                else:               
-                    acl_dict[acl].add(name)
-                    acl_arr.append((name, acl))
-        except:
-            flag_set.add(4)
-
-            '''
-            RouteFilterList
-            '''
-            if acl not in acl_dict:
-                flag = 0
-
-                '''
-                Checking if actually unique or just jumbled
-                '''
-                for dump_acl in acl_arr:
-                    if dump_acl[0] == name:
-
-                        '''
-                        Check conditions of ACLs
-                        '''
-                        temp_acl = json.loads(dump_acl[1])
-                        main_acl = json.loads(acl)
-                        if len(temp_acl['statements']) != len(main_acl['statements']):
-                            flag = 0
-                            continue
-                        total = len(temp_acl['statements'])
-                        count = 0
-                        for sub_acl in temp_acl['statements']:
-                            for sub_acl_main in main_acl['statements']:
-                                if json.dumps(sub_acl, sort_keys=True) == json.dumps(sub_acl_main, sort_keys=True):
-                                    count += 1
-                        if count == total:
-
-                            '''
-                            ACLs are equal, just jumbled
-                            '''
-                            flag = 1
-                            break
-
-                if flag == 0:
-                    acl_dict[acl] = set()
-                    acl_dict[acl].add(name)
-                    acl_arr.append((name, acl))
-                else:
-                    acl_arr.append((name, acl))
-            else:               
-                acl_dict[acl].add(name)
-                acl_arr.append((name, acl))
-        
-
-acl_name_arr = []
-datas = []
-data_for_clustering = []
-
-for key, val in acl_dict.items():
-    acl_name_arr.append(val)
-    datas.append(key)
-    import json
-    res = json.loads(key)
-    data_for_clustering.append(res)
-
-
-
-print("data parsing done...")
-
-with open('datas.txt', 'w') as fileHandler:
-    for discrete_ACL in datas:
-        fileHandler.write('%s\n' % discrete_ACL)
+discrete_namedstructure, namedstructure_node_mapper = parse_data()
 
 
 if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
 
     mlb = MultiLabelBinarizer()
-    encodedLists = encode_data(data_for_clustering)
+    ns_weight_mapper = {}
+    data_for_clustering = []
+    namedstructure_weights = []
+
+    for ns in discrete_namedstructure:
+        if ns not in ns_weight_mapper.keys():
+            ns_weight_mapper[ns] = 1
+
+        else:
+            value = ns_weight_mapper[ns]
+            ns_weight_mapper[ns] += 1
+
+    for ns, weight in ns_weight_mapper.items():
+        ns = json.loads(ns)
+        data_for_clustering.append(ns)
+        namedstructure_weights.append(weight)
+
+    encodedLists, column_names = encode_data(data_for_clustering)
     df_enc = pd.DataFrame(encodedLists)
     df_enc = df_enc.dropna(axis=1, how='any')
+
+    # perform_pca_analysis(encodedLists, column_names)
+
     print("data encoding done...")
 
     '''
-    Perform K-Means
+       Perform K-Means
     '''
     print("starting data clustering...")
-    perform_kmeans_clustering(df_enc)
+    perform_kmeans_clustering(df_enc, namedstructure_weights)
     print("data clustering done...")
+
+    # silhouette_analysis(df_enc, acl_weights)
 
     '''
     Grouping data based on their Clusters
@@ -1288,12 +1362,12 @@ if (ACTION_FLAG == 0) or (ACTION_FLAG == 3):
         temp_enc = []
         for i in range(len(df_enc)):
             if df_enc['kmeans_cluster_number'][i] == index:
-                temp.append([json.loads(datas[i])])
-                temp_enc.append([datas[i]])
+                temp.append([data_for_clustering[i]])
+                temp_enc.append([data_for_clustering[i]])
         data_final.append(temp)
         data_final_enc.append(temp_enc)
 
-    export_clusters(data_final)
+    # export_clusters(data_final, acl_weight_mapper)
     '''
     Writing Clustered Data into a file
     '''
@@ -1326,7 +1400,7 @@ elif ACTION_FLAG == 1:
 
     all_signatures = []
     try:
-        with open(sig_filename, 'r') as f:  
+        with open(sig_filename, 'r') as f:
             for item in f:
                 all_signatures.append(json.loads(item))
     except FileNotFoundError:
@@ -1372,7 +1446,7 @@ elif ACTION_FLAG == 1:
     print("signature re-tuning done...")
 
     data_final = []
-    with open(cluster_filename, 'r') as f:  
+    with open(cluster_filename, 'r') as f:
         for item in f:
             data_final.append(json.loads(item))
     data_final = data_final[0]
@@ -1384,7 +1458,7 @@ elif ACTION_FLAG == 2:
 
     outlier_nodes_arr = []
     try:
-        with open(outlier_nodes_filename, 'r') as f:  
+        with open(outlier_nodes_filename, 'r') as f:
             for item in f:
                 outlier_nodes_arr.append(json.loads(item))
     except FileNotFoundError:
@@ -1418,17 +1492,21 @@ print("signature scoring done...")
 '''
 Scoring ACLs
 '''
-deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score = calculate_acl_scores(data_final, all_signatures)
+deviant_arr, count_arr, dev_score, acls_arr, sig_score, cluster_num, acls_score, human_errors_arr, human_errors_score \
+    = calculate_namedstructure_scores(data_final, all_signatures)
+
 print("acl scoring done...")
 
 '''
 Calculate outlier nodes
 '''
+count = 0
 outlier_nodes = set()
 for i in range(len(deviant_arr)):
     if len(deviant_arr[i]) > 0:
+        count += 1
         temp = json.dumps(acls_arr[i], sort_keys=True)
-        for item in node_name_dict[temp]:
+        for item in namedstructure_node_mapper[temp]:
             outlier_nodes.add(item)
 
 with open(outlier_nodes_filename, 'w') as f:
@@ -1438,34 +1516,42 @@ with open(outlier_nodes_filename, 'w') as f:
 writing all signature to a hidden file
 '''
 with open(sig_filename, 'w') as f:
-    f.write(json.dumps(all_signatures))  
-
-acl_names = []
-for i in range(len(acls_arr)): 
-    temp = json.dumps(acls_arr[i], sort_keys=True)
-    tempArr = []
-    for item in acl_dict[temp]:
-        tempArr.append(item)
-    acl_names.append(tempArr)
+    f.write(json.dumps(all_signatures))
 
 nodes = []
-for i in range(len(acls_arr)): 
+
+for i in range(len(acls_arr)):
     temp = json.dumps(acls_arr[i], sort_keys=True)
     tempArr = []
     try:
-        for item in node_name_dict[temp]:
+        for item in namedstructure_node_mapper[temp]:
             tempArr.append(item)
         nodes.append(tempArr)
     except:
         nodes.append(None)
+
 
 '''
     Creating dataframe and exporting as a json file
 '''
 
 df_final = pd.DataFrame()
+with open("deviant_array.txt", "w") as f:
+    print(deviant_arr, file=f)
 
-df_final['acl_name'] = acl_names
+print(human_errors_arr)
+
+master_signatures = []
+
+for i in range(len(data_final)):
+    for index in data_final[i]:
+        master_signatures.append(all_signatures[i])
+
+
+
+# df_final['acl_name'] = acl_names
+df_final['cluster_number'] = cluster_num
+df_final['Conformer/Signature Definition'] = master_signatures
 df_final['acl_structure'] = acls_arr
 df_final['nodes'] = nodes
 df_final['deviant_properties'] = deviant_arr
@@ -1474,12 +1560,15 @@ df_final['human_error_score'] = human_errors_score
 df_final['similarity_score'] = count_arr
 df_final['acl_score'] = acls_score
 df_final['max_sig_score'] = sig_score
-df_final['cluster_number'] = cluster_num
+
+outlier_flag = ['T' if len(deviant_prop)==0 else 'F' for deviant_prop in deviant_arr]
+df_final['Outlier Flag'] = outlier_flag
 
 df_final.to_json(outlier_filename, orient='split', index=False)
 print(Style.RESET_ALL, end="")
-
 end = time.time()
+print(df_final)
+
 
 print("###")
 print(Fore.BLUE, end='')
@@ -1488,9 +1577,6 @@ print("time to run : {} seconds".format(round(end - start), 3))
 print(Style.RESET_ALL, end='')
 print()
 
-'''
-Final Outliers 
-'''
 print("###########################################################")
 print(outlier_nodes)
 print(Fore.BLUE, end='')
@@ -1500,5 +1586,6 @@ print("\nTo view the detailed report, open the")
 print("json file named: '{}'\n".format(outlier_filename))
 print("###########################################################")
 
+print()
 
 sys.exit(0)
