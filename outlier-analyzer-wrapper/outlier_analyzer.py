@@ -150,27 +150,28 @@ def run_ranking_module():
     network_directory = input("=> ").strip()
     node_rank_file = network_directory+"/node_ranks.json"
     curr_directory = os.path.dirname(os.path.abspath(__file__))
-    outlier_directory_path = curr_directory+"/outliers_"+network_directory.split("/")[-1]
+    outlier_directory_path = curr_directory+"/"+network_directory.split("/")[-1]
     ranking_file_path = str(Path(curr_directory).parent)+'/ranking-severity/ranking.py'
+    print(ranking_file_path, node_rank_file, outlier_directory_path)
+
     os.system('python3 '+ranking_file_path+' '+node_rank_file+' '+outlier_directory_path)
 
 
 def main():
     action_selected = 0
-    # options_count = 8
     while action_selected != 8:
-        
-        print("==========================")
+        actions = ['Calculate Outliers - Composite ACL_List Level', 'Calculate Outliers - Discrete ACL Level',
+                   'Edit Outliers', 'View Outliers', 'Plot deviant properties', 'Plot scoring comparison',
+                   'Rank outliers/bug severity', 'Exit Application']
+
+        action_functions = ['calculate_outliers()', 'calculate_outliers_acls()', 'edit_outliers()', 'view_outliers()',
+                            'deviant_plot()', 'score_plot()', 'run_ranking_module()']
+
+        print("===========")
         print("Choose Action:\n")
-        print("1 => CALCULATE OUTLIERS (e.g., Composed ACL_List level)")
-        print("2 => CALCULATE OUTLIERS (e.g., Discrete ACLs)")
-        print("3 => EDIT OUTLIERS")
-        print("4 => VIEW OUTLIER NODES")
-        print("5 => DEVIANT PROPERTIES PLOT")
-        print("6 => SCORING COMPARISION PLOT")
-        print("7 => OUTLIERS/BUG SEVERITY & RANKING")
-        print("8 => EXIT APPLICATION")
-        print("==========================")
+        for index, action in enumerate(actions, 1):
+            print("Choose %d to %s" % (index, action))
+        print("===========")
 
         action_selected = input("\nAction => ")
         try:
@@ -178,41 +179,12 @@ def main():
         except:
             print("Invalid argument selected. Returning to main menu.")
 
-        if action_selected == 1:
-            printINFO("Option: Calculate Outliers Selected !!\n")
-            if not calculate_outliers():
-                continue
+        info_string = actions[action_selected - 1] + " selected!!"
+        printINFO(info_string)
 
-        elif action_selected == 2:
-            printINFO("Option:  Calculate Outliers Selected !!\n")
-            calculate_outliers_acls()
+        eval(action_functions[action_selected - 1])
 
-        elif action_selected == 3:
-            printINFO("Option: Edit Outliers Selected !!\n")
-            edit_outliers()
-
-        elif action_selected == 4:
-            printINFO("Option: View Outliers Selected !!\n")
-            view_outliers()
-
-        elif action_selected == 5:
-            printINFO("Option: Deviant Properties Plot Selected !!\n")
-            deviant_plot()
-
-        elif action_selected == 6:
-            printINFO("Option: Scoring Comparision Plot Selected !!\n")
-            score_plot()
-
-        elif action_selected == 7:
-            printINFO("Option: Ranking Module Selected !!\n")
-            run_ranking_module()
-
-        elif action_selected == 8:
-            printError("Exiting Function. Action Selected:", action_selected)
-            sys.exit()
-
-        else:
-            printINFO("Invalid Action Selected. Returning to Main menu...\n")
 
 # Calling main function
-main()
+if __name__ == '__main__':
+    main()
