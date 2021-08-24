@@ -1,4 +1,5 @@
-# outlier-analyzers (Statistical and ML suite for detecting control plane and configuration bugs):
+# Outlier-analyzers:
+A statistical and ML suite for detecting control plane and configuration bugs.
 
 Refer to the [documentation folder](/documentation) for: 
 1. Refer to [MaverickToolGuide.pdf](/documentation/MaverickToolGuide.pdf) for steps to run the tool and 
