@@ -1,16 +1,5 @@
 # outlier-analyzers (Statistical and ML suite for detecting control plane and configuration bugs):
 
-Outlier analyzer for Network and IoT-specific configurations
-
-Module integrated with pybatfish for executing questions on to the batfish.
-
-Some Installation Tips for pyCharm:
-
-[1] When you run the code, for Error on missing package as shown below:
-
-    "ModuleNotFoundError: No module named 'pybatfish'"
-
-To fix this, install the missing packages in pycharm go to:
-
-pyCharm >> Preferences >> Project Interpreter >> then Click '+' >>
-    Search for missing package >> Click "Install Package" >> Click Apply & OK.
+Refer to the [documentation folder](/documentation) for: 
+1. Refer to [MaverickToolGuide.pdf](/documentation/MaverickToolGuide.pdf) for steps to run the tool and 
+2. Refer to [Network_Verfication_Techniques.pdf](/documentation/Network_Verfication_Techniques.pdf) for suite of statistical and ML algorithms.
