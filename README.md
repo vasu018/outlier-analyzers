@@ -1,4 +1,5 @@
-# outlier-analyzers
+# outlier-analyzers (Statistical and ML-based suite for detecting control plane and configuration bugs):
+
 Outlier analyzer for Network and IoT-specific configurations
 
 Module integrated with pybatfish for executing questions on to the batfish.
