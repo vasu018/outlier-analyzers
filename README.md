@@ -1,4 +1,4 @@
-# outlier-analyzers (Statistical and ML-based suite for detecting control plane and configuration bugs):
+# outlier-analyzers (Statistical and ML suite for detecting control plane and configuration bugs):
 
 Outlier analyzer for Network and IoT-specific configurations
 
