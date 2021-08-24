@@ -1,4 +1,0 @@
-Malanobis distance method outliers: []
-======================================
-
-
